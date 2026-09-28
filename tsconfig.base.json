@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@satdust/shared": ["./packages/shared/src/index.ts"],
+      "@satdust/dust20": ["./packages/dust20/src/index.ts"],
+      "@satdust/quote": ["./packages/quote/src/index.ts"],
+      "@satdust/bitcoin": ["./packages/bitcoin/src/index.ts"],
+      "@satdust/wallet": ["./packages/wallet/src/index.ts"]
+    }
+  }
+}
