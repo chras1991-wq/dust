@@ -53,7 +53,7 @@ export function MintMathPlate() {
         </div>
 
         <pre className="math-plate__flow" aria-hidden>
-{`mint JSON ──► ${UNIT_SATS}-sat UTXO ──► indexer 𝟙 ──► spendable unit
+{`mint JSON ──► ${UNIT_SATS}-sat UTXO ──► indexer 𝟙 ──► 1 SATDUST
                  │
                  └─ sats stay with the token`}
         </pre>

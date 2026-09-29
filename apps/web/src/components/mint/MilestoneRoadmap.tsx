@@ -81,7 +81,7 @@ export function MilestoneRoadmap({
         after that.
       </p>
       <p className="mt-3 font-sans text-sm text-[var(--ink-soft)]">
-        Genesis {stages[0]?.amount.toLocaleString()} units at launch. The other 19 stages need hard
+        Genesis {stages[0]?.amount.toLocaleString()} SATDUST at launch. The other 19 stages need hard
         measurable gates + a yes vote. Hitting goals only opens a vote — it does not mint.
       </p>
 
@@ -201,7 +201,7 @@ export function MilestoneRoadmap({
                 <GoalRow key={`${selected.id}-${g.id}`} goal={g} />
               ))}
               <p className="text-sm text-[var(--ink-soft)]">
-                Open at launch — no vote for these {selected.amount.toLocaleString()} units. Later
+                Open at launch — no vote for these {selected.amount.toLocaleString()} SATDUST. Later
                 milestones stay locked until this fills and their goals are met.
               </p>
             </div>
@@ -213,7 +213,7 @@ export function MilestoneRoadmap({
               <p className="font-display mt-2 text-2xl">
                 Open a vote for{" "}
                 <span className="text-[var(--accent)]">
-                  +{selected.amount.toLocaleString()} units
+                  +{selected.amount.toLocaleString()} SATDUST
                 </span>
               </p>
               <p className="mt-2 text-sm text-[var(--ink-mute)]">
@@ -221,11 +221,11 @@ export function MilestoneRoadmap({
               </p>
 
               <dl className="mt-5 grid gap-2 font-sans text-sm sm:grid-cols-2">
-                <Row label="Current supply" value={`${minted.toLocaleString()} units`} />
-                <Row label="On the ballot" value={`+${selected.amount.toLocaleString()} units`} />
+                <Row label="Current supply" value={minted.toLocaleString()} />
+                <Row label="On the ballot" value={`+${selected.amount.toLocaleString()}`} />
                 <Row
                   label="If yes"
-                  value={`${selected.supplyIfApproved.toLocaleString()} / ${SUPPLY.toLocaleString()} units`}
+                  value={`${selected.supplyIfApproved.toLocaleString()} / ${SUPPLY.toLocaleString()}`}
                 />
                 <Row
                   label="Dilution if yes"

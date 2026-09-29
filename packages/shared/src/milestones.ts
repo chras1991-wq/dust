@@ -100,7 +100,7 @@ export const MILESTONES: MilestoneDef[] = [
     index: 0,
     code: "01",
     title: "Genesis",
-    blurb: "5,460 units open at launch. No vote. 1 SATDUST = 1 unit.",
+    blurb: "5,460 SATDUST open at launch. No vote.",
     amount: 5_460,
     supplyAfter: 5_460,
     isGenesis: true,

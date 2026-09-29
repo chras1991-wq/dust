@@ -4,7 +4,7 @@ const DOCS = [
   {
     href: "/docs/what-is-satdust",
     title: "What is SATDUST",
-    blurb: "Opening ticker — one unit, 546 sats in the UTXO.",
+    blurb: "Opening ticker — 1 SATDUST, 546 sats in the UTXO.",
     folio: "01",
   },
   {
@@ -28,7 +28,7 @@ const DOCS = [
   {
     href: "/docs/tokenomics",
     title: "Milestone mint",
-    blurb: "Genesis 5,460 + 19 hard gates to 54,600 · $5M+ MC for large unlocks.",
+    blurb: "Genesis 5,460 + 19 hard gates to 54,600 SATDUST.",
     folio: "05",
   },
   {

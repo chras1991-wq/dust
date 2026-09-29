@@ -143,9 +143,8 @@ export default function MintPage() {
       <p className="byline">02 · Mint desk</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Mint</h1>
       <p className="deck mt-4 max-w-2xl">
-        Mint <strong className="text-[var(--ink)]">1 SATDUST unit</strong> — that is{" "}
-        <strong className="text-[var(--ink)]">1 unit</strong>, not a BRC-20 “sheet” of 1,000.{" "}
-        {UNIT_SATS} sats locked in the UTXO. Slots come from Genesis or a passed vote.
+        Mint <strong className="text-[var(--ink)]">1 SATDUST</strong> — {UNIT_SATS} sats locked in
+        the UTXO. Slots come from Genesis or a passed vote.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.35fr_0.9fr] lg:gap-10">
@@ -153,8 +152,7 @@ export default function MintPage() {
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="panel-edit">
               <p className="byline">You receive</p>
-              <p className="font-display mt-2 text-2xl">1 SATDUST unit</p>
-              <p className="mt-1 text-xs text-[var(--ink-mute)]">1 unit · not a 1,000 sheet</p>
+              <p className="font-display mt-2 text-2xl">1 SATDUST</p>
             </div>
             <div className="panel-edit">
               <p className="byline">SATDUST backing</p>
@@ -165,7 +163,7 @@ export default function MintPage() {
 
           <div className="panel-edit mt-4 space-y-3 font-sans text-sm">
             <Row
-              label="Mint fee (1 unit)"
+              label="Mint fee (1 SATDUST)"
               value={
                 quote
                   ? `$${Number(quote.usd).toFixed(2)} ≈ ${Number(quote.feeSats).toLocaleString()} sats`
@@ -205,12 +203,9 @@ export default function MintPage() {
               <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
             </p>
             <p className="mt-2 font-sans text-sm text-[var(--ink-mute)]">
-              Open now {openCapacity.toLocaleString()} units
+              Open now {openCapacity.toLocaleString()}
               {supply?.pending ? ` · Pending ${supply.pending}` : ""}
-              {" · "}Hard cap {SUPPLY.toLocaleString()} units
-            </p>
-            <p className="mt-2 font-sans text-xs leading-relaxed text-[var(--ink-mute)]">
-              1 SATDUST = 1 unit (not a BRC-20 sheet of 1,000)
+              {" · "}Hard cap {SUPPLY.toLocaleString()}
             </p>
           </div>
 
@@ -230,7 +225,7 @@ export default function MintPage() {
                 disabled={!account || busy}
                 onClick={() => setConfirmOpen(true)}
               >
-                Mint 1 unit
+                Mint 1 SATDUST
               </button>
             )}
             <Link href="#milestones" className="btn btn-ghost">
@@ -241,7 +236,7 @@ export default function MintPage() {
           {openCapacity <= 0 && (
             <p className="mt-3 text-sm text-[var(--ink-mute)]">
               This window is full ({minted.toLocaleString()} / {authorized.toLocaleString()}). Next
-              units need a passed milestone vote.
+              tokens need a passed milestone vote.
             </p>
           )}
 
@@ -264,14 +259,11 @@ export default function MintPage() {
             <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
           </p>
           <p className="mt-2 text-sm text-[var(--ink-soft)]">
-            Genesis opens {GENESIS_SUPPLY.toLocaleString()} units. Later batches need hard gates +
-            vote; contributors whitelist mints first. Cap {SUPPLY.toLocaleString()} units.
-          </p>
-          <p className="mt-3 font-sans text-xs leading-relaxed text-[var(--ink-mute)]">
-            1 SATDUST = 1 unit (not a BRC-20 sheet of 1,000)
+            Genesis opens {GENESIS_SUPPLY.toLocaleString()} SATDUST. Later batches need hard gates +
+            vote; contributors whitelist mints first. Cap {SUPPLY.toLocaleString()}.
           </p>
           <p className="mt-4 font-mono text-xs text-[var(--ink-mute)]">
-            Open {openCapacity.toLocaleString()} units · Pending {supply?.pending ?? 0}
+            Open {openCapacity.toLocaleString()} · Pending {supply?.pending ?? 0}
           </p>
           <hr className="mag-rule my-5" />
           <p className="byline">Notes</p>
@@ -320,7 +312,7 @@ export default function MintPage() {
             <p className="kicker">Confirmation</p>
             <h2 className="font-display mt-2 text-2xl sm:text-3xl">You are minting</h2>
             <ul className="mt-5 space-y-2 font-sans text-sm text-[var(--ink-soft)]">
-              <li className="text-[var(--ink)]">1 SATDUST unit (1 unit, not a sheet)</li>
+              <li className="text-[var(--ink)]">1 SATDUST</li>
               <li>{UNIT_SATS} sats backing</li>
               <li>Project fee {feeSats.toLocaleString()} sats</li>
               <li>Network ≈ {minerFee.toLocaleString()} sats</li>

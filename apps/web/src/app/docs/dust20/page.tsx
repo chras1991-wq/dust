@@ -20,7 +20,7 @@ export default function Dust20Doc() {
         </p>
         <p>
           Transfer is a normal spend of that UTXO — there is no transfer opcode. Tickers ignore
-          case; first valid deploy wins. SATDUST is the opening ticker: one unit on a{" "}
+          case; first valid deploy wins. SATDUST is the opening ticker: 1 SATDUST on a{" "}
           {UNIT_SATS}-sat UTXO.
         </p>
         <p>

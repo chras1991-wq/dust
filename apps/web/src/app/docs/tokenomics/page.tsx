@@ -15,16 +15,15 @@ export default function TokenomicsDoc() {
       <h1 className="masthead mt-2 text-4xl sm:text-5xl">Milestone mint</h1>
       <div className="mt-8 space-y-5 text-[var(--ink-soft)]">
         <p>
-          Hard cap {SUPPLY.toLocaleString()} <strong className="text-[var(--ink)]">units</strong>{" "}
-          (1 SATDUST = 1 unit, not a BRC-20 sheet). Genesis opens{" "}
-          {GENESIS_SUPPLY.toLocaleString()} units. The rest is not a timed unlock — each of the 19
-          later stages needs hard measurable gates (stake TVL, agents, AMM depth, vote turnout,
-          live secondary price × circulating units) plus a holder vote. Large unlocks require that
-          live secondary valuation ≥ $5M / $10M / $25M / $50M. Every unit locks {UNIT_SATS} sats (
+          Hard cap {SUPPLY.toLocaleString()} SATDUST. Genesis opens{" "}
+          {GENESIS_SUPPLY.toLocaleString()}. The rest is not a timed unlock — each of the 19 later
+          stages needs hard measurable gates (stake TVL, agents, AMM depth, vote turnout, live
+          secondary price × circulating supply) plus a holder vote. Large unlocks require that live
+          secondary valuation ≥ $5M / $10M / $25M / $50M. Each SATDUST locks {UNIT_SATS} sats (
           <code className="font-mono text-[var(--accent)]">
             max_sats = {MAX_SATS.toLocaleString()}
           </code>
-          ). Mint fee $1 / unit on <Link href="/mint">/mint</Link>.
+          ). Mint fee $1 per SATDUST on <Link href="/mint">/mint</Link>.
         </p>
 
         <pre className="formula">{`Mint_i = A_i × I(M_i) × I(Q_i ≥ Q_min) × I(V_i ≥ V_min)

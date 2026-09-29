@@ -6,8 +6,8 @@ export default function WhatIsSatdust() {
   return (
     <DocShell title="What is SATDUST" section="Archive · 01">
       <p>
-        <strong>SATDUST</strong> is the first fungible ticker under DUST-20. A mint gives you one
-        unit on a {UNIT_SATS}-sat UTXO on Bitcoin mainnet.
+        <strong>SATDUST</strong> is the first fungible ticker under DUST-20. A mint gives you 1
+        SATDUST on a {UNIT_SATS}-sat UTXO on Bitcoin mainnet.
       </p>
       <p>Phase 1:</p>
       <ul>
