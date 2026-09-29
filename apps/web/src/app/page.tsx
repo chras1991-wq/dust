@@ -24,8 +24,8 @@ export default function HomePage() {
             <Link href="/docs/dust20" className="btn btn-ghost-on-dark">
               Read DUST-20
             </Link>
-            <Link href="/verify" className="btn btn-ghost-on-dark">
-              Verify a mint
+            <Link href="/mint#milestones" className="btn btn-ghost-on-dark">
+              Milestone Issuance Curve
             </Link>
           </div>
         </div>
