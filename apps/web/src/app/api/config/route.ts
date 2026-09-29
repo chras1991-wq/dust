@@ -13,7 +13,7 @@ import {
   MAX_SATS,
   LIM_SATS,
   DEPLOY_PAYLOAD,
-  VOTE_BTC_THRESHOLD,
+  VOTE_SATDUST_EQUIV_BTC,
 } from "@satdust/shared";
 import { getStore } from "@/lib/store";
 import { getMilestoneSnapshot } from "@/lib/milestone-store";
@@ -40,7 +40,7 @@ export async function GET() {
     deployInscriptionId: store.deployInscriptionId,
     mintOpen: ms.openCapacity > 0,
     openMintCapacity: ms.openCapacity,
-    voteBtcThreshold: VOTE_BTC_THRESHOLD,
+    voteSatdustEquivBtc: VOTE_SATDUST_EQUIV_BTC,
     milestones: MILESTONES.map((m) => ({
       id: m.id,
       code: m.code,

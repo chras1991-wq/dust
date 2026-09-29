@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  VOTE_BTC_THRESHOLD,
+  VOTE_SATDUST_EQUIV_BTC,
   VOTE_PERIOD_DAYS,
   REVOTE_COOLDOWN_DAYS,
 } from "@satdust/shared";
@@ -261,7 +261,8 @@ export function MilestoneRoadmap({
               <p className="byline">Voting rules</p>
               <ul className="mt-3 space-y-1.5 font-sans text-sm text-[var(--ink-soft)]">
                 <li>
-                  Qualification: BTC balance ≥ {VOTE_BTC_THRESHOLD} BTC at snapshot
+                  Qualification: SATDUST balance ≥ {VOTE_SATDUST_EQUIV_BTC} BTC equivalent
+                  (live rate) at snapshot
                 </li>
                 <li>Power: 1 eligible wallet = 1 vote</li>
                 <li>Quorum: ≥ {Math.round(selected.quorum * 100)}% of eligible wallets</li>

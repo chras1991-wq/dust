@@ -5,7 +5,7 @@ import {
   MILESTONES,
   SUPPLY,
   UNIT_SATS,
-  VOTE_BTC_THRESHOLD,
+  VOTE_SATDUST_EQUIV_BTC,
 } from "@satdust/shared";
 
 export default function TokenomicsDoc() {
@@ -29,8 +29,10 @@ export default function TokenomicsDoc() {
 S = ${GENESIS_SUPPLY} + Σ Mint_i   ≤   ${SUPPLY}`}</pre>
 
         <p>
-          Completing a milestone unlocks proposal capacity only. Eligible voters: wallet BTC ≥{" "}
-          {VOTE_BTC_THRESHOLD} at the proposal snapshot. Power: 1 wallet = 1 vote.
+          Completing a milestone unlocks proposal capacity only. Eligible voters: wallet{" "}
+          <strong className="text-[var(--ink)]">SATDUST</strong> balance worth ≥{" "}
+          {VOTE_SATDUST_EQUIV_BTC} BTC at the live rate, measured at the proposal snapshot — not
+          native BTC holdings. Power: 1 wallet = 1 vote.
         </p>
         <p>
           After Genesis, later issuance prioritizes a <strong className="text-[var(--ink)]">contributors
