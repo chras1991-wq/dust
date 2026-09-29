@@ -3,9 +3,9 @@ import Link from "next/link";
 export default function VerificationDoc() {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
-      <span className="sticker sticker-yellow">LORE 05</span>
-      <h1 className="font-display mt-4 text-5xl font-extrabold uppercase">Verification</h1>
-      <div className="panel-chaos mt-8 space-y-5 text-[var(--ink-dim)]">
+      <span className="pill pill-pink">lore 05</span>
+      <h1 className="chrome-text mt-4 text-4xl sm:text-5xl">Verification</h1>
+      <div className="panel-y2k mt-8 space-y-5 text-[var(--ink-dim)]">
         <ul className="list-disc space-y-2 pl-5">
           <li>Mainnet tx exists and confirms</li>
           <li>DUST-20 mint inscription present</li>
@@ -15,9 +15,6 @@ export default function VerificationDoc() {
           <li>Deploy exists; supply not exceeded</li>
           <li>Indexer accepts</li>
         </ul>
-        <p>
-          DB is cache. Reorgs demote CONFIRMED → PENDING. RBF must be re-checked.
-        </p>
         <p>
           <Link href="/verify" className="btn btn-solid">
             Open verifier

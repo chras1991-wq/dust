@@ -58,17 +58,15 @@ function VerifyForm() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <span className="sticker sticker-lime" style={{ ["--rot" as string]: "4deg" }}>
-        TRUTH MACHINE
-      </span>
-      <h1 className="hero-title mt-4 text-6xl sm:text-7xl">CHECK</h1>
+      <span className="pill pill-lime">truth machine</span>
+      <h1 className="hologram-text hero-title mt-4 text-6xl sm:text-7xl">CHECK</h1>
       <p className="mt-3 text-[var(--ink-dim)]">
         Structural DUST-20 checks. Final word = confirmed chain + indexer.
       </p>
 
-      <form onSubmit={onSubmit} className="panel-chaos mt-8 space-y-4">
+      <form onSubmit={onSubmit} className="panel-y2k mt-8 space-y-4">
         <label className="block">
-          <span className="font-stamp text-[0.7rem] text-[var(--c-yellow)]">TXID</span>
+          <span className="font-pixel text-[0.55rem] text-[var(--pink)]">txid</span>
           <input
             className="input mt-2"
             value={txid}
@@ -79,11 +77,11 @@ function VerifyForm() {
         </label>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="font-stamp text-[0.7rem] text-[var(--c-cyan)]">CARRIER SATS</span>
+            <span className="font-pixel text-[0.55rem] text-[var(--cyan)]">carrier sats</span>
             <input className="input mt-2" value={carrier} onChange={(e) => setCarrier(e.target.value)} />
           </label>
           <label className="block">
-            <span className="font-stamp text-[0.7rem] text-[var(--c-magenta)]">OFFSET</span>
+            <span className="font-pixel text-[0.55rem] text-[var(--lime)]">offset</span>
             <input className="input mt-2" value={offset} onChange={(e) => setOffset(e.target.value)} />
           </label>
         </div>
@@ -92,28 +90,21 @@ function VerifyForm() {
         </button>
       </form>
 
-      {error && <p className="mt-4 font-stamp text-sm text-[var(--invalid)]">{error}</p>}
+      {error && <p className="mt-4 font-pixel text-[0.55rem] text-[var(--invalid)]">{error}</p>}
 
       {result && (
-        <div
-          className="panel-chaos mt-8"
-          style={{
-            boxShadow: result.valid
-              ? "8px 8px 0 var(--c-lime)"
-              : "8px 8px 0 var(--c-hot)",
-          }}
-        >
-          <p className={`font-stamp text-xl ${result.valid ? "status-confirmed" : "status-invalid"}`}>
+        <div className="panel-y2k mt-8">
+          <p className={`font-pixel text-[0.7rem] ${result.valid ? "status-confirmed" : "status-invalid"}`}>
             {result.summary}
           </p>
           <ul className="mt-6 space-y-3">
             {result.checks.map((c) => (
-              <li key={c.id} className="flex gap-3 font-mono text-sm">
-                <span className={c.pass ? "sticker sticker-lime" : "sticker sticker-hot"}>
-                  {c.pass ? "PASS" : "FAIL"}
+              <li key={c.id} className="flex gap-3 font-mono text-lg">
+                <span className={`pill ${c.pass ? "pill-lime" : "pill-pink"}`}>
+                  {c.pass ? "pass" : "fail"}
                 </span>
                 <span>
-                  <span className="text-[var(--c-cream)]">{c.label}</span>
+                  <span className="text-[var(--ink)]">{c.label}</span>
                   {c.detail && (
                     <span className="mt-0.5 block text-[var(--ink-dim)]">{c.detail}</span>
                   )}

@@ -11,13 +11,9 @@ export function DocShell({
 }) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
-      <span className="sticker sticker-yellow" style={{ ["--rot" as string]: "-2deg" }}>
-        {section}
-      </span>
-      <h1 className="font-display mt-4 text-5xl font-extrabold uppercase leading-none text-[var(--c-cream)]">
-        {title}
-      </h1>
-      <div className="panel-chaos mt-8 space-y-5 text-[var(--ink-dim)] [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5 [&_strong]:text-[var(--c-yellow)] [&_code]:font-mono [&_code]:text-[0.85rem] [&_code]:text-[var(--c-cyan)]">
+      <span className="pill pill-chrome">{section}</span>
+      <h1 className="chrome-text mt-4 text-4xl sm:text-5xl">{title}</h1>
+      <div className="panel-y2k mt-8 space-y-5 text-[var(--ink-dim)] [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5 [&_strong]:text-[var(--pink)] [&_code]:font-mono [&_code]:text-lg [&_code]:text-[var(--cyan)]">
         {children}
       </div>
     </article>

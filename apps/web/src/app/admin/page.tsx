@@ -26,8 +26,8 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <span className="sticker sticker-orange">OPS DECK</span>
-      <h1 className="hero-title mt-4 text-5xl">ADMIN</h1>
+      <span className="pill pill-chrome">ops deck</span>
+      <h1 className="hologram-text hero-title mt-4 text-5xl">ADMIN</h1>
       <p className="mt-3 text-[var(--ink-dim)]">Monitor only. Zero private keys.</p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -51,11 +51,9 @@ export default function AdminPage() {
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="panel-chaos">
-      <p className="font-stamp text-[0.65rem] text-[var(--c-yellow)]">{label}</p>
-      <p className="font-display mt-2 text-xl font-extrabold break-all text-[var(--c-cream)]">
-        {value}
-      </p>
+    <div className="panel-y2k">
+      <p className="font-pixel text-[0.5rem] text-[var(--cyan)]">{label}</p>
+      <p className="chrome-text mt-2 break-all text-xl">{value}</p>
     </div>
   );
 }

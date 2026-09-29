@@ -1,31 +1,31 @@
 import type { Metadata } from "next";
-import { Syne, Bricolage_Grotesque, Chivo_Mono, Archivo_Black } from "next/font/google";
+import { Orbitron, Comfortaa, Press_Start_2P, VT323 } from "next/font/google";
 import { SiteFooter, SiteHeader, MarqueeBar } from "@/components/SiteChrome";
 import "./globals.css";
 
-const display = Syne({
+const display = Orbitron({
   subsets: ["latin"],
-  variable: "--font-syne",
+  variable: "--font-orbitron",
   display: "swap",
-  weight: ["600", "700", "800"],
+  weight: ["500", "700", "800", "900"],
 });
 
-const body = Bricolage_Grotesque({
+const body = Comfortaa({
   subsets: ["latin"],
-  variable: "--font-bricolage",
+  variable: "--font-comfortaa",
   display: "swap",
 });
 
-const mono = Chivo_Mono({
+const pixel = Press_Start_2P({
   subsets: ["latin"],
-  variable: "--font-chivo",
+  variable: "--font-press-start",
   display: "swap",
-  weight: ["400", "600", "700"],
+  weight: "400",
 });
 
-const stamp = Archivo_Black({
+const mono = VT323({
   subsets: ["latin"],
-  variable: "--font-archivo-black",
+  variable: "--font-vt323",
   display: "swap",
   weight: "400",
 });
@@ -45,13 +45,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${display.variable} ${body.variable} ${mono.variable} ${stamp.variable} antialiased`}
+        className={`${display.variable} ${body.variable} ${pixel.variable} ${mono.variable} antialiased`}
         style={
           {
-            "--font-display": "var(--font-syne), sans-serif",
-            "--font-body": "var(--font-bricolage), sans-serif",
-            "--font-mono": "var(--font-chivo), monospace",
-            "--font-stamp": "var(--font-archivo-black), Impact, sans-serif",
+            "--font-display": "var(--font-orbitron), sans-serif",
+            "--font-body": "var(--font-comfortaa), sans-serif",
+            "--font-pixel": "var(--font-press-start), monospace",
+            "--font-mono": "var(--font-vt323), monospace",
           } as React.CSSProperties
         }
       >

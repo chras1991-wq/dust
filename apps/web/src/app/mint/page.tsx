@@ -112,15 +112,9 @@ export default function MintPage() {
 
   return (
     <div className="relative mx-auto max-w-3xl px-4 py-12">
-      <div className="absolute -right-2 top-8 sticker sticker-hot animate-wobble" style={{ ["--rot" as string]: "12deg" }}>
-        FAIR MINT
-      </div>
-
-      <span className="sticker sticker-orange" style={{ ["--rot" as string]: "-3deg" }}>
-        MINT BOOTH
-      </span>
-      <h1 className="hero-title mt-4 text-6xl sm:text-7xl">MINT</h1>
-      <p className="mt-3 font-stamp text-xl uppercase text-[var(--c-cyan)]">
+      <span className="pill pill-pink animate-floaty">mint booth</span>
+      <h1 className="hologram-text hero-title mt-4 text-6xl sm:text-7xl">MINT</h1>
+      <p className="mt-3 font-mono text-xl text-[var(--cyan)]">
         1 SATDUST · carrier {UNIT_SATS} · offset 0
       </p>
 
@@ -134,26 +128,20 @@ export default function MintPage() {
       </div>
 
       {supply && (
-        <div className="panel-chaos mt-8">
+        <div className="panel-y2k mt-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-stamp text-[0.7rem] text-[var(--c-yellow)]">CONFIRMED</p>
-              <p className="font-display text-4xl font-extrabold text-[var(--c-cream)]">
+              <p className="font-pixel text-[0.55rem] text-[var(--pink)]">confirmed</p>
+              <p className="chrome-text mt-1 text-4xl">
                 {supply.minted.toLocaleString()}
-                <span className="text-[var(--c-magenta)]"> / {supply.totalSupply.toLocaleString()}</span>
+                <span className="text-[var(--pink)]"> / {supply.totalSupply.toLocaleString()}</span>
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <span className="sticker sticker-cyan" style={{ ["--rot" as string]: "2deg" }}>
-                PENDING {supply.pending}
-              </span>
-              <span className="sticker sticker-lime" style={{ ["--rot" as string]: "-2deg" }}>
-                LEFT {supply.remaining}
-              </span>
+              <span className="pill pill-cyan">pending {supply.pending}</span>
+              <span className="pill pill-lime">left {supply.remaining}</span>
               {supply.highContention && (
-                <span className="sticker sticker-hot animate-wobble" style={{ ["--rot" as string]: "5deg" }}>
-                  HIGH CONTENTION
-                </span>
+                <span className="pill pill-pink animate-sparkle">high contention</span>
               )}
             </div>
           </div>
@@ -163,30 +151,28 @@ export default function MintPage() {
         </div>
       )}
 
-      <div className="panel-lime mt-6 space-y-3 font-mono text-sm">
-        <Row label="You receive" value="1 SATDUST" color="var(--c-lime)" />
-        <Row label="SATDUST backing" value={`${UNIT_SATS} sats`} color="var(--c-yellow)" />
+      <div className="panel-chrome mt-6 space-y-3 font-mono text-xl">
+        <Row label="You receive" value="1 SATDUST" color="var(--lime)" />
+        <Row label="SATDUST backing" value={`${UNIT_SATS} sats`} color="var(--cyan)" />
         <Row
           label="Mint fee"
           value={quote ? `$7.00 ≈ ${Number(quote.feeSats).toLocaleString()} sats` : "loading…"}
-          color="var(--c-magenta)"
+          color="var(--pink)"
         />
-        <Row label="Bitcoin network fee" value={`≈ ${minerFee.toLocaleString()} sats`} color="var(--c-cyan)" />
-        <div className="border-t-[3px] border-dashed border-[var(--c-lime)] pt-3">
-          <Row label="Estimated total" value={`≈ ${total.toLocaleString()} sats`} color="var(--c-orange)" emph />
+        <Row label="Bitcoin network fee" value={`≈ ${minerFee.toLocaleString()} sats`} color="var(--blue)" />
+        <div className="border-t border-dashed border-white/30 pt-3">
+          <Row label="Estimated total" value={`≈ ${total.toLocaleString()} sats`} color="var(--lime)" emph />
         </div>
       </div>
 
       {quote && (
-        <div className="mt-5 flex flex-wrap items-center gap-3 font-mono text-[0.75rem]">
-          <span className="sticker sticker-yellow" style={{ ["--rot" as string]: "-2deg" }}>
-            BTC ${Number(quote.btcUsd).toLocaleString()}
-          </span>
-          <span className="sticker sticker-hot" style={{ ["--rot" as string]: "3deg" }}>
-            LOCK {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <span className="pill pill-chrome">btc ${Number(quote.btcUsd).toLocaleString()}</span>
+          <span className="pill pill-pink">
+            lock {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:
             {String(secondsLeft % 60).padStart(2, "0")}
           </span>
-          <span className="text-[var(--ink-dim)]">{quote.quoteId}</span>
+          <span className="font-mono text-lg text-[var(--ink-dim)]">{quote.quoteId}</span>
         </div>
       )}
 
@@ -210,16 +196,14 @@ export default function MintPage() {
         </Link>
       </div>
 
-      {error && <p className="mt-4 font-stamp text-sm text-[var(--invalid)]">{error}</p>}
+      {error && <p className="mt-4 font-pixel text-[0.6rem] text-[var(--invalid)]">{error}</p>}
 
       {result && (
-        <div className="panel-chaos mt-10" style={{ boxShadow: "8px 8px 0 var(--c-lime)" }}>
-          <span className="sticker sticker-lime">SUBMITTED</span>
-          <h2 className="font-display mt-3 text-3xl font-extrabold uppercase text-[var(--c-lime)]">
-            Mint prepared
-          </h2>
+        <div className="panel-y2k mt-10">
+          <span className="pill pill-lime">submitted</span>
+          <h2 className="chrome-text mt-3 text-3xl">Mint prepared</h2>
           <p className="mt-3 text-sm text-[var(--ink-dim)]">{result.notice}</p>
-          <p className="mt-3 font-mono text-[0.75rem] text-[var(--c-yellow)]">mintId {result.mintId}</p>
+          <p className="mt-3 font-mono text-lg text-[var(--cyan)]">mintId {result.mintId}</p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/verify" className="btn">
               Verify
@@ -239,20 +223,20 @@ export default function MintPage() {
       )}
 
       {confirmOpen && quote && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(5,3,8,0.85)] p-4">
-          <div className="panel-chaos w-full max-w-md">
-            <span className="sticker sticker-hot">CONFIRM</span>
-            <h2 className="font-display mt-3 text-3xl font-extrabold uppercase">You are minting</h2>
-            <ul className="mt-5 space-y-2 font-mono text-sm">
-              <li className="text-[var(--c-lime)]">1 SATDUST</li>
-              <li className="text-[var(--c-yellow)]">{UNIT_SATS} sats backing</li>
-              <li className="text-[var(--c-magenta)]">Project fee {feeSats.toLocaleString()} sats</li>
-              <li className="text-[var(--c-cyan)]">Network ≈ {minerFee.toLocaleString()} sats</li>
-              <li className="font-stamp text-[var(--c-orange)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(7,6,20,0.88)] p-4 backdrop-blur-sm">
+          <div className="panel-y2k w-full max-w-md">
+            <span className="pill pill-pink">confirm</span>
+            <h2 className="hologram-text mt-3 text-3xl">You are minting</h2>
+            <ul className="mt-5 space-y-2 font-mono text-xl">
+              <li className="text-[var(--lime)]">1 SATDUST</li>
+              <li className="text-[var(--cyan)]">{UNIT_SATS} sats backing</li>
+              <li className="text-[var(--pink)]">Project fee {feeSats.toLocaleString()} sats</li>
+              <li className="text-[var(--blue)]">Network ≈ {minerFee.toLocaleString()} sats</li>
+              <li className="font-display text-base font-bold text-[var(--lime)]">
                 TOTAL ≈ {total.toLocaleString()} sats
               </li>
             </ul>
-            <p className="mt-4 break-all font-mono text-[0.65rem] text-[var(--ink-dim)]">
+            <p className="mt-4 break-all font-mono text-base text-[var(--ink-dim)]">
               Fee → {PROJECT_ADDRESS}
             </p>
             <div className="mt-6 flex gap-3">
@@ -284,10 +268,7 @@ function Row({
   return (
     <div className="flex items-baseline justify-between gap-4">
       <span className="text-[var(--ink-dim)]">{label}</span>
-      <span
-        className={emph ? "font-stamp text-base" : ""}
-        style={{ color: color ?? "var(--ink)" }}
-      >
+      <span className={emph ? "font-display text-base font-bold" : ""} style={{ color: color ?? "var(--ink)" }}>
         {value}
       </span>
     </div>

@@ -5,43 +5,27 @@ import { PROJECT_ADDRESS, MAX_SATS, SUPPLY, UNIT_SATS } from "@satdust/shared";
 export default function HomePage() {
   return (
     <div className="relative">
-      {/* Full-bleed maximalist hero */}
-      <section className="relative min-h-[88vh] overflow-hidden border-b-4 border-[var(--c-black)]">
+      <section className="relative min-h-[88vh] overflow-hidden">
         <DustField />
-        <div className="absolute inset-0 bg-[conic-gradient(from_120deg_at_50%_40%,rgba(255,106,0,0.25),rgba(255,45,149,0.3),rgba(46,242,255,0.2),rgba(184,255,60,0.2),rgba(255,106,0,0.25))] mix-blend-screen opacity-70" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--bg-ink)] to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,78,203,0.2),transparent_55%)]" />
 
         <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-center px-4 py-16">
-          <div className="absolute right-4 top-8 hidden sm:block">
-            <div
-              className="animate-spin-slow font-stamp text-[5rem] leading-none text-[var(--c-yellow)] opacity-30"
-              aria-hidden
-            >
-              ★
-            </div>
-          </div>
+          <span className="pill pill-cyan w-fit animate-floaty">bitcoin dust protocol</span>
 
-          <span
-            className="sticker sticker-lime w-fit animate-wobble"
-            style={{ ["--rot" as string]: "-4deg" }}
-          >
-            BITCOIN DUST PROTOCOL
-          </span>
-
-          <h1 className="hero-title animate-pop mt-5 text-[18vw] sm:text-[9.5rem]">
+          <h1 className="hero-title hologram-text mt-5 text-[16vw] sm:text-[8.5rem]">
             SATDUST
           </h1>
 
-          <p className="mt-4 max-w-xl font-stamp text-2xl uppercase leading-tight text-[var(--c-cream)] sm:text-3xl">
+          <p className="mt-4 max-w-xl font-display text-xl font-bold uppercase tracking-wide text-[var(--silver)] sm:text-2xl">
             Bitcoin Dust.
-            <span className="text-[var(--c-cyan)]"> Carried by Sats.</span>
+            <span className="text-[var(--cyan)]"> Carried by Sats.</span>
           </p>
 
-          <p className="mt-4 max-w-lg text-lg text-[var(--ink-dim)]">
+          <p className="mt-4 max-w-lg text-[var(--ink-dim)]">
             10,000 units. Born on Bitcoin. No bridge. No sidechain. Just Bitcoin.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-4">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/mint" className="btn btn-solid">
               Mint SATDUST
             </Link>
@@ -55,34 +39,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="section-band">
-        <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="border-y border-white/20 bg-gradient-to-r from-[rgba(255,78,203,0.15)] via-[rgba(65,243,255,0.12)] to-[rgba(198,255,77,0.15)]">
+        <div className="mx-auto max-w-6xl px-4 py-6">
           <CollageStampCloud />
         </div>
       </div>
 
-      <div className="relative mx-auto max-w-6xl px-4 py-16">
-        <section className="panel-chaos">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <span className="sticker sticker-cyan" style={{ ["--rot" as string]: "2deg" }}>
-                PIPELINE
-              </span>
-              <h2 className="font-display mt-4 text-4xl font-extrabold uppercase leading-none text-[var(--c-yellow)] sm:text-5xl">
-                Mainnet → DUST-20 → Mint → Verify
-              </h2>
-              <p className="mt-3 max-w-2xl text-[var(--ink-dim)]">
-                Phase-1 only. Marketplace, swap, staking, farming, bridges, DAO — not this
-                build.
-              </p>
-            </div>
-            <span
-              className="sticker sticker-hot animate-wobble"
-              style={{ ["--rot" as string]: "8deg" }}
-            >
-              KEEP IT LOUD
-            </span>
-          </div>
+      <div className="relative mx-auto max-w-6xl px-4 py-14">
+        <section className="panel-y2k">
+          <span className="pill pill-pink">pipeline</span>
+          <h2 className="chrome-text mt-4 text-3xl sm:text-4xl">
+            Mainnet → DUST-20 → Mint → Verify
+          </h2>
+          <p className="mt-3 max-w-2xl text-[var(--ink-dim)]">
+            Phase-1 only. Marketplace, swap, staking, farming, bridges, DAO — not this build.
+          </p>
           <div className="mt-6">
             <ProtocolDiagram />
           </div>
@@ -90,13 +61,9 @@ export default function HomePage() {
 
         <hr className="rule" />
 
-        <section className="panel-lime">
-          <span className="sticker sticker-orange" style={{ ["--rot" as string]: "-3deg" }}>
-            DEPLOY JSON
-          </span>
-          <h2 className="font-display mt-4 text-4xl font-extrabold uppercase text-[var(--c-lime)]">
-            Issuance payload
-          </h2>
+        <section className="panel-chrome">
+          <span className="pill pill-lime">deploy json</span>
+          <h2 className="hologram-text mt-4 text-3xl sm:text-4xl">Issuance payload</h2>
           <pre className="formula mt-6">{`{
   "p": "dust-20",
   "op": "deploy",
@@ -109,7 +76,7 @@ export default function HomePage() {
           <div className="mt-8 overflow-x-auto">
             <ParamTable />
           </div>
-          <p className="mt-6 font-mono text-sm text-[var(--c-cyan)]">
+          <p className="mt-6 font-mono text-xl text-[var(--cyan)]">
             max_sats = {SUPPLY.toLocaleString()} × {UNIT_SATS} = {MAX_SATS.toLocaleString()} sats
             = 0.0546 BTC backing (not revenue).
           </p>
@@ -118,32 +85,28 @@ export default function HomePage() {
         <hr className="rule" />
 
         <section>
-          <span className="sticker sticker-yellow" style={{ ["--rot" as string]: "4deg" }}>
-            MONEY SPLIT
-          </span>
-          <h2 className="font-display mt-4 text-4xl font-extrabold uppercase">
-            Three different piles of sats
-          </h2>
+          <span className="pill pill-chrome">money split</span>
+          <h2 className="chrome-text mt-4 text-3xl sm:text-4xl">Three piles of sats</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="panel-chaos">
-              <p className="font-stamp text-[var(--c-lime)]">01 BACKING</p>
-              <p className="mt-2 text-3xl font-extrabold text-[var(--c-yellow)]">
+            <div className="panel-y2k">
+              <p className="font-pixel text-[0.55rem] text-[var(--lime)]">01 backing</p>
+              <p className="mt-2 font-display text-3xl font-extrabold text-[var(--cyan)]">
                 {UNIT_SATS} sats
               </p>
               <p className="mt-2 text-sm text-[var(--ink-dim)]">
                 Lands in your SATDUST carrier UTXO. Not project income.
               </p>
             </div>
-            <div className="panel-chaos" style={{ boxShadow: "8px 8px 0 var(--c-orange)" }}>
-              <p className="font-stamp text-[var(--c-magenta)]">02 MINT FEE</p>
-              <p className="mt-2 text-3xl font-extrabold text-[var(--c-magenta)]">$7 ≡ BTC</p>
-              <p className="mt-2 break-all font-mono text-[0.7rem] text-[var(--c-cyan)]">
+            <div className="panel-y2k">
+              <p className="font-pixel text-[0.55rem] text-[var(--pink)]">02 mint fee</p>
+              <p className="mt-2 font-display text-3xl font-extrabold text-[var(--pink)]">$7 ≡ BTC</p>
+              <p className="mt-2 break-all font-mono text-base text-[var(--cyan)]">
                 {PROJECT_ADDRESS}
               </p>
             </div>
-            <div className="panel-chaos" style={{ boxShadow: "8px 8px 0 var(--c-lime)" }}>
-              <p className="font-stamp text-[var(--c-cyan)]">03 MINER FEE</p>
-              <p className="mt-2 text-3xl font-extrabold text-[var(--c-cyan)]">NETWORK</p>
+            <div className="panel-y2k">
+              <p className="font-pixel text-[0.55rem] text-[var(--cyan)]">03 miner fee</p>
+              <p className="mt-2 font-display text-3xl font-extrabold text-[var(--lime)]">NETWORK</p>
               <p className="mt-2 text-sm text-[var(--ink-dim)]">
                 Bitcoin miner fee. You pay it. Separate from $7.
               </p>

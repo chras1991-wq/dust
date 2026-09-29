@@ -36,19 +36,17 @@ export default function ExplorerPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <span className="sticker sticker-cyan" style={{ ["--rot" as string]: "-3deg" }}>
-        EXPLORER RADAR
-      </span>
-      <h1 className="hero-title mt-4 text-6xl sm:text-7xl">SCAN</h1>
-      <p className="mt-3 font-stamp uppercase text-[var(--c-yellow)]">
-        Mint Sequence ≠ Token ID · fungible noise only
+      <span className="pill pill-cyan">explorer radar</span>
+      <h1 className="hologram-text hero-title mt-4 text-6xl sm:text-7xl">SCAN</h1>
+      <p className="mt-3 font-mono text-xl text-[var(--pink)]">
+        Mint Sequence ≠ Token ID · fungible only
       </p>
 
       {data && (
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
-          <Stat label="Minted" value={`${data.supply.minted} / ${data.supply.totalSupply}`} color="var(--c-orange)" />
-          <Stat label="Remaining" value={String(data.supply.remaining)} color="var(--c-lime)" />
-          <Stat label="Pending" value={String(data.supply.pending)} color="var(--c-magenta)" />
+          <Stat label="Minted" value={`${data.supply.minted} / ${data.supply.totalSupply}`} />
+          <Stat label="Remaining" value={String(data.supply.remaining)} />
+          <Stat label="Pending" value={String(data.supply.pending)} />
         </div>
       )}
 
@@ -101,8 +99,7 @@ export default function ExplorerPage() {
             ) : (
               <tr>
                 <td colSpan={8} className="text-[var(--ink-dim)]">
-                  Empty radar. After mainnet deploy + reveals, rows land here from confirmed tx +
-                  indexer.
+                  Empty radar. After mainnet deploy + reveals, rows land here.
                   {data?.deployTxid
                     ? ` Deploy: ${data.deployTxid.slice(0, 16)}…`
                     : " Deploy not recorded."}
@@ -116,13 +113,11 @@ export default function ExplorerPage() {
   );
 }
 
-function Stat({ label, value, color }: { label: string; value: string; color: string }) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="panel-chaos">
-      <p className="font-stamp text-[0.7rem]" style={{ color }}>
-        {label}
-      </p>
-      <p className="font-display mt-2 text-2xl font-extrabold text-[var(--c-cream)]">{value}</p>
+    <div className="panel-y2k">
+      <p className="font-pixel text-[0.55rem] text-[var(--cyan)]">{label}</p>
+      <p className="chrome-text mt-2 text-2xl">{value}</p>
     </div>
   );
 }

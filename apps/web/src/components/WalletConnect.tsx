@@ -12,7 +12,7 @@ type Props = {
   onAccount?: (account: Account | null, adapter: BitcoinWalletAdapter | null) => void;
 };
 
-const COLORS = ["sticker-orange", "sticker-hot", "sticker-cyan", "sticker-lime"];
+const PILLS = ["pill-pink", "pill-cyan", "pill-lime", "pill-chrome"];
 
 export function WalletConnect({ onAccount }: Props) {
   const [open, setOpen] = useState(false);
@@ -59,8 +59,8 @@ export function WalletConnect({ onAccount }: Props) {
     <div className="relative">
       {account ? (
         <div className="flex flex-wrap items-center gap-3">
-          <span className="sticker sticker-lime" style={{ ["--rot" as string]: "-2deg" }}>
-            {adapterId?.toUpperCase()} · {account.address.slice(0, 6)}…{account.address.slice(-4)}
+          <span className="pill pill-lime">
+            {adapterId} · {account.address.slice(0, 6)}…{account.address.slice(-4)}
           </span>
           <button type="button" className="btn btn-ghost" onClick={() => setOpen(true)}>
             Switch
@@ -75,17 +75,15 @@ export function WalletConnect({ onAccount }: Props) {
         </button>
       )}
 
-      {error && <p className="mt-3 font-stamp text-[0.75rem] text-[var(--invalid)]">{error}</p>}
+      {error && <p className="mt-3 font-pixel text-[0.55rem] text-[var(--invalid)]">{error}</p>}
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(5,3,8,0.88)] p-4">
-          <div className="panel-chaos w-full max-w-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(7,6,20,0.9)] p-4 backdrop-blur-sm">
+          <div className="panel-y2k w-full max-w-md">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <span className="sticker sticker-cyan">WALLET RACK</span>
-                <h2 className="font-display mt-3 text-3xl font-extrabold uppercase text-[var(--c-yellow)]">
-                  Pick one
-                </h2>
+                <span className="pill pill-cyan">wallet rack</span>
+                <h2 className="chrome-text mt-3 text-2xl">Pick one</h2>
                 <p className="mt-2 text-sm text-[var(--ink-dim)]">
                   Sign PSBT only. Never seed / private key / WIF.
                 </p>
@@ -101,14 +99,12 @@ export function WalletConnect({ onAccount }: Props) {
                   <li key={w.id}>
                     <button
                       type="button"
-                      className="flex w-full items-center justify-between border-[3px] border-[var(--c-black)] bg-[var(--c-cream)] px-4 py-3 text-left text-[var(--c-black)] shadow-[5px_5px_0_var(--c-magenta)] hover:shadow-[7px_7px_0_var(--c-cyan)]"
+                      className="flex w-full items-center justify-between rounded-2xl border-2 border-white/40 bg-gradient-to-r from-white/20 to-white/5 px-4 py-3 text-left hover:from-[rgba(255,78,203,0.25)] hover:to-[rgba(65,243,255,0.2)]"
                       onClick={() => connect(w)}
                     >
-                      <span className={`sticker ${COLORS[i % COLORS.length]}`} style={{ ["--rot" as string]: `${(i % 3) - 1}deg` }}>
-                        {w.name}
-                      </span>
-                      <span className="font-stamp text-[0.65rem] uppercase">
-                        {ready ? "READY" : "MISSING"}
+                      <span className={`pill ${PILLS[i % PILLS.length]}`}>{w.name}</span>
+                      <span className="font-pixel text-[0.5rem] uppercase text-[var(--ink-dim)]">
+                        {ready ? "ready" : "missing"}
                       </span>
                     </button>
                   </li>

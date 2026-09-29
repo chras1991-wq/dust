@@ -1,56 +1,63 @@
 export function DustField() {
-  const shards: Array<{
+  const orbs: Array<{
     top: string;
     left?: string;
     right?: string;
-    w: number;
-    h: number;
-    bg: string;
-    rot: string;
+    size: number;
+    color: string;
+    delay: string;
   }> = [
-    { top: "8%", left: "4%", w: 120, h: 80, bg: "var(--c-orange)", rot: "-12deg" },
-    { top: "18%", right: "6%", w: 90, h: 140, bg: "var(--c-magenta)", rot: "14deg" },
-    { top: "55%", left: "8%", w: 70, h: 70, bg: "var(--c-cyan)", rot: "-8deg" },
-    { top: "62%", right: "12%", w: 110, h: 60, bg: "var(--c-lime)", rot: "9deg" },
-    { top: "30%", left: "55%", w: 50, h: 160, bg: "var(--c-yellow)", rot: "-18deg" },
+    { top: "10%", left: "8%", size: 140, color: "#ff4ecb", delay: "0s" },
+    { top: "20%", right: "10%", size: 110, color: "#41f3ff", delay: "0.6s" },
+    { top: "60%", left: "15%", size: 90, color: "#c6ff4d", delay: "1.2s" },
+    { top: "55%", right: "18%", size: 160, color: "#b388ff", delay: "0.3s" },
   ];
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute -left-10 top-10 h-48 w-48 rounded-full bg-[var(--c-magenta)] opacity-40 blur-3xl" />
-      <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-[var(--c-orange)] opacity-35 blur-3xl" />
-      <div className="absolute bottom-10 left-1/3 h-56 w-56 rounded-full bg-[var(--c-cyan)] opacity-30 blur-3xl" />
-      {shards.map((s, i) => (
+      {orbs.map((o, i) => (
         <div
           key={i}
-          className="collage-shard animate-floaty halftone"
+          className="orb"
           style={{
-            top: s.top,
-            left: s.left,
-            right: s.right,
-            width: s.w,
-            height: s.h,
-            background: s.bg,
-            ["--rot" as string]: s.rot,
-            animationDelay: `${i * 0.4}s`,
+            top: o.top,
+            left: o.left,
+            right: o.right,
+            width: o.size,
+            height: o.size,
+            ["--orb" as string]: o.color,
+            animationDelay: o.delay,
           }}
         />
       ))}
-      {Array.from({ length: 18 }).map((_, i) => (
+      {Array.from({ length: 14 }).map((_, i) => (
         <span
-          key={`p-${i}`}
-          className="absolute font-stamp text-[0.65rem] opacity-40"
+          key={`s-${i}`}
+          className="absolute animate-sparkle text-[var(--cyan)]"
           style={{
-            top: `${(i * 17) % 90}%`,
-            left: `${(i * 29) % 95}%`,
-            color: ["var(--c-yellow)", "var(--c-cyan)", "var(--c-lime)", "var(--c-magenta)"][
-              i % 4
-            ],
-            transform: `rotate(${(i % 7) * 8 - 16}deg)`,
+            top: `${(i * 13) % 90}%`,
+            left: `${(i * 23) % 95}%`,
+            fontSize: i % 2 === 0 ? 10 : 14,
+            animationDelay: `${i * 0.15}s`,
+            color: ["#ff4ecb", "#41f3ff", "#c6ff4d", "#fff"][i % 4],
           }}
         >
-          {["546", "SAT", "DUST", "★", "BTC", "UTXO"][i % 6]}
+          ✦
         </span>
+      ))}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <span
+          key={`b-${i}`}
+          className="absolute rounded-full border border-white/40 bg-gradient-to-br from-white/40 to-transparent"
+          style={{
+            left: `${10 + i * 11}%`,
+            bottom: "-20px",
+            width: 10 + (i % 3) * 8,
+            height: 10 + (i % 3) * 8,
+            animation: `bubble ${8 + (i % 5)}s linear infinite`,
+            animationDelay: `${i * 0.8}s`,
+          }}
+        />
       ))}
     </div>
   );
@@ -59,7 +66,7 @@ export function DustField() {
 export function ProtocolDiagram() {
   return (
     <pre className="formula">{`Bitcoin Mainnet
-   ║  collage of sats
+   │  chrome rails
    ▼
 Inscription (DUST-20)
    ├── deploy { tick, supply, unit_sats, max_sats, lim_sats }
@@ -94,8 +101,8 @@ export function ParamTable() {
       <tbody>
         {rows.map(([a, b, c]) => (
           <tr key={a}>
-            <td className="text-[var(--c-yellow)]">{a}</td>
-            <td className="text-[var(--c-cyan)]">{b}</td>
+            <td className="text-[var(--pink)]">{a}</td>
+            <td className="text-[var(--cyan)]">{b}</td>
             <td className="text-[var(--ink-dim)]">{c}</td>
           </tr>
         ))}
@@ -106,21 +113,17 @@ export function ParamTable() {
 
 export function CollageStampCloud() {
   const stamps = [
-    { t: "10K SUPPLY", c: "sticker-orange", r: "-6deg" },
-    { t: "1 PER MINT", c: "sticker-hot", r: "4deg" },
-    { t: "546 SATS", c: "sticker-lime", r: "-2deg" },
-    { t: "$7 FEE", c: "sticker-yellow", r: "7deg" },
-    { t: "MAINNET", c: "sticker-cyan", r: "-5deg" },
-    { t: "NO TEAM CUT", c: "sticker-hot", r: "3deg" },
+    { t: "10k supply", c: "pill-pink" },
+    { t: "1 per mint", c: "pill-cyan" },
+    { t: "546 sats", c: "pill-lime" },
+    { t: "$7 fee", c: "pill-chrome" },
+    { t: "mainnet", c: "pill-cyan" },
+    { t: "no team cut", c: "pill-pink" },
   ];
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-2">
       {stamps.map((s) => (
-        <span
-          key={s.t}
-          className={`sticker ${s.c} animate-pop`}
-          style={{ ["--rot" as string]: s.r }}
-        >
+        <span key={s.t} className={`pill ${s.c}`}>
           {s.t}
         </span>
       ))}
