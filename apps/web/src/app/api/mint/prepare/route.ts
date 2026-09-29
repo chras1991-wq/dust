@@ -4,6 +4,7 @@ import { PROJECT_ADDRESS, UNIT_SATS, NETWORK } from "@satdust/shared";
 import { buildRevealPlan, assertPreBroadcast } from "@satdust/bitcoin";
 import { getQuoteSecret } from "@/lib/site";
 import { getQuote, getSupplySnapshot, upsertMint } from "@/lib/store";
+import { getMilestoneSnapshot } from "@/lib/milestone-store";
 import { estimateMinerFeeSats } from "@/lib/prices";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +42,13 @@ export async function POST(req: Request) {
   }
 
   const supply = getSupplySnapshot();
+  const milestones = getMilestoneSnapshot();
+  if (milestones.openCapacity <= 0) {
+    return NextResponse.json(
+      { error: "No open mint capacity — await a passed milestone proposal" },
+      { status: 409 }
+    );
+  }
   if (supply.availableEstimated <= 0) {
     return NextResponse.json({ error: "No estimated supply remaining" }, { status: 409 });
   }
