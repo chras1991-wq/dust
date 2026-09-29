@@ -1,3 +1,4 @@
+import "server-only";
 import {
   DEPLOY_PAYLOAD,
   MINT_PAYLOAD,

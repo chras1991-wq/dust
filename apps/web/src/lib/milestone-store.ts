@@ -3,6 +3,7 @@
  * At launch: Genesis capacity 5,460 authorized, 0 minted.
  */
 
+import "server-only";
 import {
   GENESIS_SUPPLY,
   MILESTONES,

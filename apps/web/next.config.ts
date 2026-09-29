@@ -1,6 +1,34 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+
+/**
+ * CSP: fonts are self-hosted via next/font — no Google Fonts CDN at runtime.
+ * connect-src stays 'self' (price feeds are server-side only).
+ * script-src keeps unsafe-inline for Next hydration; no unsafe-eval in prod.
+ */
+const CSP = [
+  "default-src 'self'",
+  isProd
+    ? "script-src 'self' 'unsafe-inline'"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "img-src 'self' data: blob:",
+  "connect-src 'self'",
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  "upgrade-insecure-requests",
+].join("; ");
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
+  compress: true,
+  reactStrictMode: true,
   transpilePackages: [
     "@satdust/shared",
     "@satdust/dust20",
@@ -8,6 +36,28 @@ const nextConfig: NextConfig = {
     "@satdust/wallet",
     "@satdust/bitcoin",
   ],
+  compiler: {
+    removeConsole: isProd ? { exclude: ["error", "warn"] } : false,
+  },
+  experimental: {
+    optimizePackageImports: ["@satdust/shared"],
+  },
+  webpack: (config, { dev, isServer }) => {
+    // Never emit browser source maps in production (anti-RE / no source leak).
+    if (!dev) {
+      config.devtool = false;
+    }
+    // Keep server bundles out of client graph hints.
+    if (!isServer && !dev) {
+      config.optimization = {
+        ...config.optimization,
+        minimize: true,
+        moduleIds: "deterministic",
+        chunkIds: "deterministic",
+      };
+    }
+    return config;
+  },
   async headers() {
     return [
       {
@@ -16,11 +66,28 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
           {
-            key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://api.coinbase.com https://api.kraken.com https://www.bitstamp.net https://mempool.space https://blockstream.info; frame-ancestors 'none';",
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
           },
+          { key: "Content-Security-Policy", value: CSP },
+        ],
+      },
+      {
+        source: "/api/(.*)",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, private" },
+          { key: "Pragma", value: "no-cache" },
+        ],
+      },
+      {
+        source: "/_next/static/(.*)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
         ],
       },
     ];

@@ -132,9 +132,7 @@ export default function ExplorerPage() {
                         "—"
                       )}
                     </td>
-                    <td>
-                      {row.owner.slice(0, 8)}…{row.owner.slice(-4)}
-                    </td>
+                    <td className="font-mono text-xs">{row.owner || "—"}</td>
                     <td>{row.amount} SATDUST</td>
                     <td>{row.carrierSats} sats</td>
                     <td
