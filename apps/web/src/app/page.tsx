@@ -136,9 +136,9 @@ export default function HomePage() {
   "p": "dust-20",
   "op": "deploy",
   "tick": "SATDUST",
-  "supply": "10000",
+  "supply": "54600",
   "unit_sats": "546",
-  "max_sats": "5460000",
+  "max_sats": "29811600",
   "lim_sats": "546"
 }`}</pre>
             <div className="scroll-x mt-6">

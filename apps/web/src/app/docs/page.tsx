@@ -28,7 +28,7 @@ const DOCS = [
   {
     href: "/docs/tokenomics",
     title: "Milestone mint",
-    blurb: "Genesis 2,000 + 7 voted batches to 10,000.",
+    blurb: "Genesis 5,460 + 12 voted batches to 54,600.",
     folio: "05",
   },
   {

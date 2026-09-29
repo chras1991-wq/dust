@@ -6,7 +6,7 @@ import { UNIT_SATS } from "@satdust/shared";
 
 export default function CreatePage() {
   const [tick, setTick] = useState("");
-  const [supply, setSupply] = useState("10000");
+  const [supply, setSupply] = useState("54600");
   const [unitSats, setUnitSats] = useState(String(UNIT_SATS));
   const [limSats, setLimSats] = useState(String(UNIT_SATS));
   const [blurb, setBlurb] = useState("");

@@ -1,6 +1,6 @@
 /**
  * Milestone runtime — minted count follows the real supply store (no fake fills).
- * At launch: Genesis capacity 2,000 authorized, 0 minted.
+ * At launch: Genesis capacity 5,460 authorized, 0 minted.
  */
 
 import {
@@ -41,6 +41,23 @@ export type MilestoneSnapshot = {
   formula: string;
 };
 
+function emptyGoals(
+  ids: string[],
+  opts?: { anyOfId?: string; optionCount?: number }
+): GoalProgress[] {
+  return ids.map((id) => {
+    if (opts?.anyOfId === id) {
+      return {
+        id,
+        current: 0,
+        met: false,
+        optionMet: Array.from({ length: opts.optionCount ?? 0 }, () => false),
+      };
+    }
+    return { id, current: 0, met: false };
+  });
+}
+
 /** Authorized capacity = sum of amounts for stages that are Genesis or already voted/minted open. */
 function buildLiveSnapshot(): MilestoneSnapshot {
   const supply = getSupplySnapshot();
@@ -59,80 +76,73 @@ function buildLiveSnapshot(): MilestoneSnapshot {
     {
       id: "genesis",
       status: genesisStatus,
-      mintedAt: genesisStatus === "MINTED" ? undefined : undefined,
       goals: [{ id: "deploy", current: deployLive ? 1 : 0, met: deployLive }],
     },
     {
       id: "m1",
       status: "LOCKED",
-      goals: [
-        { id: "age", current: 0, met: false },
-        { id: "site", current: 0, met: false },
-        { id: "rules", current: 0, met: false },
-        { id: "treasury", current: 0, met: false },
-      ],
+      goals: emptyGoals(["age", "site", "rules", "treasury"]),
     },
     {
       id: "m2",
       status: "LOCKED",
-      goals: [
-        { id: "holders", current: 0, met: false },
-        { id: "holders14", current: 0, met: false },
-      ],
+      goals: emptyGoals(["holders", "holders14"]),
     },
     {
       id: "m3",
       status: "LOCKED",
-      goals: [
-        { id: "holders", current: 0, met: false },
-        { id: "holders30", current: 0, met: false },
-        { id: "top10", current: 0, met: false },
-      ],
+      goals: emptyGoals(["holders", "holders30", "top10"]),
     },
     {
       id: "m4",
       status: "LOCKED",
-      goals: [
-        { id: "utility", current: 0, met: false },
-        { id: "users", current: 0, met: false },
-        { id: "holders", current: 0, met: false },
-      ],
+      goals: emptyGoals(["utility", "users", "holders"]),
     },
     {
       id: "m5",
       status: "LOCKED",
-      goals: [
-        { id: "holders", current: 0, met: false },
-        { id: "users", current: 0, met: false },
-        { id: "returning", current: 0, met: false },
-      ],
+      goals: emptyGoals(["holders", "users", "returning"]),
     },
     {
       id: "m6",
       status: "LOCKED",
-      goals: [
-        {
-          id: "external",
-          current: 0,
-          met: false,
-          optionMet: [false, false, false, false, false],
-        },
-      ],
+      goals: emptyGoals(["holders", "holders30", "users", "top10"]),
     },
     {
       id: "m7",
       status: "LOCKED",
-      goals: [
-        { id: "holders", current: 0, met: false },
-        { id: "holders30", current: 0, met: false },
-        { id: "users", current: 0, met: false },
-        {
-          id: "growth",
-          current: 0,
-          met: false,
-          optionMet: [false, false, false, false, false],
-        },
-      ],
+      goals: emptyGoals(["holders", "external"], { anyOfId: "external", optionCount: 5 }),
+    },
+    {
+      id: "m8",
+      status: "LOCKED",
+      goals: emptyGoals(["holders", "users", "returning", "holders30"]),
+    },
+    {
+      id: "m9",
+      status: "LOCKED",
+      goals: emptyGoals(["holders", "market"], { anyOfId: "market", optionCount: 5 }),
+    },
+    {
+      id: "m10",
+      status: "LOCKED",
+      goals: emptyGoals(["holders", "holders30", "users", "top10"]),
+    },
+    {
+      id: "m11",
+      status: "LOCKED",
+      goals: emptyGoals(["holders", "users", "returning", "growth"], {
+        anyOfId: "growth",
+        optionCount: 4,
+      }),
+    },
+    {
+      id: "m12",
+      status: "LOCKED",
+      goals: emptyGoals(["holders", "holders30", "users", "returning", "maturity"], {
+        anyOfId: "maturity",
+        optionCount: 4,
+      }),
     },
   ];
 

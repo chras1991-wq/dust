@@ -1,7 +1,7 @@
 # Mint runbook (summary)
 
 1. Confirm SATDUST ticker free on authoritative DUST-20 index
-2. Deploy payload with max_sats = 10000 × 546 = 5460000
+2. Deploy payload with max_sats = 54600 × 546 = 29811600
 3. Wait for indexer acceptance
 4. OPEN MINT on site (`DEPLOY_TXID` set)
 5. Quotes: median BTC/USD, 60s TTL, HMAC signature

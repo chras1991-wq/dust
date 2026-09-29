@@ -17,9 +17,9 @@ export const SLOGAN = "Bitcoin Dust. Carried by Sats." as const;
 export const PROJECT_ADDRESS =
   "bc1pvhl5eemwk4a9d8k225medwye8m4rzw0nhr3nsfw732xzr6zx8rmq5ckdk4" as const;
 
-export const SUPPLY = 10_000;
+export const SUPPLY = 54_600;
 export const UNIT_SATS = 546;
-export const MAX_SATS = SUPPLY * UNIT_SATS; // 5_460_000
+export const MAX_SATS = SUPPLY * UNIT_SATS; // 29_811_600
 export const LIM_SATS = UNIT_SATS; // 546 → max 1 SATDUST per mint
 export const MINT_AMT = 1;
 export const MINT_USD = 7;

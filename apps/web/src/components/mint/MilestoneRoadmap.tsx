@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
+  SUPPLY,
   VOTE_SATDUST_EQUIV_BTC,
   VOTE_PERIOD_DAYS,
   REVOTE_COOLDOWN_DAYS,
@@ -80,8 +81,8 @@ export function MilestoneRoadmap({
         after that.
       </p>
       <p className="mt-3 font-sans text-sm text-[var(--ink-soft)]">
-        Genesis {stages[0]?.amount.toLocaleString()} at launch. The other 8,000 need a milestone +
-        a yes vote. Hitting the goal only opens a vote — it does not mint.
+        Genesis {stages[0]?.amount.toLocaleString()} at launch. The rest need a milestone + a yes
+        vote. Hitting the goal only opens a vote — it does not mint.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,14rem)_1fr] lg:gap-10">
@@ -221,7 +222,7 @@ export function MilestoneRoadmap({
                 <Row label="On the ballot" value={`+${selected.amount.toLocaleString()}`} />
                 <Row
                   label="If yes"
-                  value={`${selected.supplyIfApproved.toLocaleString()} / 10,000`}
+                  value={`${selected.supplyIfApproved.toLocaleString()} / ${SUPPLY.toLocaleString()}`}
                 />
                 <Row
                   label="Dilution if yes"
