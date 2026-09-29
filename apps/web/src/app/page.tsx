@@ -138,7 +138,7 @@ export default function HomePage() {
               <p className="font-pixel text-[0.55rem] text-[var(--pink)]">danger zone</p>
               <p className="mt-3 text-sm text-[var(--ink-dim)]">
                 Wallet UTXO selection and change layout decide whether balances survive a spend.
-                Colored inputs (Ordinals / Runes / BRC-20 / DUST) must never fund mint fee paths.
+                Colored inputs (Ordinals / Runes / BRC-20 / DUST) must never be selected as funding inputs.
               </p>
             </div>
             <div className="panel-y2k">
