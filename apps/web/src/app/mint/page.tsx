@@ -34,10 +34,7 @@ export default function MintPage() {
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{
-    mintId: string;
-    notice: string;
-  } | null>(null);
+  const [result, setResult] = useState<{ mintId: string; notice: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const refreshSupply = useCallback(async () => {
@@ -111,13 +108,13 @@ export default function MintPage() {
   }
 
   return (
-    <div className="relative mx-auto max-w-3xl px-4 py-12">
-      <span className="pill pill-pink animate-floaty">mint surface</span>
-      <h1 className="hologram-text hero-title mt-4 text-6xl sm:text-7xl">MINT</h1>
-      <p className="mt-3 max-w-xl text-[var(--ink-dim)]">
-        Operational pricing and quantity. Protocol theory lives on the home/docs surfaces.
+    <div className="mx-auto max-w-3xl px-5 py-14">
+      <p className="byline">Operations · Mint desk</p>
+      <h1 className="masthead mt-2 text-6xl md:text-7xl">Mint</h1>
+      <p className="deck mt-4 max-w-xl">
+        Quantity and pricing live here. Protocol essay elsewhere.
       </p>
-      <p className="mt-2 font-mono text-xl text-[var(--cyan)]">
+      <p className="mt-3 font-mono text-sm text-[var(--accent)]">
         receive 1 SATDUST · carrier {UNIT_SATS} sats · offset 0
       </p>
 
@@ -131,51 +128,49 @@ export default function MintPage() {
       </div>
 
       {supply && (
-        <div className="panel-y2k mt-8">
+        <div className="panel-edit mt-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-pixel text-[0.55rem] text-[var(--pink)]">confirmed</p>
-              <p className="chrome-text mt-1 text-4xl">
+              <p className="byline">Confirmed</p>
+              <p className="font-display mt-1 text-4xl">
                 {supply.minted.toLocaleString()}
-                <span className="text-[var(--pink)]"> / {supply.totalSupply.toLocaleString()}</span>
+                <span className="text-[var(--ink-mute)]"> / {supply.totalSupply.toLocaleString()}</span>
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <span className="pill pill-cyan">pending {supply.pending}</span>
-              <span className="pill pill-lime">left {supply.remaining}</span>
+            <div className="font-condensed text-[0.75rem] uppercase tracking-[0.12em] text-[var(--ink-mute)]">
+              Pending {supply.pending} · Left {supply.remaining}
               {supply.highContention && (
-                <span className="pill pill-pink animate-sparkle">high contention</span>
+                <span className="ml-3 text-[var(--accent)]">High contention</span>
               )}
             </div>
           </div>
-          <p className="mt-4 text-sm text-[var(--ink-dim)]">
+          <p className="mt-4 text-sm text-[var(--ink-mute)]">
             No reservation. Valid only after confirmation + DUST-20 indexer acceptance.
           </p>
         </div>
       )}
 
-      <div className="panel-chrome mt-6 space-y-3 font-mono text-xl">
-        <Row label="You receive" value="1 SATDUST" color="var(--lime)" />
-        <Row label="SATDUST backing" value={`${UNIT_SATS} sats`} color="var(--cyan)" />
+      <div className="panel-edit mt-6 space-y-3 font-sans text-sm">
+        <Row label="You receive" value="1 SATDUST" />
+        <Row label="SATDUST backing" value={`${UNIT_SATS} sats`} />
         <Row
           label="Mint fee"
           value={quote ? `$7.00 ≈ ${Number(quote.feeSats).toLocaleString()} sats` : "loading…"}
-          color="var(--pink)"
         />
-        <Row label="Bitcoin network fee" value={`≈ ${minerFee.toLocaleString()} sats`} color="var(--blue)" />
-        <div className="border-t border-dashed border-white/30 pt-3">
-          <Row label="Estimated total" value={`≈ ${total.toLocaleString()} sats`} color="var(--lime)" emph />
+        <Row label="Bitcoin network fee" value={`≈ ${minerFee.toLocaleString()} sats`} />
+        <div className="border-t border-[var(--ink)] pt-3">
+          <Row label="Estimated total" value={`≈ ${total.toLocaleString()} sats`} emph />
         </div>
       </div>
 
       {quote && (
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          <span className="pill pill-chrome">btc ${Number(quote.btcUsd).toLocaleString()}</span>
-          <span className="pill pill-pink">
-            lock {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:
+        <div className="mt-5 flex flex-wrap gap-4 font-condensed text-[0.75rem] uppercase tracking-[0.12em] text-[var(--ink-mute)]">
+          <span>BTC ${Number(quote.btcUsd).toLocaleString()}</span>
+          <span className="text-[var(--accent)]">
+            Locked {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:
             {String(secondsLeft % 60).padStart(2, "0")}
           </span>
-          <span className="font-mono text-lg text-[var(--ink-dim)]">{quote.quoteId}</span>
+          <span>{quote.quoteId}</span>
         </div>
       )}
 
@@ -199,14 +194,14 @@ export default function MintPage() {
         </Link>
       </div>
 
-      {error && <p className="mt-4 font-pixel text-[0.6rem] text-[var(--invalid)]">{error}</p>}
+      {error && <p className="mt-4 font-sans text-sm text-[var(--invalid)]">{error}</p>}
 
       {result && (
-        <div className="panel-y2k mt-10">
-          <span className="pill pill-lime">submitted</span>
-          <h2 className="chrome-text mt-3 text-3xl">Mint prepared</h2>
-          <p className="mt-3 text-sm text-[var(--ink-dim)]">{result.notice}</p>
-          <p className="mt-3 font-mono text-lg text-[var(--cyan)]">mintId {result.mintId}</p>
+        <div className="panel-edit mt-10 border-[var(--valid)]">
+          <p className="kicker">Submitted</p>
+          <h2 className="font-display mt-2 text-3xl">Mint prepared</h2>
+          <p className="mt-3 text-sm text-[var(--ink-soft)]">{result.notice}</p>
+          <p className="mt-3 font-mono text-xs text-[var(--ink-mute)]">mintId {result.mintId}</p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/verify" className="btn">
               Verify
@@ -226,20 +221,20 @@ export default function MintPage() {
       )}
 
       {confirmOpen && quote && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(7,6,20,0.88)] p-4 backdrop-blur-sm">
-          <div className="panel-y2k w-full max-w-md">
-            <span className="pill pill-pink">confirm</span>
-            <h2 className="hologram-text mt-3 text-3xl">You are minting</h2>
-            <ul className="mt-5 space-y-2 font-mono text-xl">
-              <li className="text-[var(--lime)]">1 SATDUST</li>
-              <li className="text-[var(--cyan)]">{UNIT_SATS} sats backing</li>
-              <li className="text-[var(--pink)]">Project fee {feeSats.toLocaleString()} sats</li>
-              <li className="text-[var(--blue)]">Network ≈ {minerFee.toLocaleString()} sats</li>
-              <li className="font-display text-base font-bold text-[var(--lime)]">
-                TOTAL ≈ {total.toLocaleString()} sats
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="panel-edit w-full max-w-md">
+            <p className="kicker">Confirmation</p>
+            <h2 className="font-display mt-2 text-3xl">You are minting</h2>
+            <ul className="mt-5 space-y-2 font-sans text-sm text-[var(--ink-soft)]">
+              <li className="text-[var(--ink)]">1 SATDUST</li>
+              <li>{UNIT_SATS} sats backing</li>
+              <li>Project fee {feeSats.toLocaleString()} sats</li>
+              <li>Network ≈ {minerFee.toLocaleString()} sats</li>
+              <li className="font-display text-lg text-[var(--accent)]">
+                Total ≈ {total.toLocaleString()} sats
               </li>
             </ul>
-            <p className="mt-4 break-all font-mono text-base text-[var(--ink-dim)]">
+            <p className="mt-4 break-all font-mono text-xs text-[var(--ink-mute)]">
               Fee → {PROJECT_ADDRESS}
             </p>
             <div className="mt-6 flex gap-3">
@@ -257,21 +252,11 @@ export default function MintPage() {
   );
 }
 
-function Row({
-  label,
-  value,
-  color,
-  emph,
-}: {
-  label: string;
-  value: string;
-  color?: string;
-  emph?: boolean;
-}) {
+function Row({ label, value, emph }: { label: string; value: string; emph?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <span className="text-[var(--ink-dim)]">{label}</span>
-      <span className={emph ? "font-display text-base font-bold" : ""} style={{ color: color ?? "var(--ink)" }}>
+      <span className="text-[var(--ink-mute)]">{label}</span>
+      <span className={emph ? "font-display text-base text-[var(--accent)]" : "text-[var(--ink)]"}>
         {value}
       </span>
     </div>

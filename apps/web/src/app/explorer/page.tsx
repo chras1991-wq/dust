@@ -35,22 +35,22 @@ export default function ExplorerPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
-      <span className="pill pill-cyan">indexer view</span>
-      <h1 className="hologram-text hero-title mt-4 text-6xl sm:text-7xl">INDEX</h1>
-      <p className="mt-3 font-mono text-xl text-[var(--pink)]">
-        Confirmed mints · mint_sequence is ordering metadata, not token id
+    <div className="mx-auto max-w-6xl px-5 py-14">
+      <p className="byline">Ledger · Indexer view</p>
+      <h1 className="masthead mt-2 text-6xl md:text-7xl">Index</h1>
+      <p className="deck mt-4 max-w-2xl">
+        Confirmed mints. Mint sequence is ordering metadata — never a token id.
       </p>
 
       {data && (
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-3">
           <Stat label="Minted" value={`${data.supply.minted} / ${data.supply.totalSupply}`} />
           <Stat label="Remaining" value={String(data.supply.remaining)} />
           <Stat label="Pending" value={String(data.supply.pending)} />
         </div>
       )}
 
-      <div className="mt-8 overflow-x-auto">
+      <div className="mt-10 overflow-x-auto">
         <table className="table-spec min-w-[720px]">
           <thead>
             <tr>
@@ -98,8 +98,8 @@ export default function ExplorerPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={8} className="text-[var(--ink-dim)]">
-                  Empty radar. After mainnet deploy + reveals, rows land here.
+                <td colSpan={8} className="text-[var(--ink-mute)]">
+                  No indexed mints yet. Rows appear from confirmed tx + indexer results.
                   {data?.deployTxid
                     ? ` Deploy: ${data.deployTxid.slice(0, 16)}…`
                     : " Deploy not recorded."}
@@ -115,9 +115,9 @@ export default function ExplorerPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="panel-y2k">
-      <p className="font-pixel text-[0.55rem] text-[var(--cyan)]">{label}</p>
-      <p className="chrome-text mt-2 text-2xl">{value}</p>
+    <div className="panel-edit">
+      <p className="byline">{label}</p>
+      <p className="font-display mt-2 text-3xl">{value}</p>
     </div>
   );
 }

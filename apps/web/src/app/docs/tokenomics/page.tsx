@@ -3,37 +3,23 @@ import { MAX_SATS, SUPPLY, UNIT_SATS } from "@satdust/shared";
 
 export default function TokenomicsDoc() {
   return (
-    <article className="mx-auto max-w-3xl px-4 py-12">
-      <span className="pill pill-chrome">§ 04</span>
-      <h1 className="chrome-text mt-4 text-4xl sm:text-5xl">Satoshi binding</h1>
-      <div className="panel-y2k mt-8 space-y-5 text-[var(--ink-dim)]">
+    <article className="mx-auto max-w-3xl px-5 py-14">
+      <p className="byline">Archive · 05</p>
+      <h1 className="masthead mt-2 text-5xl">Satoshi binding</h1>
+      <div className="mt-8 space-y-5 text-[var(--ink-soft)]">
         <p>
-          Deploy locks a permanent ratio between protocol units and carrier sats. Pricing and
-          mint-fee quotes are intentionally omitted here — see{" "}
-          <Link href="/mint">/mint</Link>.
+          Deploy locks a permanent ratio between protocol units and carrier sats. Pricing is
+          omitted here — see <Link href="/mint">/mint</Link>.
         </p>
         <pre className="formula">{`max_sats = supply × unit_sats
 ${MAX_SATS} = ${SUPPLY} × ${UNIT_SATS}`}</pre>
-        <ul className="list-disc space-y-2 pl-5">
-          <li>
-            <code className="text-[var(--cyan)]">unit_sats</code> — sats bound to one accepted unit
-          </li>
-          <li>
-            <code className="text-[var(--cyan)]">lim_sats</code> — maximum sats in a single mint
-            inscription
-          </li>
-          <li>
-            <code className="text-[var(--cyan)]">max_sats</code> — aggregate sat capacity implied by
-            supply
-          </li>
-        </ul>
         <p>
-          Aggregate carrier sats are not protocol “revenue”; they are the carrying capacity of
-          accepted mints under DUST-20 allocation rules.
+          Aggregate carrier sats are carrying capacity under DUST-20 allocation — not protocol
+          revenue.
         </p>
         <p>
           <Link href="/docs" className="btn btn-ghost">
-            ← Docs index
+            ← Archive
           </Link>
         </p>
       </div>

@@ -2,15 +2,14 @@ import Link from "next/link";
 
 export default function HowMintingWorks() {
   return (
-    <article className="mx-auto max-w-3xl px-4 py-12">
-      <span className="pill pill-lime">§ 03</span>
-      <h1 className="chrome-text mt-4 text-4xl sm:text-5xl">Mint execution</h1>
-      <div className="panel-y2k mt-8 space-y-5 text-[var(--ink-dim)]">
+    <article className="mx-auto max-w-3xl px-5 py-14">
+      <p className="byline">Archive · 03</p>
+      <h1 className="masthead mt-2 text-5xl">Mint execution</h1>
+      <div className="mt-8 space-y-5 text-[var(--ink-soft)]">
         <p>
-          Mints use a commit/reveal inscription envelope. The reveal transaction must create a
-          carrier output whose value equals the declared{" "}
-          <code className="font-mono text-lg text-[var(--cyan)]">sats</code> field, with the
-          inscription at satoshi offset <code className="font-mono text-lg text-[var(--pink)]">0</code>.
+          Mints use a commit/reveal inscription envelope. The reveal must create a carrier whose
+          value equals declared <code className="font-mono text-[var(--accent)]">sats</code>, with
+          the inscription at offset <code className="font-mono text-[var(--accent)]">0</code>.
         </p>
         <pre className="formula">{`{
   "p": "dust-20",
@@ -20,19 +19,16 @@ export default function HowMintingWorks() {
   "sats": "..."
 }`}</pre>
         <p>
-          Constraint: <code className="font-mono text-lg text-[var(--lime)]">amt × unit_sats = sats</code>{" "}
-          and <code className="font-mono text-lg text-[var(--lime)]">carrier.value = sats</code>.
-          Off-by-one layouts can confirm on Bitcoin and still be DUST-INVALID.
+          Constraint:{" "}
+          <code className="font-mono text-sm text-[var(--accent)]">amt × unit_sats = sats</code> and
+          carrier.value = sats. Off-by-one layouts can confirm on Bitcoin and remain DUST-INVALID.
         </p>
-        <pre className="formula">{`OUT0  user carrier   value == sats   inscription @ offset 0
-OUTn  funding / change / fees from non-colored UTXOs
-never subtract sats from the carrier to pay miners`}</pre>
         <p>
-          Operational pricing and quantity UI: <Link href="/mint">/mint</Link> only.
+          Operational pricing: <Link href="/mint">/mint</Link> only.
         </p>
         <p>
           <Link href="/docs" className="btn btn-ghost">
-            ← Docs index
+            ← Archive
           </Link>
         </p>
       </div>

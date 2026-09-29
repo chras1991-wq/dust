@@ -5,59 +5,64 @@ const DOCS = [
     href: "/docs/what-is-satdust",
     title: "What is SATDUST",
     blurb: "Sat-bound meta-asset definition and phase-1 scope.",
-    pill: "pill-pink",
+    folio: "01",
   },
   {
     href: "/docs/dust20",
     title: "DUST-20",
     blurb: "Meta-protocol model, identity, indexing.",
-    pill: "pill-cyan",
+    folio: "02",
   },
   {
     href: "/docs/how-minting-works",
     title: "Mint execution",
     blurb: "Commit/reveal, carrier invariants, offset-0.",
-    pill: "pill-lime",
+    folio: "03",
   },
   {
     href: "/docs/verification",
     title: "Verification",
     blurb: "Predicate checklist and indexer truth.",
-    pill: "pill-chrome",
+    folio: "04",
   },
   {
     href: "/docs/tokenomics",
     title: "Satoshi binding",
-    blurb: "unit_sats / max_sats invariants (no pricing).",
-    pill: "pill-pink",
+    blurb: "unit_sats / max_sats invariants.",
+    folio: "05",
   },
   {
     href: "/docs/risks",
     title: "Risks",
     blurb: "Experimental protocol disclosures.",
-    pill: "pill-cyan",
+    folio: "06",
   },
 ];
 
 export default function DocsIndex() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
-      <span className="pill pill-pink">technical docs</span>
-      <h1 className="hologram-text hero-title mt-4 text-6xl">DOCS</h1>
-      <p className="mt-3 text-[var(--ink-dim)]">
-        Protocol notes for implementers. Pricing lives on the mint surface only.
+    <div className="mx-auto max-w-3xl px-5 py-14">
+      <p className="byline">Archive · Technical papers</p>
+      <h1 className="masthead mt-2 text-6xl">Archive</h1>
+      <p className="deck mt-4">
+        Protocol notes for implementers. Pricing remains on the mint desk only.
       </p>
-      <ol className="mt-10 space-y-4">
-        {DOCS.map((d, i) => (
-          <li key={d.href} className="panel-y2k">
-            <span className={`pill ${d.pill}`}>{String(i + 1).padStart(2, "0")}</span>
-            <Link
-              href={d.href}
-              className="chrome-text mt-3 block text-2xl no-underline hover:opacity-90"
-            >
-              {d.title}
-            </Link>
-            <p className="mt-2 text-sm text-[var(--ink-dim)]">{d.blurb}</p>
+      <ol className="mt-12 space-y-0">
+        {DOCS.map((d) => (
+          <li
+            key={d.href}
+            className="grid grid-cols-[auto_1fr] gap-5 border-t border-[var(--ink)] py-6"
+          >
+            <span className="folio text-2xl">{d.folio}</span>
+            <div>
+              <Link
+                href={d.href}
+                className="font-display text-2xl text-[var(--ink)] no-underline hover:text-[var(--accent)] md:text-3xl"
+              >
+                {d.title}
+              </Link>
+              <p className="mt-2 text-sm text-[var(--ink-mute)]">{d.blurb}</p>
+            </div>
           </li>
         ))}
       </ol>

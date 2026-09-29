@@ -1,37 +1,49 @@
 import type { Metadata } from "next";
-import { Orbitron, Comfortaa, Press_Start_2P, VT323 } from "next/font/google";
+import {
+  Playfair_Display,
+  Literata,
+  Archivo,
+  Archivo_Narrow,
+  IBM_Plex_Mono,
+} from "next/font/google";
 import { SiteFooter, SiteHeader, MarqueeBar } from "@/components/SiteChrome";
 import "./globals.css";
 
-const display = Orbitron({
+const display = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-orbitron",
+  variable: "--font-playfair",
   display: "swap",
-  weight: ["500", "700", "800", "900"],
+  style: ["normal", "italic"],
 });
 
-const body = Comfortaa({
+const body = Literata({
   subsets: ["latin"],
-  variable: "--font-comfortaa",
+  variable: "--font-literata",
   display: "swap",
 });
 
-const pixel = Press_Start_2P({
+const sans = Archivo({
   subsets: ["latin"],
-  variable: "--font-press-start",
+  variable: "--font-archivo",
   display: "swap",
-  weight: "400",
 });
 
-const mono = VT323({
+const condensed = Archivo_Narrow({
   subsets: ["latin"],
-  variable: "--font-vt323",
+  variable: "--font-archivo-narrow",
   display: "swap",
-  weight: "400",
+  weight: ["400", "500", "600", "700"],
+});
+
+const mono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-ibm-plex",
+  display: "swap",
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "SATDUST — Bitcoin Dust, Carried by Sats",
+  title: "SATDUST — Sat-bound Assets on Bitcoin L1",
   description:
     "SATDUST — sat-bound DUST-20 meta-protocol asset on Bitcoin Mainnet. Inscription predicates, exact carrier invariants, indexer state.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://satdust.vercel.app"),
@@ -45,13 +57,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${display.variable} ${body.variable} ${pixel.variable} ${mono.variable} antialiased`}
+        className={`${display.variable} ${body.variable} ${sans.variable} ${condensed.variable} ${mono.variable} antialiased`}
         style={
           {
-            "--font-display": "var(--font-orbitron), sans-serif",
-            "--font-body": "var(--font-comfortaa), sans-serif",
-            "--font-pixel": "var(--font-press-start), monospace",
-            "--font-mono": "var(--font-vt323), monospace",
+            "--font-display": "var(--font-playfair), serif",
+            "--font-body": "var(--font-literata), serif",
+            "--font-sans": "var(--font-archivo), sans-serif",
+            "--font-condensed": "var(--font-archivo-narrow), sans-serif",
+            "--font-mono": "var(--font-ibm-plex), monospace",
           } as React.CSSProperties
         }
       >

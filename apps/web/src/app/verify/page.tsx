@@ -57,16 +57,16 @@ function VerifyForm() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
-      <span className="pill pill-lime">truth machine</span>
-      <h1 className="hologram-text hero-title mt-4 text-6xl sm:text-7xl">CHECK</h1>
-      <p className="mt-3 text-[var(--ink-dim)]">
-        Structural DUST-20 checks. Final word = confirmed chain + indexer.
+    <div className="mx-auto max-w-3xl px-5 py-14">
+      <p className="byline">Laboratory · Proof</p>
+      <h1 className="masthead mt-2 text-6xl md:text-7xl">Prove</h1>
+      <p className="deck mt-4">
+        Structural DUST-20 checks. Final word remains confirmed chain + indexer.
       </p>
 
-      <form onSubmit={onSubmit} className="panel-y2k mt-8 space-y-4">
+      <form onSubmit={onSubmit} className="panel-edit mt-10 space-y-4">
         <label className="block">
-          <span className="font-pixel text-[0.55rem] text-[var(--pink)]">txid</span>
+          <span className="byline">TXID</span>
           <input
             className="input mt-2"
             value={txid}
@@ -77,11 +77,11 @@ function VerifyForm() {
         </label>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="font-pixel text-[0.55rem] text-[var(--cyan)]">carrier sats</span>
+            <span className="byline">Carrier sats</span>
             <input className="input mt-2" value={carrier} onChange={(e) => setCarrier(e.target.value)} />
           </label>
           <label className="block">
-            <span className="font-pixel text-[0.55rem] text-[var(--lime)]">offset</span>
+            <span className="byline">Offset</span>
             <input className="input mt-2" value={offset} onChange={(e) => setOffset(e.target.value)} />
           </label>
         </div>
@@ -90,23 +90,23 @@ function VerifyForm() {
         </button>
       </form>
 
-      {error && <p className="mt-4 font-pixel text-[0.55rem] text-[var(--invalid)]">{error}</p>}
+      {error && <p className="mt-4 text-sm text-[var(--invalid)]">{error}</p>}
 
       {result && (
-        <div className="panel-y2k mt-8">
-          <p className={`font-pixel text-[0.7rem] ${result.valid ? "status-confirmed" : "status-invalid"}`}>
+        <div className="panel-edit mt-8">
+          <p className={result.valid ? "status-confirmed" : "status-invalid"}>
             {result.summary}
           </p>
           <ul className="mt-6 space-y-3">
             {result.checks.map((c) => (
-              <li key={c.id} className="flex gap-3 font-mono text-lg">
-                <span className={`pill ${c.pass ? "pill-lime" : "pill-pink"}`}>
-                  {c.pass ? "pass" : "fail"}
+              <li key={c.id} className="flex gap-3 font-sans text-sm">
+                <span className={c.pass ? "status-confirmed" : "status-invalid"}>
+                  {c.pass ? "Pass" : "Fail"}
                 </span>
                 <span>
                   <span className="text-[var(--ink)]">{c.label}</span>
                   {c.detail && (
-                    <span className="mt-0.5 block text-[var(--ink-dim)]">{c.detail}</span>
+                    <span className="mt-0.5 block text-[var(--ink-mute)]">{c.detail}</span>
                   )}
                 </span>
               </li>
@@ -120,7 +120,7 @@ function VerifyForm() {
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={<div className="px-4 py-12 text-[var(--ink-dim)]">Loading…</div>}>
+    <Suspense fallback={<div className="px-5 py-14 text-[var(--ink-mute)]">Loading…</div>}>
       <VerifyForm />
     </Suspense>
   );

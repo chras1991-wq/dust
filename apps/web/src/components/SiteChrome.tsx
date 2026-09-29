@@ -4,19 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "spec", pill: "pill-chrome" },
-  { href: "/mint", label: "mint", pill: "pill-pink" },
-  { href: "/explorer", label: "index", pill: "pill-cyan" },
-  { href: "/verify", label: "prove", pill: "pill-lime" },
-  { href: "/docs", label: "docs", pill: "pill-chrome" },
+  { href: "/", label: "Essay" },
+  { href: "/mint", label: "Mint" },
+  { href: "/explorer", label: "Index" },
+  { href: "/verify", label: "Prove" },
+  { href: "/docs", label: "Archive" },
 ];
 
 export function MarqueeBar() {
   const text =
-    "DUST-20 v1.1.0 ★ META-PROTOCOL ★ INSCRIPTION + SAT FLOW ★ OFFSET-0 BINDING ★ CARRIER EXACTNESS ★ CASE-FOLDED TICK ★ FIRST-DEPLOY-WINS ★ UTXO TOPOLOGY ★ INDEXER STATE ★ BITCOIN MAINNET ★ ";
+    "Vol. I  ·  DUST-20  ·  Bitcoin Mainnet  ·  Meta-protocol  ·  Sat-bound  ·  Offset-0  ·  Indexer State  ·  Experimental  ·  ";
   return (
-    <div className="marquee layer" aria-hidden>
-      <div className="marquee-track">
+    <div className="issue-bar layer" aria-hidden>
+      <div className="issue-track">
         <span>{text}</span>
         <span>{text}</span>
       </div>
@@ -28,15 +28,15 @@ export function SiteHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="layer chrome-bar">
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="no-underline">
-            <span className="chrome-text text-2xl sm:text-3xl">SATDUST</span>
+    <header className="layer border-b-[1.5px] border-[var(--ink)] bg-[var(--paper)]/90 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-5 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="byline">The Satoshi Review · Special Issue</p>
+          <Link href="/" className="no-underline text-[var(--ink)]">
+            <span className="masthead text-4xl md:text-5xl">SATDUST</span>
           </Link>
-          <span className="pill pill-pink animate-sparkle">mainnet</span>
         </div>
-        <nav className="flex flex-wrap gap-2">
+        <nav className="flex flex-wrap gap-x-5 gap-y-2 font-condensed text-[0.8rem] uppercase tracking-[0.16em]">
           {LINKS.map((l) => {
             const active =
               pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href));
@@ -44,7 +44,11 @@ export function SiteHeader() {
               <Link
                 key={l.href}
                 href={l.href}
-                className={`pill ${l.pill} no-underline ${active ? "ring-2 ring-[var(--pink)]" : ""}`}
+                className={
+                  active
+                    ? "text-[var(--accent)] no-underline"
+                    : "text-[var(--ink)] no-underline hover:text-[var(--accent)]"
+                }
               >
                 {l.label}
               </Link>
@@ -52,36 +56,31 @@ export function SiteHeader() {
           })}
         </nav>
       </div>
-      <div className="border-t border-white/30 bg-[#0b0a1a]/px-4 py-2">
-        <p className="mx-auto max-w-6xl overflow-x-auto font-mono text-lg text-[var(--cyan)]">
-          protocol :: dust-20@1.1.0 · network :: bitcoin-mainnet · status :: experimental ·
-          consensus :: off-chain-index
-        </p>
-      </div>
     </header>
   );
 }
 
 export function SiteFooter() {
   return (
-    <footer className="layer mt-12">
-      <div className="bg-gradient-to-r from-[var(--pink)] via-[var(--cyan)] to-[var(--lime)] px-4 py-2">
-        <p className="font-pixel text-[0.55rem] uppercase text-[#0b0a1a]">
-          disclaimer † not bitcoin consensus · indexer-dependent state
+    <footer className="layer mt-16 border-t-[1.5px] border-[var(--ink)]">
+      <div className="bg-[var(--ink)] px-5 py-3">
+        <p className="font-condensed text-[0.72rem] uppercase tracking-[0.16em] text-[var(--paper)]">
+          Colophon · Not Bitcoin consensus · Indexer-dependent state
         </p>
       </div>
-      <div className="bg-[#070614] px-4 py-8">
-        <div className="mx-auto max-w-6xl">
-          <p className="max-w-3xl text-sm text-[var(--ink-dim)]">
+      <div className="mx-auto max-w-6xl px-5 py-10">
+        <div className="grid gap-8 md:grid-cols-[1.4fr_1fr]">
+          <p className="max-w-xl text-[0.95rem] text-[var(--ink-soft)]">
             SATDUST is a DUST-20 meta-protocol asset. Bitcoin Core does not interpret SATDUST
             balances. Validity is defined by confirmed transactions plus compatible indexer rules.
-            Ecosystem support is limited. No guaranteed value, listing, or liquidity.
+            No guaranteed value, listing, or liquidity.
           </p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <span className="pill pill-chrome">dust-20 1.1.0</span>
-            <span className="pill pill-cyan">mainnet</span>
-            <span className="pill pill-pink">experimental</span>
-            <span className="pill pill-lime">sat-bound</span>
+          <div className="md:text-right">
+            <p className="byline">Spec</p>
+            <p className="font-display mt-2 text-2xl italic">DUST-20 v1.1.0</p>
+            <p className="mt-1 font-sans text-sm text-[var(--ink-mute)]">
+              Revised 2026-09-01 · Mainnet · Experimental
+            </p>
           </div>
         </div>
       </div>
