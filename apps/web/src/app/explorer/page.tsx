@@ -39,7 +39,7 @@ export default function ExplorerPage() {
       <p className="byline">Ledger · Indexer view</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Index</h1>
       <p className="deck mt-4 max-w-2xl">
-        Confirmed mints. Mint sequence is ordering metadata — never a token id.
+        Confirmed SATDUST mints. Sequence is just order — not a unique token id.
       </p>
 
       {data && (

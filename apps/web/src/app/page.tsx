@@ -5,48 +5,49 @@ import { MAX_SATS, SUPPLY, UNIT_SATS } from "@satdust/shared";
 export default function HomePage() {
   return (
     <div>
-      {/* Full-bleed editorial opener */}
       <section className="hero-media">
         <div className="page-shell relative z-[1] flex min-h-[62vh] flex-col justify-end pb-10 pt-12 sm:min-h-[70vh] sm:pb-14 sm:pt-20">
-          <p className="animate-rise kicker text-[var(--accent-soft)]">Cover story · Protocol</p>
+          <p className="animate-rise kicker text-[var(--accent-soft)]">DUST-20 · Bitcoin Mainnet</p>
           <h1 className="animate-rise-delay masthead mt-3 max-w-4xl text-[clamp(3.25rem,15vw,7.5rem)] text-[var(--paper)]">
             SATDUST
           </h1>
-          <p className="animate-rise-delay-2 mt-4 max-w-xl font-display text-xl italic leading-snug text-[var(--paper)] sm:mt-5 sm:text-2xl md:text-3xl">
-            Sat-bound assets on Bitcoin L1.
-            <span className="not-italic text-[var(--accent-soft)]"> Indexed, not consensus.</span>
+          <p className="animate-rise-delay-2 mt-4 max-w-2xl font-display text-xl italic leading-snug text-[var(--paper)] sm:mt-5 sm:text-2xl md:text-3xl">
+            Assets that carry their own liquidity.
+          </p>
+          <p className="animate-rise-delay-2 mt-3 max-w-xl font-sans text-base leading-relaxed text-[var(--accent-soft)] sm:text-lg">
+            DUST-20 is a Bitcoin mainnet protocol that builds each unit into a real satoshi UTXO —
+            spendable BTC glued to the asset. SATDUST is the first ticker.
           </p>
           <div className="animate-rise-delay-2 btn-row mt-7 sm:mt-8">
-            <Link href="/docs/dust20" className="btn btn-solid">
-              Read the Spec
+            <Link href="/mint" className="btn btn-solid">
+              Mint SATDUST
+            </Link>
+            <Link href="/docs/dust20" className="btn btn-ghost-on-dark">
+              How DUST-20 works
             </Link>
             <Link href="/verify" className="btn btn-ghost-on-dark">
-              Verification
-            </Link>
-            <Link href="/mint" className="btn btn-ghost-on-dark">
-              Open Mint
+              Verify a mint
             </Link>
           </div>
         </div>
       </section>
 
       <div className="page-shell py-10 sm:py-14">
-        {/* Irregular two-column opener */}
         <div className="grid items-start gap-8 lg:grid-cols-[1.35fr_0.9fr] lg:gap-10">
           <article>
-            <p className="byline">Essay · 01</p>
+            <p className="byline">Plain English · 01</p>
             <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl md:text-5xl">
-              A meta-protocol that rides satoshis, not a virtual machine
+              Most Bitcoin tokens are ledger entries. DUST-20 builds a liquidity UTXO.
             </h2>
             <p className="dropcap deck mt-6">
-              SATDUST binds fungible units to exact satoshi carriers through inscription predicates
-              and UTXO topology. There is no bridge, no sidechain, and no account model pretending
-              to be Bitcoin. Confirmed ink on L1 is necessary; compatible indexers make it legible.
+              A lot of protocols write a number into an inscription and let an indexer remember who
+              owns it. That balance is not Bitcoin you can spend. DUST-20 does the opposite: when you
+              mint, the protocol constructs a carrier UTXO — real sats on L1 — and binds the asset to
+              that output.
             </p>
             <p className="mt-5 text-[var(--ink-soft)]">
-              DUST-20 does not extend Bitcoin consensus. It is a deterministic reading of JSON
-              inscriptions plus satoshi-range accounting over ordinary spends. Invalid layouts can
-              still confirm on-chain — and simply never mint.
+              Hold SATDUST and you also hold its carrier sats. Transfer means spending that UTXO like
+              any other Bitcoin output. No bridge. No sidechain. No separate “transfer” opcode.
             </p>
           </article>
           <EditorialAside />
@@ -54,38 +55,46 @@ export default function HomePage() {
 
         <hr className="mag-rule-accent" />
 
-        {/* Broken grid feature band */}
         <section className="relative">
           <div className="absolute -left-2 top-0 page-mark hidden md:block">pp. 04–07</div>
-          <p className="kicker">Architecture</p>
+          <p className="kicker">How it works</p>
           <h2 className="font-display mt-2 max-w-3xl text-[1.85rem] italic sm:text-4xl md:text-5xl">
-            From confirmation to meaning
+            One mint. One UTXO. Asset + liquidity together.
           </h2>
           <div className="mt-6 grid gap-6 sm:mt-8 md:grid-cols-12">
             <div className="scroll-x md:col-span-7">
               <ProtocolDiagram />
             </div>
-            <div className="flex flex-col justify-between gap-6 md:col-span-5 md:pt-8">
-              <p className="pull-quote m-0 text-[1.25rem] sm:text-[1.45rem]">
-                Carrier value must equal declared sats. Offset must be zero. Everything else is
-                commentary.
-              </p>
-              <p className="font-sans text-sm text-[var(--ink-mute)]">
-                Pre-broadcast asserts abort when either invariant fails. Databases remain caches;
-                RBF and reorgs force re-evaluation.
-              </p>
-            </div>
+            <ol className="space-y-4 font-sans text-[0.95rem] text-[var(--ink-soft)] md:col-span-5 md:pt-2">
+              <li>
+                <strong className="text-[var(--ink)]">1. Inscribe mint JSON</strong> — tick, amount,
+                and how many sats the carrier must hold.
+              </li>
+              <li>
+                <strong className="text-[var(--ink)]">2. Reveal builds the carrier</strong> — for
+                SATDUST that is exactly {UNIT_SATS} sats, inscription at offset 0.
+              </li>
+              <li>
+                <strong className="text-[var(--ink)]">3. Indexer accepts or rejects</strong> — wrong
+                sats or wrong offset can confirm on Bitcoin and still fail as DUST.
+              </li>
+            </ol>
           </div>
+          <p className="pull-quote mt-8 text-[1.25rem] sm:text-[1.45rem]">
+            If the carrier is wrong, you do not get the asset. Liquidity is not a marketing claim —
+            it is the UTXO itself.
+          </p>
         </section>
 
         <hr className="mag-rule" />
 
-        {/* Three irregular editorial cards - not identical cards, staggered */}
         <section>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="kicker">Invariants</p>
-              <h2 className="font-display mt-2 text-[1.85rem] sm:text-4xl">Three hard rules</h2>
+              <p className="kicker">Hard rules</p>
+              <h2 className="font-display mt-2 text-[1.85rem] sm:text-4xl">
+                Three checks. Fail any one, mint dies.
+              </h2>
             </div>
             <p className="folio text-xl">Fig. A</p>
           </div>
@@ -94,24 +103,24 @@ export default function HomePage() {
               <span className="overlap-label">01</span>
               <h3 className="font-display mt-4 text-2xl">Exact carrier</h3>
               <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
-                <code className="font-mono text-sm">vout.value</code> must equal declared{" "}
-                <code className="font-mono text-sm">sats</code>. ±1 sat confirms on L1 and still
-                fails acceptance.
+                The output must hold exactly the sats declared in the mint. Off by one sat? Bitcoin
+                may confirm the tx. DUST still rejects it.
               </p>
             </div>
             <div className="panel-edit slant-block">
               <span className="overlap-label">02</span>
               <h3 className="font-display mt-4 text-2xl">Offset zero</h3>
               <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
-                The mint inscription occupies satoshi offset{" "}
-                <code className="font-mono text-sm">0</code> of the carrier. No exceptions.
+                The inscription sits on the first sat of that carrier. Anywhere else and the mint is
+                invalid.
               </p>
             </div>
             <div className="panel-edit md:mt-12">
               <span className="overlap-label">03</span>
-              <h3 className="font-display mt-4 text-2xl">Case-folded tick</h3>
+              <h3 className="font-display mt-4 text-2xl">One ticker identity</h3>
               <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
-                SATDUST / satdust / SatDust collapse to one identity. First valid deploy wins.
+                SATDUST, satdust, SatDust are the same name. First valid deploy wins; later copies do
+                not.
               </p>
             </div>
           </div>
@@ -121,16 +130,13 @@ export default function HomePage() {
 
         <section className="grid gap-8 lg:grid-cols-[0.9fr_1.3fr] lg:gap-10">
           <div>
-            <p className="kicker">Deploy schema</p>
+            <p className="kicker">Deploy</p>
             <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl">
-              The issuance object, locked in ink
+              The token rules, written once on-chain
             </h2>
             <p className="mt-4 text-[var(--ink-soft)]">
-              <code className="font-mono text-sm">max_sats</code> is constrained by{" "}
-              <code className="font-mono text-sm">supply × unit_sats</code> — not free prose.
-            </p>
-            <p className="mt-6 font-mono text-sm text-[var(--accent)]">
-              assert → {SUPPLY} × {UNIT_SATS} = {MAX_SATS}
+              Deploy fixes supply and how many sats back each unit. For SATDUST: {SUPPLY} units ×{" "}
+              {UNIT_SATS} sats = {MAX_SATS.toLocaleString()} sats of carrier capacity.
             </p>
           </div>
           <div className="min-w-0">
@@ -152,28 +158,20 @@ export default function HomePage() {
         <hr className="mag-rule-accent" />
 
         <section>
-          <p className="kicker">Execution</p>
+          <p className="kicker">Transfers</p>
           <h2 className="font-display mt-2 text-[1.85rem] sm:text-4xl md:text-5xl">
-            Transfer without a transfer opcode
+            Move the UTXO. The asset follows.
           </h2>
-          <div className="mt-6 columns-1 gap-10 sm:mt-8 md:columns-2">
-            <p className="mb-5 text-[var(--ink-soft)]">
-              Asset movement is derived from ordinary Bitcoin spends. Input sat ranges are ordered
-              into outputs; DUST units ride those ranges. There is no{" "}
-              <code className="font-mono text-sm">op:transfer</code>.
+          <div className="mt-6 max-w-3xl space-y-5 text-[var(--ink-soft)]">
+            <p>
+              There is no <code className="font-mono text-sm">op:transfer</code>. Ownership moves when
+              you spend the carrier like a normal Bitcoin output. Sat ranges go in; sat ranges come
+              out; DUST units ride along.
             </p>
-            <p className="mb-5 text-[var(--ink-soft)]">
-              Wallet UTXO selection and change layout decide whether balances survive a spend.
-              Colored inputs — Ordinals, Runes, BRC-20, DUST — must never be selected as funding
-              inputs for mint construction.
-            </p>
-            <p className="mb-5 text-[var(--ink-soft)]">
-              Inscriptions use a commit/reveal envelope. Reveal constructs the carrier and embeds
-              mint JSON. Acceptance is L1 confirmation plus indexer approval — nothing else.
-            </p>
-            <p className="text-[var(--ink-soft)]">
-              Operational quantity and pricing appear only on the mint surface. This essay stays
-              with the machine.
+            <p>
+              That is the point of a liquidity UTXO: the asset never floats free of spendable sats.
+              Price and quantity for minting live only on the mint page — this page stays on the
+              protocol.
             </p>
           </div>
         </section>
@@ -183,35 +181,35 @@ export default function HomePage() {
         <section className="panel-edit">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="kicker">Verification</p>
+              <p className="kicker">Check a mint</p>
               <h2 className="font-display mt-2 text-2xl sm:text-3xl md:text-4xl">
-                Acceptance checklist
+                Valid means all of this is true
               </h2>
             </div>
             <span className="pill-tag">Prove</span>
           </div>
           <ol className="mt-6 list-decimal space-y-2 pl-5 font-sans text-[0.95rem] text-[var(--ink-soft)]">
-            <li>mainnet tx exists ∧ confirms</li>
-            <li>inscription: p=dust-20 ∧ op=mint ∧ tick≡SATDUST</li>
-            <li>amt × unit_sats == sats</li>
-            <li>carrier.vout.value == sats</li>
-            <li>inscription.offset == 0</li>
-            <li>deploy exists ∧ supply not exceeded</li>
-            <li>indexer.accept(mint) == true</li>
+            <li>Mainnet transaction exists and confirms</li>
+            <li>Inscription is dust-20 / mint / SATDUST</li>
+            <li>Amount × unit sats equals declared sats</li>
+            <li>Carrier output value matches those sats</li>
+            <li>Inscription offset is 0</li>
+            <li>Deploy exists and supply is not exceeded</li>
+            <li>A compatible indexer accepts the mint</li>
           </ol>
           <div className="btn-row mt-8">
             <Link href="/verify" className="btn btn-solid">
               Run verifier
             </Link>
             <Link href="/docs" className="btn btn-ghost">
-              Archive
+              Full notes
             </Link>
           </div>
         </section>
 
         <div className="footnote">
-          Spec reference: DUST-20 v1.1.0 (2026-09-01), Bitcoin mainnet, Experimental. Confirm ticker
-          vacancy against an authoritative index before deploy.
+          DUST-20 v1.1.0 · Bitcoin mainnet · Experimental. Bitcoin Core does not natively understand
+          SATDUST; balances depend on compatible indexers.
         </div>
       </div>
     </div>

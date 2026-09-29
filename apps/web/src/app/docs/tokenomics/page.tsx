@@ -8,14 +8,14 @@ export default function TokenomicsDoc() {
       <h1 className="masthead mt-2 text-4xl sm:text-5xl">Satoshi binding</h1>
       <div className="mt-8 space-y-5 text-[var(--ink-soft)]">
         <p>
-          Deploy locks a permanent ratio between protocol units and carrier sats. Pricing is
-          omitted here — see <Link href="/mint">/mint</Link>.
+          Deploy locks how many sats back each unit. That ratio is the liquidity UTXO size — not a
+          price. Mint pricing is only on <Link href="/mint">/mint</Link>.
         </p>
         <pre className="formula">{`max_sats = supply × unit_sats
 ${MAX_SATS} = ${SUPPLY} × ${UNIT_SATS}`}</pre>
         <p>
-          Aggregate carrier sats are carrying capacity under DUST-20 allocation — not protocol
-          revenue.
+          Fully minted, SATDUST sits on {MAX_SATS.toLocaleString()} sats of carrier capacity across
+          all units. Those sats are the assets&apos; liquidity floor on L1, not protocol revenue.
         </p>
         <p>
           <Link href="/docs" className="btn btn-ghost">

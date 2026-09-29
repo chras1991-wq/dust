@@ -13,7 +13,7 @@ const LINKS = [
 
 export function MarqueeBar() {
   const text =
-    "Vol. I  ·  DUST-20  ·  Bitcoin Mainnet  ·  Meta-protocol  ·  Sat-bound  ·  Offset-0  ·  Indexer State  ·  Experimental  ·  ";
+    "DUST-20  ·  Liquidity UTXOs  ·  Bitcoin Mainnet  ·  Asset + Sats  ·  Offset-0  ·  SATDUST  ·  Experimental  ·  ";
   return (
     <div className="issue-bar layer" aria-hidden>
       <div className="issue-track">
@@ -77,9 +77,9 @@ export function SiteFooter() {
       <div className="page-shell py-8 sm:py-10">
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr]">
           <p className="max-w-xl text-[0.95rem] text-[var(--ink-soft)]">
-            SATDUST is a DUST-20 meta-protocol asset. Bitcoin Core does not interpret SATDUST
-            balances. Validity is defined by confirmed transactions plus compatible indexer rules.
-            No guaranteed value, listing, or liquidity.
+            DUST-20 binds each SATDUST unit to a real satoshi UTXO on Bitcoin mainnet. Bitcoin Core
+            does not read those balances — confirmed txs plus compatible indexers do. No guaranteed
+            value, listing, or market liquidity.
           </p>
           <div className="md:text-right">
             <p className="byline">Spec</p>

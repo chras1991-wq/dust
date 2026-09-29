@@ -1,33 +1,31 @@
 export function ProtocolDiagram() {
   return (
-    <pre className="formula">{`Bitcoin L1 (consensus)
-   │  confirmed tx graph
+    <pre className="formula">{`Bitcoin mainnet
+   │  a normal confirmed transaction
    ▼
-Inscription envelope  (commit → reveal)
-   │  content-type: application/json
+Inscription (commit → reveal)
+   │  JSON: dust-20 mint
    ▼
-DUST-20 predicate machine
-   ├── deploy  → ticker registry (case-fold, first-wins)
-   └── mint    → carrier.value == declared.sats
-                 && inscription.offset == 0
-                 && minted + amt ≤ supply
+Build liquidity UTXO
+   │  carrier sats == declared sats
+   │  inscription at offset 0
    ▼
-Satoshi topology transfer
-   │  no transfer opcode — allocation follows
-   │  input sat ranges → output sat ranges
+Indexer accepts → you hold
+   SATDUST + spendable carrier sats
    ▼
-Compatible indexer  =  authoritative balances`}</pre>
+Transfer = spend that UTXO
+   (no separate transfer opcode)`}</pre>
   );
 }
 
 export function ParamTable() {
   const rows = [
-    ["p", "dust-20", "Protocol identifier"],
-    ["tick", "SATDUST", "Case-folded ticker identity"],
-    ["supply", "10000", "Hard cap on mint acceptance"],
-    ["unit_sats", "546", "Sats bound per unit"],
-    ["max_sats", "5460000", "Invariant: supply × unit_sats"],
-    ["lim_sats", "546", "Per-tx mint sats ceiling"],
+    ["p", "dust-20", "Protocol name"],
+    ["tick", "SATDUST", "Ticker (case ignored)"],
+    ["supply", "10000", "Max units that can mint"],
+    ["unit_sats", "546", "Sats glued to each unit"],
+    ["max_sats", "5460000", "supply × unit_sats"],
+    ["lim_sats", "546", "Max sats per mint tx"],
   ];
 
   return (
@@ -36,7 +34,7 @@ export function ParamTable() {
         <tr>
           <th>Field</th>
           <th>Value</th>
-          <th>Semantics</th>
+          <th>Meaning</th>
         </tr>
       </thead>
       <tbody>
@@ -55,11 +53,11 @@ export function ParamTable() {
 export function EditorialAside() {
   return (
     <aside className="panel-edit slant-block-r">
-      <p className="kicker">Field notes</p>
+      <p className="kicker">The idea</p>
       <p className="font-display mt-3 text-2xl italic leading-snug">
-        “The chain confirms ink. The indexer decides meaning.”
+        “Every mint builds a liquidity UTXO — the asset and the sats leave together.”
       </p>
-      <p className="byline mt-4">On meta-protocols</p>
+      <p className="byline mt-4">DUST-20 in one line</p>
     </aside>
   );
 }

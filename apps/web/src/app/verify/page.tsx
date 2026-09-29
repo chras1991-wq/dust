@@ -61,7 +61,8 @@ function VerifyForm() {
       <p className="byline">Laboratory · Proof</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Prove</h1>
       <p className="deck mt-4">
-        Structural DUST-20 checks. Final word remains confirmed chain + indexer.
+        Paste a txid. We check carrier sats, offset, and DUST-20 mint shape. Chain + indexer still
+        have the final say.
       </p>
 
       <form onSubmit={onSubmit} className="panel-edit mt-8 space-y-4 sm:mt-10">
