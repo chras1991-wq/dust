@@ -33,7 +33,7 @@ const mono = VT323({
 export const metadata: Metadata = {
   title: "SATDUST — Bitcoin Dust, Carried by Sats",
   description:
-    "SATDUST is an experimental DUST-20 digital asset on Bitcoin Mainnet. 10,000 supply. 546 sats per unit. Fair mint.",
+    "SATDUST — sat-bound DUST-20 meta-protocol asset on Bitcoin Mainnet. Inscription predicates, exact carrier invariants, indexer state.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://satdust.vercel.app"),
 };
 

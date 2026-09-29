@@ -2,25 +2,25 @@ import { DocBack, DocShell } from "@/components/DocShell";
 
 export default function WhatIsSatdust() {
   return (
-    <DocShell title="What is SATDUST" section="§ D.1">
+    <DocShell title="What is SATDUST" section="§ 01">
       <p>
-        SATDUST is an experimental DUST-20 digital asset on Bitcoin Mainnet. Brand line:
-        Bitcoin Dust. Carried by Sats.
+        SATDUST is a fungible DUST-20 asset inscribed on Bitcoin Mainnet. Units are bound to
+        satoshi carriers through inscription predicates and sat-range accounting — not through an
+        account model or virtual machine.
       </p>
-      <p>
-        Phase 1 does three things only: deploy SATDUST, mint from the site, and verify each
-        mint in the explorer. Marketplace, swap, staking, farming, bridge, DAO, and complex
-        NFT surfaces are deferred.
-      </p>
+      <p>Phase-1 surface area:</p>
       <ul>
-        <li>Total supply: 10,000</li>
-        <li>1 SATDUST per mint; lim_sats = 546</li>
-        <li>546 sats backing per unit</li>
-        <li>$7 USD-equivalent BTC mint fee</li>
-        <li>No premine. No team allocation. First come, first served.</li>
+        <li>Deploy the SATDUST ticker under DUST-20 rules</li>
+        <li>Mint via commit/reveal with exact carrier invariants</li>
+        <li>Verify acceptance against L1 + indexer predicates</li>
       </ul>
       <p>
-        SATDUST is fungible. UI may show Mint Sequence numbers; it must not imply Token IDs.
+        Out of scope: marketplace mutation, swap, staking, bridges, DAO tooling. Mint pricing and
+        per-mint quantity are documented exclusively on the mint UI.
+      </p>
+      <p>
+        SATDUST is fungible. Explorer may show Mint Sequence as ordering metadata — never as Token
+        ID.
       </p>
       <DocBack />
     </DocShell>

@@ -65,37 +65,43 @@ export function DustField() {
 
 export function ProtocolDiagram() {
   return (
-    <pre className="formula">{`Bitcoin Mainnet
-   │  chrome rails
+    <pre className="formula">{`Bitcoin L1 (consensus)
+   │  confirmed tx graph
    ▼
-Inscription (DUST-20)
-   ├── deploy { tick, supply, unit_sats, max_sats, lim_sats }
-   └── mint   { tick, amt, sats }  @ carrier = sats, offset = 0
+Inscription envelope  (commit → reveal)
+   │  content-type: application/json
    ▼
-UTXO / satoshi flow  (no separate transfer msg)
+DUST-20 predicate machine
+   ├── deploy  → ticker registry (case-fold, first-wins)
+   └── mint    → carrier.value == declared.sats
+                 && inscription.offset == 0
+                 && minted + amt ≤ supply
    ▼
-Indexer → verified balance`}</pre>
+Satoshi topology transfer
+   │  no transfer opcode — allocation follows
+   │  input sat ranges → output sat ranges
+   ▼
+Compatible indexer  =  authoritative balances`}</pre>
   );
 }
 
 export function ParamTable() {
   const rows = [
-    ["tick", "SATDUST", "Case-folded identity"],
-    ["supply", "10000", "Permanent max units"],
-    ["unit_sats", "546", "1 SATDUST = 546 sats"],
-    ["max_sats", "5460000", "supply × unit_sats"],
-    ["lim_sats", "546", "Max 1 unit / mint"],
-    ["mint fee", "$7 ≡ BTC", "Project income"],
-    ["backing", "546 sats", "Carrier UTXO"],
+    ["p", "dust-20", "Protocol identifier"],
+    ["tick", "SATDUST", "Case-folded ticker identity"],
+    ["supply", "10000", "Hard cap on mint acceptance"],
+    ["unit_sats", "546", "Sats bound per unit"],
+    ["max_sats", "5460000", "Invariant: supply × unit_sats"],
+    ["lim_sats", "546", "Per-tx mint sats ceiling"],
   ];
 
   return (
     <table className="table-spec">
       <thead>
         <tr>
-          <th>Parameter</th>
+          <th>Field</th>
           <th>Value</th>
-          <th>Note</th>
+          <th>Semantics</th>
         </tr>
       </thead>
       <tbody>
@@ -111,14 +117,14 @@ export function ParamTable() {
   );
 }
 
-export function CollageStampCloud() {
+export function TechPillStrip() {
   const stamps = [
-    { t: "10k supply", c: "pill-pink" },
-    { t: "1 per mint", c: "pill-cyan" },
-    { t: "546 sats", c: "pill-lime" },
-    { t: "$7 fee", c: "pill-chrome" },
-    { t: "mainnet", c: "pill-cyan" },
-    { t: "no team cut", c: "pill-pink" },
+    { t: "inscription-bound", c: "pill-pink" },
+    { t: "sat-topology", c: "pill-cyan" },
+    { t: "offset-0", c: "pill-lime" },
+    { t: "exact-carrier", c: "pill-chrome" },
+    { t: "indexer-truth", c: "pill-cyan" },
+    { t: "no-transfer-op", c: "pill-pink" },
   ];
   return (
     <div className="flex flex-wrap gap-2">

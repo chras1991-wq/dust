@@ -36,10 +36,10 @@ export default function ExplorerPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <span className="pill pill-cyan">explorer radar</span>
-      <h1 className="hologram-text hero-title mt-4 text-6xl sm:text-7xl">SCAN</h1>
+      <span className="pill pill-cyan">indexer view</span>
+      <h1 className="hologram-text hero-title mt-4 text-6xl sm:text-7xl">INDEX</h1>
       <p className="mt-3 font-mono text-xl text-[var(--pink)]">
-        Mint Sequence ≠ Token ID · fungible only
+        Confirmed mints · mint_sequence is ordering metadata, not token id
       </p>
 
       {data && (

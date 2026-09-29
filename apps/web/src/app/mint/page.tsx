@@ -112,10 +112,13 @@ export default function MintPage() {
 
   return (
     <div className="relative mx-auto max-w-3xl px-4 py-12">
-      <span className="pill pill-pink animate-floaty">mint booth</span>
+      <span className="pill pill-pink animate-floaty">mint surface</span>
       <h1 className="hologram-text hero-title mt-4 text-6xl sm:text-7xl">MINT</h1>
-      <p className="mt-3 font-mono text-xl text-[var(--cyan)]">
-        1 SATDUST · carrier {UNIT_SATS} · offset 0
+      <p className="mt-3 max-w-xl text-[var(--ink-dim)]">
+        Operational pricing and quantity. Protocol theory lives on the home/docs surfaces.
+      </p>
+      <p className="mt-2 font-mono text-xl text-[var(--cyan)]">
+        receive 1 SATDUST · carrier {UNIT_SATS} sats · offset 0
       </p>
 
       <div className="mt-8">

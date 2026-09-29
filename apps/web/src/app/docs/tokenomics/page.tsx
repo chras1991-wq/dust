@@ -1,24 +1,39 @@
 import Link from "next/link";
-import { MAX_SATS, PROJECT_ADDRESS } from "@satdust/shared";
+import { MAX_SATS, SUPPLY, UNIT_SATS } from "@satdust/shared";
 
 export default function TokenomicsDoc() {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
-      <span className="pill pill-chrome">lore 04</span>
-      <h1 className="chrome-text mt-4 text-4xl sm:text-5xl">Tokenomics</h1>
+      <span className="pill pill-chrome">§ 04</span>
+      <h1 className="chrome-text mt-4 text-4xl sm:text-5xl">Satoshi binding</h1>
       <div className="panel-y2k mt-8 space-y-5 text-[var(--ink-dim)]">
-        <pre className="formula">{`feeSats = round( 7 / BTCUSD × 100_000_000 )`}</pre>
         <p>
-          $7 USD ≡ BTC from median of Coinbase / Kraken / Bitstamp. Quotes expire in 60 seconds.
+          Deploy locks a permanent ratio between protocol units and carrier sats. Pricing and
+          mint-fee quotes are intentionally omitted here — see{" "}
+          <Link href="/mint">/mint</Link>.
         </p>
+        <pre className="formula">{`max_sats = supply × unit_sats
+${MAX_SATS} = ${SUPPLY} × ${UNIT_SATS}`}</pre>
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <code className="text-[var(--cyan)]">unit_sats</code> — sats bound to one accepted unit
+          </li>
+          <li>
+            <code className="text-[var(--cyan)]">lim_sats</code> — maximum sats in a single mint
+            inscription
+          </li>
+          <li>
+            <code className="text-[var(--cyan)]">max_sats</code> — aggregate sat capacity implied by
+            supply
+          </li>
+        </ul>
         <p>
-          Max gross mint fee if sold out: $70,000 ≡ BTC. Aggregate backing{" "}
-          {MAX_SATS.toLocaleString()} sats is not project income.
+          Aggregate carrier sats are not protocol “revenue”; they are the carrying capacity of
+          accepted mints under DUST-20 allocation rules.
         </p>
-        <p className="break-all font-mono text-lg text-[var(--cyan)]">{PROJECT_ADDRESS}</p>
         <p>
           <Link href="/docs" className="btn btn-ghost">
-            ← Lore index
+            ← Docs index
           </Link>
         </p>
       </div>
