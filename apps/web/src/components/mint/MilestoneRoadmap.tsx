@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   SUPPLY,
   VOTE_SATDUST_EQUIV_BTC,
@@ -58,15 +58,15 @@ export function MilestoneRoadmap({
   tagline: string;
 }) {
   const [selectedId, setSelectedId] = useState(current.id);
-  // Keep selection on the live current stage when data refreshes (never jump ahead).
-  useEffect(() => {
-    setSelectedId(current.id);
-  }, [current.id]);
   const selected = stages.find((s) => s.id === selectedId) ?? current;
   const canPropose =
     !selected.isGenesis &&
     (selected.status === "REACHED" ||
       (selected.status === "IN_PROGRESS" && selected.goalsComplete));
+
+  function selectStage(id: string) {
+    setSelectedId(id);
+  }
 
   return (
     <section className="mt-14 border-t-[1.5px] border-[var(--ink)] pt-10 sm:mt-16 sm:pt-12">
@@ -89,7 +89,7 @@ export function MilestoneRoadmap({
         {/* Vertical timeline */}
         <ol className="milestone-rail relative space-y-0">
           {stages.map((s, i) => {
-            const active = s.id === selected.id;
+            const active = s.id === selectedId;
             const done = s.status === "MINTED";
             const currentish =
               s.status === "IN_PROGRESS" || s.status === "REACHED" || s.status === "VOTING";
@@ -105,7 +105,8 @@ export function MilestoneRoadmap({
                 )}
                 <button
                   type="button"
-                  onClick={() => setSelectedId(s.id)}
+                  onClick={() => selectStage(s.id)}
+                  aria-pressed={active}
                   className={`relative z-[1] flex min-h-11 w-full items-start gap-3 rounded-none border px-2 py-2 text-left transition-colors ${
                     active
                       ? "border-[var(--accent)] bg-white"
@@ -151,8 +152,8 @@ export function MilestoneRoadmap({
           })}
         </ol>
 
-        {/* Detail panel */}
-        <div className="panel-edit">
+        {/* Detail panel — remount on select so goal rows never reuse the wrong stage */}
+        <div className="panel-edit" key={selected.id}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="kicker">
@@ -173,7 +174,7 @@ export function MilestoneRoadmap({
                 Goals {selected.goalsMetCount}/{selected.goalsTotal}
               </p>
               {selected.goals.map((g) => (
-                <GoalRow key={g.id} goal={g} />
+                <GoalRow key={`${selected.id}-${g.id}`} goal={g} />
               ))}
             </div>
           )}
@@ -197,7 +198,7 @@ export function MilestoneRoadmap({
                 </div>
               </div>
               {selected.goals.map((g) => (
-                <GoalRow key={g.id} goal={g} />
+                <GoalRow key={`${selected.id}-${g.id}`} goal={g} />
               ))}
               <p className="text-sm text-[var(--ink-soft)]">
                 Open at launch — no vote for these {selected.amount.toLocaleString()} units. Later
@@ -211,18 +212,20 @@ export function MilestoneRoadmap({
               <p className="byline">Mint vote</p>
               <p className="font-display mt-2 text-2xl">
                 Open a vote for{" "}
-                <span className="text-[var(--accent)]">+{selected.amount.toLocaleString()} SATDUST</span>
+                <span className="text-[var(--accent)]">
+                  +{selected.amount.toLocaleString()} units
+                </span>
               </p>
               <p className="mt-2 text-sm text-[var(--ink-mute)]">
                 Hitting the milestone does not mint. Holders still have to approve.
               </p>
 
               <dl className="mt-5 grid gap-2 font-sans text-sm sm:grid-cols-2">
-                <Row label="Current supply" value={minted.toLocaleString()} />
-                <Row label="On the ballot" value={`+${selected.amount.toLocaleString()}`} />
+                <Row label="Current supply" value={`${minted.toLocaleString()} units`} />
+                <Row label="On the ballot" value={`+${selected.amount.toLocaleString()} units`} />
                 <Row
                   label="If yes"
-                  value={`${selected.supplyIfApproved.toLocaleString()} / ${SUPPLY.toLocaleString()}`}
+                  value={`${selected.supplyIfApproved.toLocaleString()} / ${SUPPLY.toLocaleString()} units`}
                 />
                 <Row
                   label="Dilution if yes"

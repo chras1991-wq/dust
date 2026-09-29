@@ -19,8 +19,8 @@ export default function TokenomicsDoc() {
           (1 SATDUST = 1 unit, not a BRC-20 sheet). Genesis opens{" "}
           {GENESIS_SUPPLY.toLocaleString()} units. The rest is not a timed unlock — each of the 19
           later stages needs hard measurable gates (stake TVL, agents, AMM depth, vote turnout,
-          secondary circulating market cap) plus a holder vote. Large unlocks require circ MC ≥
-          $5M / $10M / $25M / $50M at the live secondary price. Every unit locks {UNIT_SATS} sats (
+          live secondary price × circulating units) plus a holder vote. Large unlocks require that
+          live secondary valuation ≥ $5M / $10M / $25M / $50M. Every unit locks {UNIT_SATS} sats (
           <code className="font-mono text-[var(--accent)]">
             max_sats = {MAX_SATS.toLocaleString()}
           </code>

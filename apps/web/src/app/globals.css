@@ -753,12 +753,19 @@ body::before {
     overscroll-behavior-x: contain;
     padding-bottom: 0.35rem;
     margin-inline: -0.25rem;
+    scroll-snap-type: x proximity;
   }
 
   .milestone-rail > li {
     flex: 0 0 auto;
     width: min(72vw, 14rem);
     padding-bottom: 0 !important;
+    scroll-snap-align: start;
+  }
+
+  .milestone-rail > li > button {
+    touch-action: manipulation;
+    min-height: 3.25rem;
   }
 
   .milestone-stem {

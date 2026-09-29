@@ -9,7 +9,6 @@ import { SupplyTrack } from "@/components/mint/SupplyTrack";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 import {
   GENESIS_SUPPLY,
-  MINT_USD,
   PROJECT_ADDRESS,
   SUPPLY,
   UNIT_SATS,
@@ -211,8 +210,7 @@ export default function MintPage() {
               {" · "}Hard cap {SUPPLY.toLocaleString()} units
             </p>
             <p className="mt-2 font-sans text-xs leading-relaxed text-[var(--ink-mute)]">
-              Circ. MC ${ (minted * MINT_USD).toLocaleString() } · Total MC $
-              {(SUPPLY * MINT_USD).toLocaleString()} · at ${MINT_USD}/unit mint mark · 1 unit each
+              1 SATDUST = 1 unit (not a BRC-20 sheet of 1,000)
             </p>
           </div>
 
@@ -270,10 +268,7 @@ export default function MintPage() {
             vote; contributors whitelist mints first. Cap {SUPPLY.toLocaleString()} units.
           </p>
           <p className="mt-3 font-sans text-xs leading-relaxed text-[var(--ink-mute)]">
-            Circ. MC ${(minted * MINT_USD).toLocaleString()} · Total MC $
-            {(SUPPLY * MINT_USD).toLocaleString()}
-            <br />
-            Mark ${MINT_USD} / unit · 1 SATDUST = 1 unit (not a BRC-20 sheet)
+            1 SATDUST = 1 unit (not a BRC-20 sheet of 1,000)
           </p>
           <p className="mt-4 font-mono text-xs text-[var(--ink-mute)]">
             Open {openCapacity.toLocaleString()} units · Pending {supply?.pending ?? 0}
@@ -302,7 +297,6 @@ export default function MintPage() {
       <div id="milestones">
         {milestones && (
           <MilestoneRoadmap
-            key={milestones.currentId}
             stages={milestones.stages}
             current={milestones.current}
             minted={milestones.minted}

@@ -143,7 +143,7 @@ function buildLiveSnapshot(): MilestoneSnapshot {
     currentId: genesisStatus === "MINTED" ? "m1" : "genesis",
     stages,
     tagline:
-      "No timed unlocks. Hard gates — stake, agents, AMM depth, vote turnout, secondary market cap — then holders vote. Contributors whitelist first after Genesis.",
+      "No timed unlocks. Hard gates — stake TVL, agent count, AMM depth, vote turnout, live secondary price × supply — then holders vote. Contributors whitelist first after Genesis.",
     formula: "Mint_i = A_i × I(M_i) × I(Q_i ≥ Q_min) × I(V_i ≥ V_min)",
   };
 }
