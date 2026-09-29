@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { FeatureEntry } from "@/components/PrelaunchNotice";
+import { SwapDesk } from "@/components/SwapDesk";
 
 type ActivityItem = {
   mintSequence: number;
@@ -25,6 +27,33 @@ type Payload = {
   activity: ActivityItem[];
 };
 
+const FEATURES = [
+  {
+    href: "/stake",
+    code: "01 · Stake",
+    title: "Stake",
+    blurb: "Lock SATDUST carriers for protocol weight and future rewards.",
+  },
+  {
+    href: "/agent",
+    code: "02 · Agent",
+    title: "Agent",
+    blurb: "Delegate execution agents that act on your liquidity UTXOs.",
+  },
+  {
+    href: "/compute",
+    code: "03 · Compute",
+    title: "Compute",
+    blurb: "Commit hashrate / compute credits against SATDUST collateral.",
+  },
+  {
+    href: "/auction",
+    code: "04 · Auction",
+    title: "Auction",
+    blurb: "Bid on carrier lots, whitelist seats, and milestone capacity.",
+  },
+];
+
 export default function ExplorerPage() {
   const [data, setData] = useState<Payload | null>(null);
 
@@ -35,80 +64,104 @@ export default function ExplorerPage() {
   }, []);
 
   return (
-    <div className="page-shell py-10 sm:py-14">
-      <p className="byline">Ledger · Indexer view</p>
+    <div className="page-shell max-w-5xl py-10 sm:py-14">
+      <p className="byline">Index · Markets &amp; modules</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Index</h1>
       <p className="deck mt-4 max-w-2xl">
-        Confirmed SATDUST mints. Sequence is just order — not a unique token id.
+        Swap SATDUST ⇄ BTC, then enter stake, agent, compute, and auction. Token markets are
+        pre-launch — desks are interactive shells until Genesis and pools go live.
       </p>
 
-      {data && (
-        <div className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-3 sm:gap-4">
-          <Stat label="Minted" value={`${data.supply.minted} / ${data.supply.totalSupply}`} />
-          <Stat label="Remaining" value={String(data.supply.remaining)} />
-          <Stat label="Pending" value={String(data.supply.pending)} />
-        </div>
-      )}
+      <div className="mt-8 grid gap-3 sm:grid-cols-3">
+        <Stat
+          label="Minted"
+          value={data ? `${data.supply.minted.toLocaleString()} / ${data.supply.totalSupply.toLocaleString()}` : "—"}
+        />
+        <Stat label="Pool status" value="Offline" />
+        <Stat label="Modules" value="4 gated" />
+      </div>
 
-      <div className="scroll-x mt-8 sm:mt-10">
-        <table className="table-spec min-w-[720px]">
-          <thead>
-            <tr>
-              <th>Mint #</th>
-              <th>TXID</th>
-              <th>Inscription</th>
-              <th>Owner</th>
-              <th>Amount</th>
-              <th>Carrier</th>
-              <th>Block</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.activity.length ? (
-              data.activity.map((row) => (
-                <tr key={`${row.mintSequence}-${row.txid}`}>
-                  <td>{String(row.mintSequence).padStart(6, "0")}</td>
-                  <td>
-                    {row.txid ? (
-                      <Link href={`/verify?txid=${row.txid}`}>{row.txid.slice(0, 8)}…</Link>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td>{row.inscriptionId ? `${row.inscriptionId.slice(0, 10)}…` : "—"}</td>
-                  <td>
-                    {row.owner.slice(0, 8)}…{row.owner.slice(-4)}
-                  </td>
-                  <td>{row.amount} SATDUST</td>
-                  <td>{row.carrierSats} sats</td>
-                  <td>{row.block ?? "—"}</td>
-                  <td
-                    className={
-                      row.status.includes("VALID") || row.status.includes("CONFIRMED")
-                        ? "status-confirmed"
-                        : row.status.includes("INVALID")
-                          ? "status-invalid"
+      <div className="mt-10">
+        <SwapDesk />
+      </div>
+
+      <section className="mt-12">
+        <p className="byline">Modules</p>
+        <h2 className="font-display mt-2 text-3xl sm:text-4xl">Protocol surfaces</h2>
+        <p className="mt-2 max-w-2xl text-sm text-[var(--ink-mute)]">
+          Each module opens a full desk. Actions stay disabled until official launch.
+        </p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {FEATURES.map((f) => (
+            <FeatureEntry key={f.href} {...f} />
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-14">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="byline">Ledger</p>
+            <h2 className="font-display mt-1 text-2xl sm:text-3xl">Mint activity</h2>
+          </div>
+          <Link href="/verify" className="font-condensed text-[0.75rem] uppercase tracking-[0.12em]">
+            Prove a tx →
+          </Link>
+        </div>
+        <div className="scroll-x mt-5">
+          <table className="table-spec min-w-[720px]">
+            <thead>
+              <tr>
+                <th>Mint #</th>
+                <th>TXID</th>
+                <th>Owner</th>
+                <th>Amount</th>
+                <th>Carrier</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.activity.length ? (
+                data.activity.map((row) => (
+                  <tr key={`${row.mintSequence}-${row.txid}`}>
+                    <td>{String(row.mintSequence).padStart(6, "0")}</td>
+                    <td>
+                      {row.txid ? (
+                        <Link href={`/verify?txid=${row.txid}`}>{row.txid.slice(0, 8)}…</Link>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td>
+                      {row.owner.slice(0, 8)}…{row.owner.slice(-4)}
+                    </td>
+                    <td>{row.amount} SATDUST</td>
+                    <td>{row.carrierSats} sats</td>
+                    <td
+                      className={
+                        row.status.includes("VALID") || row.status.includes("CONFIRMED")
+                          ? "status-confirmed"
                           : "status-pending"
-                    }
-                  >
-                    {row.status}
+                      }
+                    >
+                      {row.status}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="text-[var(--ink-mute)]">
+                    No indexed mints yet. Rows appear after confirmation + indexer acceptance.
+                    {data?.deployTxid
+                      ? ` Deploy: ${data.deployTxid.slice(0, 16)}…`
+                      : " Deploy not recorded."}
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={8} className="text-[var(--ink-mute)]">
-                  No indexed mints yet. Rows appear from confirmed tx + indexer results.
-                  {data?.deployTxid
-                    ? ` Deploy: ${data.deployTxid.slice(0, 16)}…`
-                    : " Deploy not recorded."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }
@@ -117,7 +170,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="panel-edit">
       <p className="byline">{label}</p>
-      <p className="font-display mt-2 text-3xl">{value}</p>
+      <p className="font-display mt-2 text-2xl sm:text-3xl">{value}</p>
     </div>
   );
 }

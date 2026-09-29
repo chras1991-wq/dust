@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "Essay" },
   { href: "/mint", label: "Mint" },
   { href: "/explorer", label: "Index" },
+  { href: "/create", label: "Create" },
   { href: "/verify", label: "Prove" },
   { href: "/docs", label: "Archive" },
 ];
@@ -43,8 +44,11 @@ export function SiteHeader() {
           aria-label="Primary"
         >
           {LINKS.map((l) => {
+            const moduleRoutes = ["/stake", "/agent", "/compute", "/auction"];
             const active =
-              pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href));
+              pathname === l.href ||
+              (l.href !== "/" && pathname.startsWith(l.href)) ||
+              (l.href === "/explorer" && moduleRoutes.some((r) => pathname.startsWith(r)));
             return (
               <Link
                 key={l.href}
