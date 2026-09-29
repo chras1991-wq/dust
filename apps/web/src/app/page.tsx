@@ -42,13 +42,12 @@ export default function HomePage() {
           <article>
             <p className="byline">Essay · 01</p>
             <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl md:text-5xl">
-              Other protocols track balances. This one builds the UTXO.
+              Unlike BRC-20 ledgers, every unit carries real sats
             </h2>
             <p className="dropcap deck mt-6">
-              Most Bitcoin token schemes write a number into an inscription and leave an indexer to
-              remember who owns it. That number is not sats you can spend. Under DUST-20, a mint
-              creates a carrier output — real sats on mainnet — and attaches the asset to that
-              output.
+              BRC-20 is an accounting layer — balances live as indexer entries with no physical sats
+              behind each unit. DUST-20 does the opposite: each token carries a fixed amount of real
+              sats in its carrier UTXO, so the asset itself can seed trading liquidity on L1.
             </p>
             <p className="mt-5 text-[var(--ink-soft)]">
               Transfer is a normal Bitcoin spend of that carrier. No bridge, no sidechain, no
