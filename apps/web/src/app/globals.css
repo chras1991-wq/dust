@@ -656,3 +656,30 @@ body::before {
     -webkit-tap-highlight-color: rgba(196, 18, 48, 0.12);
   }
 }
+
+/* Milestone roadmap */
+.milestone-rail {
+  max-height: none;
+}
+
+@media (max-width: 768px) {
+  .milestone-rail {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    padding-bottom: 0.35rem;
+    margin-inline: -0.25rem;
+  }
+
+  .milestone-rail > li {
+    flex: 0 0 auto;
+    width: min(72vw, 14rem);
+    padding-bottom: 0 !important;
+  }
+
+  .milestone-stem {
+    display: none;
+  }
+}

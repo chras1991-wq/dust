@@ -54,3 +54,5 @@ export function assertProjectAddress(address: string): boolean {
 }
 
 export type Network = typeof NETWORK;
+
+export * from "./milestones";

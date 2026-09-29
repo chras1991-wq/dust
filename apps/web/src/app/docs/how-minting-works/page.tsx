@@ -22,7 +22,9 @@ export default function HowMintingWorks() {
         <p>
           Constraint:{" "}
           <code className="font-mono text-sm text-[var(--accent)]">amt × unit_sats = sats</code>, and
-          carrier.value matches. Price: <Link href="/mint">/mint</Link>.
+          carrier.value matches. Open mint capacity comes from Genesis or a passed milestone vote —
+          see <Link href="/mint#milestones">milestone issuance</Link>. Price:{" "}
+          <Link href="/mint">/mint</Link>.
         </p>
         <p>
           <Link href="/docs" className="btn btn-ghost">

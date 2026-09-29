@@ -27,8 +27,8 @@ const DOCS = [
   },
   {
     href: "/docs/tokenomics",
-    title: "Satoshi binding",
-    blurb: "Sats per unit, locked at deploy.",
+    title: "Milestone issuance",
+    blurb: "Genesis 2,000 + 7 voted tranches to 10,000.",
     folio: "05",
   },
   {
