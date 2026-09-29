@@ -7,11 +7,11 @@ export default function RisksDoc() {
       <h1 className="masthead mt-2 text-4xl sm:text-5xl">Risks</h1>
       <div className="mt-8 space-y-5 text-[var(--ink-soft)]">
         <ul className="list-disc space-y-3 pl-5">
-          <li>DUST-20 is experimental. Bitcoin Core does not treat it as consensus.</li>
-          <li>Balances depend on indexers staying online and agreeing on rules.</li>
-          <li>Wallet and market support may be thin or absent.</li>
-          <li>No guaranteed value, listing, liquidity, or return.</li>
-          <li>Wrong carrier sats or nonzero offset → invalid mint, even if the tx confirms.</li>
+          <li>Experimental. Not Bitcoin consensus.</li>
+          <li>Balances depend on indexers.</li>
+          <li>Wallet and market support may be thin.</li>
+          <li>No guaranteed value, listing, or return.</li>
+          <li>Wrong carrier or nonzero offset → invalid mint.</li>
         </ul>
         <p>
           <Link href="/docs" className="btn btn-ghost">

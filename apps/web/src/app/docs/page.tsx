@@ -4,37 +4,37 @@ const DOCS = [
   {
     href: "/docs/what-is-satdust",
     title: "What is SATDUST",
-    blurb: "First DUST-20 ticker — asset + carrier sats in one UTXO.",
+    blurb: "Opening ticker — unit + 546-sat carrier.",
     folio: "01",
   },
   {
     href: "/docs/dust20",
     title: "DUST-20",
-    blurb: "Bitcoin protocol that builds liquidity UTXOs for each mint.",
+    blurb: "First Bitcoin-native protocol that constructs liquidity UTXOs.",
     folio: "02",
   },
   {
     href: "/docs/how-minting-works",
     title: "Mint execution",
-    blurb: "Commit/reveal, exact carrier, offset zero.",
+    blurb: "Commit/reveal, carrier, offset zero.",
     folio: "03",
   },
   {
     href: "/docs/verification",
     title: "Verification",
-    blurb: "What must be true before a mint counts.",
+    blurb: "Checks before a mint counts.",
     folio: "04",
   },
   {
     href: "/docs/tokenomics",
     title: "Satoshi binding",
-    blurb: "How many sats back each unit.",
+    blurb: "Sats per unit, locked at deploy.",
     folio: "05",
   },
   {
     href: "/docs/risks",
     title: "Risks",
-    blurb: "Experimental. Indexer-dependent. No guarantees.",
+    blurb: "Experimental. Indexer-dependent.",
     folio: "06",
   },
 ];
@@ -42,11 +42,9 @@ const DOCS = [
 export default function DocsIndex() {
   return (
     <div className="page-shell max-w-3xl py-10 sm:py-14">
-      <p className="byline">Archive · Notes</p>
+      <p className="byline">Archive</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl">Archive</h1>
-      <p className="deck mt-4">
-        Short notes on DUST-20 and SATDUST. Mint price lives only on the mint page.
-      </p>
+      <p className="deck mt-4">Short notes. Mint price only on /mint.</p>
       <ol className="mt-8 space-y-0 sm:mt-12">
         {DOCS.map((d) => (
           <li

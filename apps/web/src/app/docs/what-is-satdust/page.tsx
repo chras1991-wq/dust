@@ -6,22 +6,18 @@ export default function WhatIsSatdust() {
   return (
     <DocShell title="What is SATDUST" section="Archive · 01">
       <p>
-        <strong>SATDUST</strong> is the first fungible asset under DUST-20 on Bitcoin mainnet. Mint
-        one unit and you receive that unit bound to a {UNIT_SATS}-sat carrier UTXO — the asset and
-        its liquidity in one output.
+        <strong>SATDUST</strong> is the opening fungible ticker under DUST-20. A mint gives you one
+        unit on a {UNIT_SATS}-sat carrier output on Bitcoin mainnet.
       </p>
-      <p>Phase 1 covers three things:</p>
+      <p>Phase 1:</p>
       <ul>
-        <li>Deploy the SATDUST ticker under DUST-20</li>
-        <li>Mint with an exact carrier and offset-0 inscription</li>
-        <li>Verify against chain confirmation plus indexer rules</li>
+        <li>Deploy the ticker</li>
+        <li>Mint with exact carrier and offset 0</li>
+        <li>Verify against chain + indexer rules</li>
       </ul>
       <p>
-        Not in scope: marketplace, swaps, staking, bridges, DAO tools. Mint price and quantity sit
-        only on <Link href="/mint">/mint</Link>.
-      </p>
-      <p>
-        Units are fungible. Explorer “mint sequence” is just ordering — not a unique token id.
+        Out of scope: marketplace, swaps, staking, bridges. Price only on{" "}
+        <Link href="/mint">/mint</Link>. Mint sequence in the explorer is order, not a token id.
       </p>
       <DocBack />
     </DocShell>

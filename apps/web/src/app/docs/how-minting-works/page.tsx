@@ -8,9 +8,9 @@ export default function HowMintingWorks() {
       <h1 className="masthead mt-2 text-4xl sm:text-5xl">Mint execution</h1>
       <div className="mt-8 space-y-5 text-[var(--ink-soft)]">
         <p>
-          A mint is a commit/reveal inscription. The reveal must create the liquidity UTXO: carrier
-          value equals declared <code className="font-mono text-[var(--accent)]">sats</code>,
-          inscription at offset <code className="font-mono text-[var(--accent)]">0</code>.
+          Commit/reveal inscription. The reveal must create a carrier whose value equals declared{" "}
+          <code className="font-mono text-[var(--accent)]">sats</code>, with the inscription at
+          offset <code className="font-mono text-[var(--accent)]">0</code>.
         </p>
         <pre className="formula">{`{
   "p": "dust-20",
@@ -20,13 +20,9 @@ export default function HowMintingWorks() {
   "sats": "${UNIT_SATS}"
 }`}</pre>
         <p>
-          Rule of thumb:{" "}
+          Constraint:{" "}
           <code className="font-mono text-sm text-[var(--accent)]">amt × unit_sats = sats</code>, and
-          the carrier output must match. Off-by-one layouts can confirm on Bitcoin and still be
-          DUST-invalid.
-        </p>
-        <p>
-          Price and quantity: <Link href="/mint">/mint</Link> only.
+          carrier.value matches. Price: <Link href="/mint">/mint</Link>.
         </p>
         <p>
           <Link href="/docs" className="btn btn-ghost">

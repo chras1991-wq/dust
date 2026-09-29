@@ -1,31 +1,30 @@
 export function ProtocolDiagram() {
   return (
-    <pre className="formula">{`Bitcoin mainnet
-   │  a normal confirmed transaction
+    <pre className="formula">{`Bitcoin mainnet tx
+   │
    ▼
 Inscription (commit → reveal)
-   │  JSON: dust-20 mint
+   │  dust-20 mint JSON
    ▼
-Build liquidity UTXO
-   │  carrier sats == declared sats
-   │  inscription at offset 0
+Carrier UTXO
+   │  value == declared sats
+   │  inscription offset == 0
    ▼
-Indexer accepts → you hold
-   SATDUST + spendable carrier sats
+Indexer accept
+   → SATDUST + spendable sats
    ▼
-Transfer = spend that UTXO
-   (no separate transfer opcode)`}</pre>
+Transfer = spend the carrier`}</pre>
   );
 }
 
 export function ParamTable() {
   const rows = [
-    ["p", "dust-20", "Protocol name"],
+    ["p", "dust-20", "Protocol"],
     ["tick", "SATDUST", "Ticker (case ignored)"],
-    ["supply", "10000", "Max units that can mint"],
-    ["unit_sats", "546", "Sats glued to each unit"],
+    ["supply", "10000", "Max mintable units"],
+    ["unit_sats", "546", "Sats per unit"],
     ["max_sats", "5460000", "supply × unit_sats"],
-    ["lim_sats", "546", "Max sats per mint tx"],
+    ["lim_sats", "546", "Per-mint sats cap"],
   ];
 
   return (
@@ -53,11 +52,11 @@ export function ParamTable() {
 export function EditorialAside() {
   return (
     <aside className="panel-edit slant-block-r">
-      <p className="kicker">The idea</p>
+      <p className="kicker">Carrier</p>
       <p className="font-display mt-3 text-2xl italic leading-snug">
-        “Every mint builds a liquidity UTXO — the asset and the sats leave together.”
+        Asset on the inscription. Liquidity in the sats. Same output.
       </p>
-      <p className="byline mt-4">DUST-20 in one line</p>
+      <p className="byline mt-4">What you hold after mint</p>
     </aside>
   );
 }

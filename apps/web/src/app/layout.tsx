@@ -43,9 +43,9 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SATDUST — DUST-20 Liquidity UTXOs on Bitcoin",
+  title: "SATDUST — DUST-20 on Bitcoin Mainnet",
   description:
-    "DUST-20 builds Bitcoin assets into real satoshi UTXOs — asset and spendable liquidity together. SATDUST is the first ticker on mainnet.",
+    "DUST-20 is the first Bitcoin-native protocol that constructs liquidity UTXOs. SATDUST is the opening ticker.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://satdust.vercel.app"),
 };
 

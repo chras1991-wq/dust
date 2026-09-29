@@ -13,7 +13,7 @@ const LINKS = [
 
 export function MarqueeBar() {
   const text =
-    "DUST-20  ·  Liquidity UTXOs  ·  Bitcoin Mainnet  ·  Asset + Sats  ·  Offset-0  ·  SATDUST  ·  Experimental  ·  ";
+    "DUST-20  ·  First liquidity UTXO protocol  ·  Bitcoin Mainnet  ·  SATDUST  ·  Offset-0  ·  Experimental  ·  ";
   return (
     <div className="issue-bar layer" aria-hidden>
       <div className="issue-track">
@@ -77,9 +77,8 @@ export function SiteFooter() {
       <div className="page-shell py-8 sm:py-10">
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr]">
           <p className="max-w-xl text-[0.95rem] text-[var(--ink-soft)]">
-            DUST-20 binds each SATDUST unit to a real satoshi UTXO on Bitcoin mainnet. Bitcoin Core
-            does not read those balances — confirmed txs plus compatible indexers do. No guaranteed
-            value, listing, or market liquidity.
+            SATDUST mints under DUST-20 on Bitcoin mainnet. Bitcoin Core does not interpret balances;
+            confirmed txs and compatible indexers do. No guaranteed value or listing.
           </p>
           <div className="md:text-right">
             <p className="byline">Spec</p>

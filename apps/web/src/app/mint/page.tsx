@@ -112,7 +112,7 @@ export default function MintPage() {
       <p className="byline">Operations · Mint desk</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Mint</h1>
       <p className="deck mt-4 max-w-xl">
-        Mint one SATDUST. You get the unit plus its {UNIT_SATS}-sat liquidity UTXO.
+        One SATDUST on a {UNIT_SATS}-sat carrier. Price locked for this quote below.
       </p>
       <p className="mt-3 break-words font-mono text-sm text-[var(--accent)]">
         1 SATDUST · carrier {UNIT_SATS} sats · offset 0
