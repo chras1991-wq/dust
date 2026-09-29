@@ -24,7 +24,7 @@ export function SupplyTrack({
           <h2 className="font-display mt-1 text-2xl sm:text-3xl">Issuance track</h2>
         </div>
         <p className="font-mono text-sm text-[var(--accent)]">
-          {minted.toLocaleString()} / {total.toLocaleString()}
+          {minted.toLocaleString()} minted · cap {total.toLocaleString()}
         </p>
       </div>
 

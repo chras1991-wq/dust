@@ -1,6 +1,6 @@
 /**
- * Demo milestone runtime state for the mint roadmap UI.
- * Chain + indexer remain source of truth for confirmed balances.
+ * Milestone runtime — minted count follows the real supply store (no fake fills).
+ * At launch: Genesis capacity 2,000 authorized, 0 minted.
  */
 
 import {
@@ -10,12 +10,12 @@ import {
   type MilestoneStatus,
   dilutionPct,
 } from "@satdust/shared";
+import { getStore, getSupplySnapshot } from "@/lib/store";
 
 export type GoalProgress = {
   id: string;
   current: number;
   met: boolean;
-  /** For any_of: which option indices are met */
   optionMet?: boolean[];
 };
 
@@ -41,55 +41,52 @@ export type MilestoneSnapshot = {
   formula: string;
 };
 
-declare global {
-  var __satdustMilestones: MilestoneSnapshot | undefined;
-}
+/** Authorized capacity = sum of amounts for stages that are Genesis or already voted/minted open. */
+function buildLiveSnapshot(): MilestoneSnapshot {
+  const supply = getSupplySnapshot();
+  const store = getStore();
+  const minted = supply.minted;
+  const deployLive = Boolean(store.deployTxid);
 
-/**
- * Demo: Genesis + Foundation + First 50 minted (2,650).
- * Stable Community (M3) in progress — matches design reference.
- */
-function buildDemoSnapshot(): MilestoneSnapshot {
+  // Launch: only Genesis is open. Later stages unlock after real votes (not mocked).
+  const authorized = GENESIS_SUPPLY;
+  const openCapacity = Math.max(0, authorized - minted);
+
+  const genesisStatus: MilestoneStatus =
+    minted >= GENESIS_SUPPLY ? "MINTED" : "IN_PROGRESS";
+
   const stages: MilestoneRuntime[] = [
     {
       id: "genesis",
-      status: "MINTED",
-      mintedAt: "2026-09-01",
-      goals: [{ id: "deploy", current: 1, met: true }],
+      status: genesisStatus,
+      mintedAt: genesisStatus === "MINTED" ? undefined : undefined,
+      goals: [{ id: "deploy", current: deployLive ? 1 : 0, met: deployLive }],
     },
     {
       id: "m1",
-      status: "MINTED",
-      mintedAt: "2026-09-16",
-      voteYes: 38,
-      voteNo: 9,
-      eligibleVoters: 42,
+      status: "LOCKED",
       goals: [
-        { id: "age", current: 1, met: true },
-        { id: "site", current: 1, met: true },
-        { id: "rules", current: 1, met: true },
-        { id: "treasury", current: 1, met: true },
+        { id: "age", current: 0, met: false },
+        { id: "site", current: 0, met: false },
+        { id: "rules", current: 0, met: false },
+        { id: "treasury", current: 0, met: false },
       ],
     },
     {
       id: "m2",
-      status: "MINTED",
-      mintedAt: "2026-10-08",
-      voteYes: 31,
-      voteNo: 12,
-      eligibleVoters: 47,
+      status: "LOCKED",
       goals: [
-        { id: "holders", current: 52, met: true },
-        { id: "holders14", current: 33, met: true },
+        { id: "holders", current: 0, met: false },
+        { id: "holders14", current: 0, met: false },
       ],
     },
     {
       id: "m3",
-      status: "IN_PROGRESS",
+      status: "LOCKED",
       goals: [
-        { id: "holders", current: 82, met: false },
-        { id: "holders30", current: 41, met: false },
-        { id: "top10", current: 51, met: true },
+        { id: "holders", current: 0, met: false },
+        { id: "holders30", current: 0, met: false },
+        { id: "top10", current: 0, met: false },
       ],
     },
     {
@@ -98,14 +95,14 @@ function buildDemoSnapshot(): MilestoneSnapshot {
       goals: [
         { id: "utility", current: 0, met: false },
         { id: "users", current: 0, met: false },
-        { id: "holders", current: 82, met: false },
+        { id: "holders", current: 0, met: false },
       ],
     },
     {
       id: "m5",
       status: "LOCKED",
       goals: [
-        { id: "holders", current: 82, met: false },
+        { id: "holders", current: 0, met: false },
         { id: "users", current: 0, met: false },
         { id: "returning", current: 0, met: false },
       ],
@@ -126,8 +123,8 @@ function buildDemoSnapshot(): MilestoneSnapshot {
       id: "m7",
       status: "LOCKED",
       goals: [
-        { id: "holders", current: 82, met: false },
-        { id: "holders30", current: 41, met: false },
+        { id: "holders", current: 0, met: false },
+        { id: "holders30", current: 0, met: false },
         { id: "users", current: 0, met: false },
         {
           id: "growth",
@@ -139,14 +136,11 @@ function buildDemoSnapshot(): MilestoneSnapshot {
     },
   ];
 
-  const minted = GENESIS_SUPPLY + 250 + 400; // 2_650
-  const authorized = minted;
-
   return {
     minted,
     authorized,
-    openCapacity: Math.max(0, authorized - minted),
-    currentId: "m3",
+    openCapacity,
+    currentId: genesisStatus === "MINTED" ? "m1" : "genesis",
     stages,
     tagline:
       "SATDUST cannot be minted by time. It must be earned by progress and approved by holders.",
@@ -155,10 +149,7 @@ function buildDemoSnapshot(): MilestoneSnapshot {
 }
 
 export function getMilestoneSnapshot(): MilestoneSnapshot {
-  if (!globalThis.__satdustMilestones) {
-    globalThis.__satdustMilestones = buildDemoSnapshot();
-  }
-  return globalThis.__satdustMilestones;
+  return buildLiveSnapshot();
 }
 
 export function getMilestoneView() {
@@ -188,13 +179,17 @@ export function getMilestoneView() {
       eligibleVoters: runtime.eligibleVoters,
       dilution:
         runtime.status === "IN_PROGRESS" || runtime.status === "REACHED"
-          ? dilutionPct(def.amount, snap.minted)
+          ? dilutionPct(def.amount, Math.max(snap.minted, 1))
           : null,
       supplyIfApproved: def.supplyAfter,
     };
   });
 
-  const current = stages.find((s) => s.id === snap.currentId) ?? stages[0];
+  // After genesis fills, surface next locked stage as "current" focus for the rail.
+  const current =
+    stages.find((s) => s.id === snap.currentId) ??
+    stages.find((s) => s.status === "IN_PROGRESS") ??
+    stages[0];
 
   return {
     ...snap,

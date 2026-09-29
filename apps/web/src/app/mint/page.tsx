@@ -107,7 +107,8 @@ export default function MintPage() {
   const total = UNIT_SATS + feeSats + minerFee;
   const quoteExpired = secondsLeft <= 0;
   const openCapacity = milestones?.openCapacity ?? 0;
-  const minted = milestones?.minted ?? supply?.minted ?? 0;
+  const minted = supply?.minted ?? milestones?.minted ?? 0;
+  const authorized = milestones?.authorized ?? GENESIS_SUPPLY;
 
   async function prepareMint() {
     if (!account || !quote) return;
@@ -189,7 +190,21 @@ export default function MintPage() {
             />
           </div>
 
-          <div className="btn-row mt-6">
+          {/* Confirmed / authorized — directly above mint CTA */}
+          <div className="panel-edit mt-6 border-[var(--ink)]">
+            <p className="byline">Confirmed / authorized</p>
+            <p className="font-display mt-1 text-4xl tracking-tight sm:text-5xl">
+              {minted.toLocaleString()}
+              <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
+            </p>
+            <p className="mt-2 font-sans text-sm text-[var(--ink-mute)]">
+              Open now {openCapacity.toLocaleString()}
+              {supply?.pending ? ` · Pending ${supply.pending}` : ""}
+              {" · "}Hard cap {SUPPLY.toLocaleString()}
+            </p>
+          </div>
+
+          <div className="btn-row mt-4">
             {openCapacity <= 0 ? (
               <button type="button" className="btn" disabled>
                 No open mint capacity
@@ -215,9 +230,8 @@ export default function MintPage() {
 
           {openCapacity <= 0 && (
             <p className="mt-3 text-sm text-[var(--ink-mute)]">
-              Authorized supply is fully minted ({minted.toLocaleString()} /{" "}
-              {(milestones?.authorized ?? minted).toLocaleString()}). Next units require a passed
-              milestone proposal.
+              Authorized capacity is full ({minted.toLocaleString()} / {authorized.toLocaleString()}
+              ). Next units require a passed milestone proposal.
             </p>
           )}
 
@@ -234,17 +248,17 @@ export default function MintPage() {
         </div>
 
         <aside className="panel-edit h-fit">
-          <p className="kicker">Supply</p>
+          <p className="kicker">Authorized window</p>
           <p className="font-display mt-2 text-4xl">
             {minted.toLocaleString()}
-            <span className="text-[var(--ink-mute)]"> / {SUPPLY.toLocaleString()}</span>
+            <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
           </p>
           <p className="mt-2 text-sm text-[var(--ink-soft)]">
-            Genesis {GENESIS_SUPPLY.toLocaleString()} at launch. Remaining{" "}
-            {(SUPPLY - GENESIS_SUPPLY).toLocaleString()} only after milestones and community votes.
+            Genesis opens {GENESIS_SUPPLY.toLocaleString()}. Later tranches need milestones + votes.
+            Hard cap {SUPPLY.toLocaleString()}.
           </p>
           <p className="mt-4 font-mono text-xs text-[var(--ink-mute)]">
-            Open capacity {openCapacity.toLocaleString()} · Pending {supply?.pending ?? 0}
+            Open {openCapacity.toLocaleString()} · Pending {supply?.pending ?? 0}
           </p>
           <hr className="mag-rule my-5" />
           <p className="byline">Notes</p>

@@ -39,8 +39,8 @@ function createStore(): Store {
   return {
     quotes: new Map(),
     mints: [],
-    // Demo default aligns with milestone roadmap (Genesis+M1+M2 minted).
-    confirmedMinted: Number(process.env.MOCK_MINTED ?? 2650),
+    // Real confirmed count only — default 0 until indexer/mints update it.
+    confirmedMinted: Number(process.env.MOCK_MINTED ?? 0),
     pendingMinted: Number(process.env.MOCK_PENDING ?? 0),
     deployTxid: process.env.DEPLOY_TXID || null,
     deployInscriptionId: process.env.DEPLOY_INSCRIPTION_ID || null,

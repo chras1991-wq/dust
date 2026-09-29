@@ -71,9 +71,8 @@ export function MilestoneRoadmap({
       <p className="deck mt-3 max-w-2xl">{tagline}</p>
       <p className="mt-3 font-mono text-xs text-[var(--ink-mute)] sm:text-sm">{formula}</p>
       <p className="mt-2 font-sans text-sm text-[var(--ink-soft)]">
-        Genesis {stages[0]?.amount.toLocaleString()} open at launch. Remaining{" "}
-        {(10000 - (stages[0]?.amount ?? 2000)).toLocaleString()} only via milestones + vote.
-        Completing a milestone unlocks proposal capacity — it does not mint.
+        Genesis {stages[0]?.amount.toLocaleString()} open at launch. Remaining 8,000 only via
+        milestones + vote. Completing a milestone unlocks proposal capacity — it does not mint.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,14rem)_1fr] lg:gap-10">
