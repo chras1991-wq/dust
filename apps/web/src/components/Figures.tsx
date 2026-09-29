@@ -52,11 +52,11 @@ export function ParamTable() {
 export function EditorialAside() {
   return (
     <aside className="panel-edit slant-block-r">
-      <p className="kicker">Not BRC-20</p>
+      <p className="kicker">L1 inventory</p>
       <p className="font-display mt-3 text-2xl italic leading-snug">
-        Not an empty ledger line — fixed sats ride with every unit.
+        A UTXO-shaped token built to seed BTC L1 swap inventory.
       </p>
-      <p className="byline mt-4">Liquidity in the UTXO</p>
+      <p className="byline mt-4">Carrier sats · pool-ready</p>
     </aside>
   );
 }

@@ -36,12 +36,12 @@ export default function HomePage() {
           <article>
             <p className="byline">Essay · 01</p>
             <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl md:text-5xl">
-              Unlike BRC-20, every unit carries real sats
+              UTXO inventory built for BTC L1 swap
             </h2>
             <p className="dropcap deck mt-6">
-              BRC-20 is a ledger entry — balances live in the indexer with no sats behind each unit.
-              DUST-20 puts a fixed bag of sats in the mint UTXO, so the asset itself can trade with
-              liquidity on L1.
+              DUST-20 shapes a UTXO-native token: each accepted mint binds the asset to a fixed
+              carrier of real sats. That unit is swap inventory on Bitcoin L1 — spendable liquidity,
+              not an empty indexer balance.
             </p>
             <p className="mt-5 text-[var(--ink-soft)]">
               Transfer is a normal Bitcoin spend of that UTXO. No bridge, no sidechain, no transfer
@@ -52,6 +52,43 @@ export default function HomePage() {
         </div>
 
         <hr className="mag-rule-accent" />
+
+        <section>
+          <p className="kicker">L1 swap architecture</p>
+          <h2 className="font-display mt-2 max-w-3xl text-[1.85rem] sm:text-4xl md:text-5xl">
+            Pool UTXOs, price invariant, concurrent fills
+          </h2>
+          <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-5 md:grid-cols-3">
+            <div className="panel-edit md:mt-8">
+              <span className="overlap-label">01</span>
+              <h3 className="font-display mt-4 text-2xl">Pool UTXO control</h3>
+              <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
+                The pool holds BTC and SATDUST carrier UTXOs under a declared control path. Swaps
+                spend and recreate those outputs atomically — inventory stays on L1, visible in the
+                UTXO set.
+              </p>
+            </div>
+            <div className="panel-edit slant-block">
+              <span className="overlap-label">02</span>
+              <h3 className="font-display mt-4 text-2xl">Price invariant</h3>
+              <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
+                Spot follows the pool ratio. Each fill must leave reserves on the invariant curve —
+                no silent repricing outside the swap transaction that moves the UTXOs.
+              </p>
+            </div>
+            <div className="panel-edit md:mt-12">
+              <span className="overlap-label">03</span>
+              <h3 className="font-display mt-4 text-2xl">Concurrency</h3>
+              <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
+                Parallel intents contend for the same pool UTXOs. Reservation, conflict drop, and
+                retry keep fills serializable on L1 without freezing the whole market on one
+                mempool race.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <hr className="mag-rule" />
 
         <section className="relative">
           <div className="absolute -left-2 top-0 page-mark hidden md:block">pp. 04–07</div>
@@ -77,44 +114,6 @@ export default function HomePage() {
                 can confirm on Bitcoin and still fail as DUST.
               </li>
             </ol>
-          </div>
-        </section>
-
-        <hr className="mag-rule" />
-
-        <section>
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="kicker">Rules</p>
-              <h2 className="font-display mt-2 text-[1.85rem] sm:text-4xl">
-                Fail one check and the mint is dead
-              </h2>
-            </div>
-            <p className="folio text-xl">Fig. A</p>
-          </div>
-          <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-5 md:grid-cols-3">
-            <div className="panel-edit md:mt-8">
-              <span className="overlap-label">01</span>
-              <h3 className="font-display mt-4 text-2xl">Exact sats</h3>
-              <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
-                Output value must match the sats in the mint payload. Off-by-one can confirm on
-                Bitcoin and still get rejected.
-              </p>
-            </div>
-            <div className="panel-edit slant-block">
-              <span className="overlap-label">02</span>
-              <h3 className="font-display mt-4 text-2xl">Offset zero</h3>
-              <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
-                Inscription sits on the first sat of the UTXO. Anywhere else is invalid.
-              </p>
-            </div>
-            <div className="panel-edit md:mt-12">
-              <span className="overlap-label">03</span>
-              <h3 className="font-display mt-4 text-2xl">One ticker</h3>
-              <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
-                Case does not matter. First valid deploy for the name wins.
-              </p>
-            </div>
           </div>
         </section>
 
@@ -157,7 +156,7 @@ export default function HomePage() {
           <p className="mt-6 max-w-2xl text-[var(--ink-soft)]">
             No <code className="font-mono text-sm">op:transfer</code>. Sat ranges move in a normal
             spend; DUST follows those ranges. Mint price only on{" "}
-            <Link href="/mint">/mint</Link>.
+            <Link href="/mint">/mint</Link>. Swap migrates when the first mint batch completes.
           </p>
         </section>
 
