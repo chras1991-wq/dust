@@ -123,10 +123,10 @@ export default function HomePage() {
           <div>
             <p className="kicker">Deploy</p>
             <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl">
-              Supply and sats per unit, locked once
+              Supply and sats per token, locked once
             </h2>
             <p className="mt-4 text-[var(--ink-soft)]">
-              SATDUST: {SUPPLY.toLocaleString()} units × {UNIT_SATS} sats ={" "}
+              SATDUST: {SUPPLY.toLocaleString()} × {UNIT_SATS} sats ={" "}
               {MAX_SATS.toLocaleString()} sats total.
             </p>
           </div>
