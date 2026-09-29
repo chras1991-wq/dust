@@ -7,17 +7,17 @@ const AGENTS = [
   {
     id: "rebalancer",
     name: "Rebalancer",
-    blurb: "Keeps carrier UTXOs within declared sats bounds across spends.",
+    blurb: "Keeps your mint UTXOs at the right sats across spends.",
   },
   {
     id: "whitelist",
     name: "Whitelist scout",
-    blurb: "Tracks contributor eligibility for later issuance rounds.",
+    blurb: "Tracks who is on the contributors whitelist for later mints.",
   },
   {
     id: "mint-watch",
     name: "Mint watch",
-    blurb: "Alerts when milestone goals flip or proposals open.",
+    blurb: "Alerts when milestone goals flip or a vote opens.",
   },
 ];
 
@@ -28,7 +28,7 @@ export default function AgentPage() {
     <ModuleShell
       code="Agent"
       title="Agent"
-      deck="Delegate bounded agents that watch or act on your SATDUST carriers. No private keys leave the wallet — agents request PSBT signatures only."
+      deck="Agents that watch or act on your SATDUST UTXOs. Keys stay in the wallet — they only ask for PSBT signatures."
     >
       <ul className="space-y-3">
         {AGENTS.map((a) => (

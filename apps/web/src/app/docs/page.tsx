@@ -4,19 +4,19 @@ const DOCS = [
   {
     href: "/docs/what-is-satdust",
     title: "What is SATDUST",
-    blurb: "Opening ticker — unit + 546-sat carrier.",
+    blurb: "Opening ticker — one unit, 546 sats in the UTXO.",
     folio: "01",
   },
   {
     href: "/docs/dust20",
     title: "DUST-20",
-    blurb: "First Bitcoin-native protocol that constructs liquidity UTXOs.",
+    blurb: "Tokens that lock real sats in a UTXO on Bitcoin.",
     folio: "02",
   },
   {
     href: "/docs/how-minting-works",
-    title: "Mint execution",
-    blurb: "Commit/reveal, carrier, offset zero.",
+    title: "How minting works",
+    blurb: "Commit/reveal, exact sats, offset zero.",
     folio: "03",
   },
   {
@@ -27,8 +27,8 @@ const DOCS = [
   },
   {
     href: "/docs/tokenomics",
-    title: "Milestone issuance",
-    blurb: "Genesis 2,000 + 7 voted tranches to 10,000.",
+    title: "Milestone mint",
+    blurb: "Genesis 2,000 + 7 voted batches to 10,000.",
     folio: "05",
   },
   {

@@ -6,14 +6,14 @@ export function ProtocolDiagram() {
 Inscription (commit → reveal)
    │  dust-20 mint JSON
    ▼
-Carrier UTXO
+Mint UTXO
    │  value == declared sats
    │  inscription offset == 0
    ▼
 Indexer accept
    → SATDUST + spendable sats
    ▼
-Transfer = spend the carrier`}</pre>
+Transfer = spend that UTXO`}</pre>
   );
 }
 
@@ -54,9 +54,9 @@ export function EditorialAside() {
     <aside className="panel-edit slant-block-r">
       <p className="kicker">Not BRC-20</p>
       <p className="font-display mt-3 text-2xl italic leading-snug">
-        No empty ledger entry — fixed sats ride with every unit.
+        Not an empty ledger line — fixed sats ride with every unit.
       </p>
-      <p className="byline mt-4">Liquidity in the carrier</p>
+      <p className="byline mt-4">Liquidity in the UTXO</p>
     </aside>
   );
 }

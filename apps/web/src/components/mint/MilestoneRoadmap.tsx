@@ -69,19 +69,19 @@ export function MilestoneRoadmap({
 
   return (
     <section className="mt-14 border-t-[1.5px] border-[var(--ink)] pt-10 sm:mt-16 sm:pt-12">
-      <p className="byline">03 · Milestone issuance</p>
+      <p className="byline">03 · Milestone mint</p>
       <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl">
-        Community-approved supply
+        Holders vote supply open
       </h2>
       <p className="deck mt-3 max-w-2xl">{tagline}</p>
       <p className="mt-3 font-mono text-xs text-[var(--ink-mute)] sm:text-sm">{formula}</p>
       <p className="mt-3 max-w-2xl border-l-4 border-[var(--accent)] pl-3 font-sans text-sm text-[var(--ink)] sm:text-[0.95rem]">
-        After Genesis, mint access favors a <strong>contributors whitelist</strong> — people who
-        shipped, held, integrated, or otherwise moved the project forward — before open capacity.
+        After Genesis, the <strong>contributors whitelist</strong> mints first. Open mint comes
+        after that.
       </p>
       <p className="mt-3 font-sans text-sm text-[var(--ink-soft)]">
-        Genesis {stages[0]?.amount.toLocaleString()} open at launch. Remaining 8,000 only via
-        milestones + vote. Completing a milestone unlocks proposal capacity — it does not mint.
+        Genesis {stages[0]?.amount.toLocaleString()} at launch. The other 8,000 need a milestone +
+        a yes vote. Hitting the goal only opens a vote — it does not mint.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,14rem)_1fr] lg:gap-10">
@@ -199,33 +199,32 @@ export function MilestoneRoadmap({
                 <GoalRow key={g.id} goal={g} />
               ))}
               <p className="text-sm text-[var(--ink-soft)]">
-                Open at launch — no community vote for the first {selected.amount.toLocaleString()}{" "}
-                units. Later stages stay locked until this window fills and their goals are met.
+                Open at launch — no vote for these {selected.amount.toLocaleString()} units. Later
+                milestones stay locked until this fills and their goals are met.
               </p>
             </div>
           )}
 
           {!selected.isGenesis && (
             <div className="mt-8 border border-[var(--ink)] bg-[var(--paper)] p-4 sm:p-5">
-              <p className="byline">Issuance &amp; governance</p>
+              <p className="byline">Mint vote</p>
               <p className="font-display mt-2 text-2xl">
-                Unlock proposal capacity:{" "}
+                Open a vote for{" "}
                 <span className="text-[var(--accent)]">+{selected.amount.toLocaleString()} SATDUST</span>
               </p>
               <p className="mt-2 text-sm text-[var(--ink-mute)]">
-                Reaching the milestone does not create new SATDUST. Holders must approve a mint
-                proposal.
+                Hitting the milestone does not mint. Holders still have to approve.
               </p>
 
               <dl className="mt-5 grid gap-2 font-sans text-sm sm:grid-cols-2">
                 <Row label="Current supply" value={minted.toLocaleString()} />
-                <Row label="Proposed issuance" value={`+${selected.amount.toLocaleString()}`} />
+                <Row label="On the ballot" value={`+${selected.amount.toLocaleString()}`} />
                 <Row
-                  label="If approved"
+                  label="If yes"
                   value={`${selected.supplyIfApproved.toLocaleString()} / 10,000`}
                 />
                 <Row
-                  label="Dilution from proposal"
+                  label="Dilution if yes"
                   value={
                     selected.dilution != null ? `+${selected.dilution.toFixed(2)}%` : "—"
                   }
@@ -246,12 +245,12 @@ export function MilestoneRoadmap({
               </button>
               <p className="mt-2 font-sans text-xs text-[var(--ink-mute)]">
                 {selected.status === "LOCKED"
-                  ? "Prior milestones must mint first."
+                  ? "Earlier milestones must mint first."
                   : selected.status === "MINTED"
-                    ? `Minted${selected.mintedAt ? ` ${selected.mintedAt}` : ""}. Cooldown ${selected.cooldownDays}d before next proposal.`
+                    ? `Minted${selected.mintedAt ? ` ${selected.mintedAt}` : ""}. ${selected.cooldownDays}d cooldown before the next vote.`
                     : canPropose
-                      ? "Milestone goals met — proposal can be submitted."
-                      : "Only when all milestone goals are met can a proposal be submitted."}
+                      ? "Goals met — you can submit a mint vote."
+                      : "All goals must pass before a vote can open."}
               </p>
             </div>
           )}
@@ -261,10 +260,10 @@ export function MilestoneRoadmap({
               <p className="byline">Voting rules</p>
               <ul className="mt-3 space-y-1.5 font-sans text-sm text-[var(--ink-soft)]">
                 <li>
-                  Qualification: SATDUST balance ≥ {VOTE_SATDUST_EQUIV_BTC} BTC equivalent
-                  (live rate) at snapshot
+                  Qualify: SATDUST worth ≥ {VOTE_SATDUST_EQUIV_BTC} BTC (live rate) at snapshot —
+                  not BTC holdings
                 </li>
-                <li>Power: 1 eligible wallet = 1 vote</li>
+                <li>Power: 1 wallet = 1 vote</li>
                 <li>Quorum: ≥ {Math.round(selected.quorum * 100)}% of eligible wallets</li>
                 <li>Approval: ≥ {Math.round(selected.approval * 100)}% YES</li>
                 <li>Voting period: {VOTE_PERIOD_DAYS} days</li>

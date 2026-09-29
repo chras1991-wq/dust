@@ -12,16 +12,10 @@ export default function HomePage() {
             SATDUST
           </h1>
           <p className="animate-rise-delay-2 mt-4 max-w-2xl font-display text-xl italic leading-snug text-[var(--paper)] sm:mt-5 sm:text-2xl md:text-3xl">
-            DUST-20 — the first Bitcoin-native protocol that constructs liquidity UTXOs.
+            DUST-20 — each unit locks {UNIT_SATS} sats in a UTXO on L1.
           </p>
-          <p className="animate-rise-delay-2 mt-3 max-w-xl font-sans text-base leading-relaxed text-[var(--accent-soft)] sm:text-lg">
-            Milestone-Based Issuance curve — supply earned by progress, then approved by holders.
-          </p>
-          <p className="animate-rise-delay-2 mt-2 max-w-xl font-sans text-base leading-relaxed text-[var(--paper)]/80">
-            Later issuance prioritizes a whitelist of standout contributors.
-          </p>
-          <p className="animate-rise-delay-2 mt-2 max-w-lg font-sans text-sm leading-relaxed text-[var(--paper)]/75 sm:text-base">
-            SATDUST is the opening ticker. Each unit rides a {UNIT_SATS}-sat carrier on L1.
+          <p className="animate-rise-delay-2 mt-3 max-w-xl font-sans text-base leading-relaxed text-[var(--paper)]/80 sm:text-lg">
+            More supply only after milestones and holder votes. Contributors whitelist mints first.
           </p>
           <div className="animate-rise-delay-2 btn-row mt-7 sm:mt-8">
             <Link href="/mint" className="btn btn-solid">
@@ -42,16 +36,16 @@ export default function HomePage() {
           <article>
             <p className="byline">Essay · 01</p>
             <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl md:text-5xl">
-              Unlike BRC-20 ledgers, every unit carries real sats
+              Unlike BRC-20, every unit carries real sats
             </h2>
             <p className="dropcap deck mt-6">
-              BRC-20 is an accounting layer — balances live as indexer entries with no physical sats
-              behind each unit. DUST-20 does the opposite: each token carries a fixed amount of real
-              sats in its carrier UTXO, so the asset itself can seed trading liquidity on L1.
+              BRC-20 is a ledger entry — balances live in the indexer with no sats behind each unit.
+              DUST-20 puts a fixed bag of sats in the mint UTXO, so the asset itself can trade with
+              liquidity on L1.
             </p>
             <p className="mt-5 text-[var(--ink-soft)]">
-              Transfer is a normal Bitcoin spend of that carrier. No bridge, no sidechain, no
-              transfer opcode.
+              Transfer is a normal Bitcoin spend of that UTXO. No bridge, no sidechain, no transfer
+              opcode.
             </p>
           </article>
           <EditorialAside />
@@ -63,7 +57,7 @@ export default function HomePage() {
           <div className="absolute -left-2 top-0 page-mark hidden md:block">pp. 04–07</div>
           <p className="kicker">Mint path</p>
           <h2 className="font-display mt-2 max-w-3xl text-[1.85rem] italic sm:text-4xl md:text-5xl">
-            Inscribe. Build the carrier. Indexer accepts or you get nothing.
+            Inscribe. Build the UTXO. Indexer says yes — or it never counted.
           </h2>
           <div className="mt-6 grid gap-6 sm:mt-8 md:grid-cols-12">
             <div className="scroll-x md:col-span-7">
@@ -72,11 +66,11 @@ export default function HomePage() {
             <ol className="space-y-4 font-sans text-[0.95rem] text-[var(--ink-soft)] md:col-span-5 md:pt-2">
               <li>
                 <strong className="text-[var(--ink)]">1. Mint JSON</strong> — ticker, amount, and
-                required carrier sats.
+                required sats.
               </li>
               <li>
                 <strong className="text-[var(--ink)]">2. Reveal</strong> — creates the{" "}
-                {UNIT_SATS}-sat carrier with the inscription at offset 0.
+                {UNIT_SATS}-sat UTXO with the inscription at offset 0.
               </li>
               <li>
                 <strong className="text-[var(--ink)]">3. Acceptance</strong> — wrong sats or offset
@@ -101,7 +95,7 @@ export default function HomePage() {
           <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-5 md:grid-cols-3">
             <div className="panel-edit md:mt-8">
               <span className="overlap-label">01</span>
-              <h3 className="font-display mt-4 text-2xl">Exact carrier</h3>
+              <h3 className="font-display mt-4 text-2xl">Exact sats</h3>
               <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
                 Output value must match the sats in the mint payload. Off-by-one can confirm on
                 Bitcoin and still get rejected.
@@ -111,7 +105,7 @@ export default function HomePage() {
               <span className="overlap-label">02</span>
               <h3 className="font-display mt-4 text-2xl">Offset zero</h3>
               <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
-                Inscription sits on the first sat of the carrier. Anywhere else is invalid.
+                Inscription sits on the first sat of the UTXO. Anywhere else is invalid.
               </p>
             </div>
             <div className="panel-edit md:mt-12">
@@ -130,11 +124,11 @@ export default function HomePage() {
           <div>
             <p className="kicker">Deploy</p>
             <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl">
-              Supply and carrier size, locked once
+              Supply and sats per unit, locked once
             </h2>
             <p className="mt-4 text-[var(--ink-soft)]">
               SATDUST: {SUPPLY.toLocaleString()} units × {UNIT_SATS} sats ={" "}
-              {MAX_SATS.toLocaleString()} sats of total carrier capacity.
+              {MAX_SATS.toLocaleString()} sats total.
             </p>
           </div>
           <div className="min-w-0">
@@ -158,11 +152,11 @@ export default function HomePage() {
         <section>
           <p className="kicker">Transfer</p>
           <h2 className="font-display mt-2 text-[1.85rem] sm:text-4xl md:text-5xl">
-            Spend the carrier. The asset moves with it.
+            Spend the UTXO. The asset moves with it.
           </h2>
           <p className="mt-6 max-w-2xl text-[var(--ink-soft)]">
-            No <code className="font-mono text-sm">op:transfer</code>. Sat ranges flow through a
-            normal spend; DUST units follow those ranges. Mint price is only on{" "}
+            No <code className="font-mono text-sm">op:transfer</code>. Sat ranges move in a normal
+            spend; DUST follows those ranges. Mint price only on{" "}
             <Link href="/mint">/mint</Link>.
           </p>
         </section>
@@ -183,7 +177,7 @@ export default function HomePage() {
             <li>Mainnet tx confirms</li>
             <li>Inscription is dust-20 / mint / SATDUST</li>
             <li>Amount × unit sats equals declared sats</li>
-            <li>Carrier value matches those sats</li>
+            <li>UTXO value matches those sats</li>
             <li>Inscription offset is 0</li>
             <li>Deploy exists; supply not exceeded</li>
             <li>Indexer accepts</li>

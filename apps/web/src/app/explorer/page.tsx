@@ -32,25 +32,25 @@ const FEATURES = [
     href: "/stake",
     code: "01 · Stake",
     title: "Stake",
-    blurb: "Lock SATDUST carriers for protocol weight and future rewards.",
+    blurb: "Lock SATDUST for weight and rewards after launch.",
   },
   {
     href: "/agent",
     code: "02 · Agent",
     title: "Agent",
-    blurb: "Delegate execution agents that act on your liquidity UTXOs.",
+    blurb: "Agents that watch or act on your SATDUST UTXOs.",
   },
   {
     href: "/compute",
     code: "03 · Compute",
     title: "Compute",
-    blurb: "Commit hashrate / compute credits against SATDUST collateral.",
+    blurb: "Commit hashrate against SATDUST collateral.",
   },
   {
     href: "/auction",
     code: "04 · Auction",
     title: "Auction",
-    blurb: "Bid on carrier lots, whitelist seats, and milestone capacity.",
+    blurb: "Bid on UTXO lots, whitelist seats, and mint batches.",
   },
 ];
 
@@ -68,8 +68,8 @@ export default function ExplorerPage() {
       <p className="byline">Index · Markets &amp; modules</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Index</h1>
       <p className="deck mt-3 max-w-2xl text-[0.95rem] sm:mt-4 sm:text-[1.05rem]">
-        Swap SATDUST ⇄ BTC, then enter stake, agent, compute, and auction. Token markets are
-        pre-launch — desks are interactive shells until Genesis and pools go live.
+        Swap SATDUST ⇄ BTC, then stake, agent, compute, auction. Markets are pre-launch — desks
+        open after Genesis and the pool go live.
       </p>
 
       <div className="stat-strip mt-8 grid gap-3 sm:grid-cols-3">
@@ -87,9 +87,9 @@ export default function ExplorerPage() {
 
       <section className="mt-12">
         <p className="byline">Modules</p>
-        <h2 className="font-display mt-2 text-3xl sm:text-4xl">Protocol surfaces</h2>
+        <h2 className="font-display mt-2 text-3xl sm:text-4xl">Modules</h2>
         <p className="mt-2 max-w-2xl text-sm text-[var(--ink-mute)]">
-          Each module opens a full desk. Actions stay disabled until official launch.
+          Each opens a full desk. Actions stay off until launch.
         </p>
         <div className="feature-grid mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4">
           {FEATURES.map((f) => (
@@ -116,7 +116,7 @@ export default function ExplorerPage() {
                 <th>TXID</th>
                 <th>Owner</th>
                 <th>Amount</th>
-                <th>Carrier</th>
+                <th>UTXO sats</th>
                 <th>Status</th>
               </tr>
             </thead>
