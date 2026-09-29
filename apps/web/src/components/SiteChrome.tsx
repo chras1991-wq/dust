@@ -29,11 +29,11 @@ export function SiteHeader() {
 
   return (
     <header className="layer sticky top-0 z-40 border-b-[1.5px] border-[var(--ink)] bg-[var(--paper)]/95 backdrop-blur-md pt-[env(safe-area-inset-top)]">
-      <div className="page-shell flex flex-col gap-3 py-3 sm:gap-4 sm:py-4 md:flex-row md:items-end md:justify-between md:py-5">
+      <div className="page-shell flex flex-col gap-2 py-2.5 sm:gap-4 sm:py-4 md:flex-row md:items-end md:justify-between md:py-5">
         <div className="min-w-0">
           <p className="byline truncate">The Satoshi Review · Special Issue</p>
-          <Link href="/" className="no-underline text-[var(--ink)]">
-            <span className="masthead text-[2.35rem] leading-none sm:text-4xl md:text-5xl">
+          <Link href="/" className="no-underline">
+            <span className="masthead text-[2.1rem] leading-none text-[var(--accent)] sm:text-4xl md:text-5xl">
               SATDUST
             </span>
           </Link>
@@ -49,10 +49,11 @@ export function SiteHeader() {
               <Link
                 key={l.href}
                 href={l.href}
+                aria-current={active ? "page" : undefined}
                 className={
                   active
-                    ? "bg-[var(--ink)] text-[var(--paper)] no-underline"
-                    : "text-[var(--ink)] no-underline hover:text-[var(--accent)]"
+                    ? "bg-[var(--ink)] text-[var(--paper)] no-underline hover:text-[var(--paper)]"
+                    : "text-[var(--accent)] no-underline hover:bg-[var(--ink)] hover:text-[var(--paper)]"
                 }
               >
                 {l.label}

@@ -75,8 +75,8 @@ export function WalletConnect({ onAccount }: Props) {
       {error && <p className="mt-3 font-sans text-sm text-[var(--invalid)]">{error}</p>}
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm sm:items-center sm:p-4">
-          <div className="panel-edit modal-sheet mb-[env(safe-area-inset-bottom)] w-full">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="panel-edit modal-sheet mb-[env(safe-area-inset-bottom)] w-full sm:mb-0">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="kicker">Wallet</p>

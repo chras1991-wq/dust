@@ -110,7 +110,7 @@ export default function MintPage() {
   return (
     <div className="page-shell max-w-3xl py-10 sm:py-14">
       <p className="byline">Operations · Mint desk</p>
-      <h1 className="masthead mt-2 text-5xl sm:text-6xl md:text-7xl">Mint</h1>
+      <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Mint</h1>
       <p className="deck mt-4 max-w-xl">
         Quantity and pricing live here. Protocol essay elsewhere.
       </p>
@@ -223,8 +223,8 @@ export default function MintPage() {
       )}
 
       {confirmOpen && quote && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm sm:items-center sm:p-4">
-          <div className="panel-edit modal-sheet mb-[env(safe-area-inset-bottom)] w-full">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="panel-edit modal-sheet mb-[env(safe-area-inset-bottom)] w-full sm:mb-0">
             <p className="kicker">Confirmation</p>
             <h2 className="font-display mt-2 text-2xl sm:text-3xl">You are minting</h2>
             <ul className="mt-5 space-y-2 font-sans text-sm text-[var(--ink-soft)]">

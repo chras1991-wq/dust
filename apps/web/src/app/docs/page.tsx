@@ -43,7 +43,7 @@ export default function DocsIndex() {
   return (
     <div className="page-shell max-w-3xl py-10 sm:py-14">
       <p className="byline">Archive · Technical papers</p>
-      <h1 className="masthead mt-2 text-5xl sm:text-6xl">Archive</h1>
+      <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl">Archive</h1>
       <p className="deck mt-4">
         Protocol notes for implementers. Pricing remains on the mint desk only.
       </p>

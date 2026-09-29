@@ -65,13 +65,16 @@ body::before {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
 }
 
-a {
-  color: var(--accent);
-  text-underline-offset: 3px;
-}
+/* @layer base so Tailwind utilities can override link color (nav active, etc.) */
+@layer base {
+  a {
+    color: var(--accent);
+    text-underline-offset: 3px;
+  }
 
-a:hover {
-  color: var(--ink);
+  a:hover {
+    color: var(--ink);
+  }
 }
 
 ::selection {
@@ -197,6 +200,19 @@ a:hover {
 .btn-ghost:hover:not(:disabled) {
   background: var(--ink);
   color: var(--paper);
+}
+
+/* Readable ghost CTAs on dark hero planes */
+.btn-ghost-on-dark {
+  background: rgba(243, 241, 236, 0.08);
+  border-color: var(--paper);
+  color: var(--paper);
+}
+
+.btn-ghost-on-dark:hover:not(:disabled) {
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--ink);
 }
 
 .input {
@@ -573,6 +589,10 @@ a:hover {
     letter-spacing: 0.1em;
   }
 
+  .issue-track {
+    padding: 0.4rem 0;
+  }
+
   .byline {
     font-size: 0.68rem;
     letter-spacing: 0.12em;
@@ -586,6 +606,26 @@ a:hover {
   .footnote {
     font-size: 0.78rem;
     margin-top: 2rem;
+  }
+
+  /* Avoid iOS focus-zoom on form fields */
+  .input {
+    font-size: 16px;
+  }
+
+  /* Bottom sheet: edge-to-edge on phones */
+  .modal-sheet {
+    width: 100%;
+    max-width: 100%;
+    max-height: min(82dvh, 36rem);
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    border-top: 2px solid var(--ink);
+  }
+
+  .page-title {
+    font-size: clamp(2.6rem, 14vw, 3.75rem);
   }
 
   /* Prefer readable stacks on narrow screens */

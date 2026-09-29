@@ -20,16 +20,10 @@ export default function HomePage() {
             <Link href="/docs/dust20" className="btn btn-solid">
               Read the Spec
             </Link>
-            <Link
-              href="/verify"
-              className="btn btn-ghost border-[var(--paper)] text-[var(--paper)] hover:bg-[var(--paper)] hover:text-[var(--ink)]"
-            >
+            <Link href="/verify" className="btn btn-ghost-on-dark">
               Verification
             </Link>
-            <Link
-              href="/mint"
-              className="btn btn-ghost border-[var(--paper)] text-[var(--paper)] hover:bg-[var(--paper)] hover:text-[var(--ink)]"
-            >
+            <Link href="/mint" className="btn btn-ghost-on-dark">
               Open Mint
             </Link>
           </div>

@@ -59,7 +59,7 @@ function VerifyForm() {
   return (
     <div className="page-shell max-w-3xl py-10 sm:py-14">
       <p className="byline">Laboratory · Proof</p>
-      <h1 className="masthead mt-2 text-5xl sm:text-6xl md:text-7xl">Prove</h1>
+      <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Prove</h1>
       <p className="deck mt-4">
         Structural DUST-20 checks. Final word remains confirmed chain + indexer.
       </p>
