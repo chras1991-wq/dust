@@ -52,11 +52,11 @@ export function ParamTable() {
 export function EditorialAside() {
   return (
     <aside className="panel-edit slant-block-r">
-      <p className="kicker">Carrier</p>
+      <p className="kicker">Not BRC-20</p>
       <p className="font-display mt-3 text-2xl italic leading-snug">
-        Asset on the inscription. Liquidity in the sats. Same output.
+        No empty ledger entry — fixed sats ride with every unit.
       </p>
-      <p className="byline mt-4">What you hold after mint</p>
+      <p className="byline mt-4">Liquidity in the carrier</p>
     </aside>
   );
 }
