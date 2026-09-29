@@ -17,7 +17,7 @@ export async function GET() {
     governance: {
       voteSatdustEquivBtc: VOTE_SATDUST_EQUIV_BTC,
       voteRule:
-        "Eligible if wallet SATDUST balance ≥ 0.01 BTC equivalent at live rate (snapshot). Not native BTC.",
+        "Eligible if wallet SATDUST balance ≥ 0.005 BTC equivalent at live rate (snapshot). Not native BTC.",
       power: "1 eligible wallet = 1 vote",
       votePeriodDays: VOTE_PERIOD_DAYS,
       revoteCooldownDays: REVOTE_COOLDOWN_DAYS,

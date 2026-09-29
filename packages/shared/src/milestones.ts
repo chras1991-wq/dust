@@ -19,7 +19,7 @@ export const RESERVE_SUPPLY = SUPPLY_CAP - GENESIS_SUPPLY; // 8_000
  * Threshold: SATDUST holdings valued at the live BTC rate ≥ this BTC-equivalent,
  * measured at the proposal snapshot. Power: 1 eligible wallet = 1 vote.
  */
-export const VOTE_SATDUST_EQUIV_BTC = 0.01;
+export const VOTE_SATDUST_EQUIV_BTC = 0.005;
 /** @deprecated Use VOTE_SATDUST_EQUIV_BTC — was misread as native BTC balance. */
 export const VOTE_BTC_THRESHOLD = VOTE_SATDUST_EQUIV_BTC;
 
