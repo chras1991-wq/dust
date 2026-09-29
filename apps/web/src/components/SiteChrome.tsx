@@ -5,41 +5,53 @@ import { usePathname } from "next/navigation";
 import { PROJECT_ADDRESS } from "@satdust/shared";
 
 const LINKS = [
-  { href: "/", label: "Abstract" },
-  { href: "/mint", label: "Mint" },
-  { href: "/explorer", label: "Explorer" },
-  { href: "/verify", label: "Verify" },
-  { href: "/docs", label: "Spec" },
+  { href: "/", label: "HOME", color: "sticker-orange", rot: "-3deg" },
+  { href: "/mint", label: "MINT", color: "sticker-hot", rot: "2deg" },
+  { href: "/explorer", label: "SCAN", color: "sticker-cyan", rot: "-1deg" },
+  { href: "/verify", label: "CHECK", color: "sticker-lime", rot: "3deg" },
+  { href: "/docs", label: "LORE", color: "sticker-yellow", rot: "-2deg" },
 ];
+
+export function MarqueeBar() {
+  const text =
+    "SATDUST ★ BITCOIN DUST ★ CARRIED BY SATS ★ 10,000 ★ 546 SATS ★ $7 MINT ★ NO PREMINE ★ FAIR MINT ★ DUST-20 ★ MAINNET ★ ";
+  return (
+    <div className="marquee layer" aria-hidden>
+      <div className="marquee-track">
+        <span>{text}</span>
+        <span>{text}</span>
+      </div>
+    </div>
+  );
+}
 
 export function SiteHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="paper border-b border-[var(--rule)]">
-      <div className="mx-auto flex max-w-5xl flex-col gap-4 px-5 py-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+    <header className="layer relative border-b-4 border-[var(--c-black)] bg-[linear-gradient(90deg,#ff6a00,#ff2d95,#2ef2ff,#b8ff3c,#ffe14a)]">
+      <div className="absolute inset-0 barcode opacity-20 mix-blend-multiply" />
+      <div className="relative mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
           <Link href="/" className="no-underline">
-            <span className="font-display text-2xl tracking-tight text-[var(--ink)]">
+            <span className="font-stamp text-3xl tracking-tight text-[var(--c-black)] drop-shadow-[3px_3px_0_#fff6e8]">
               SATDUST
             </span>
           </Link>
-          <p className="mt-1 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-[var(--ink-dim)]">
-            DUST-20 · v1.1.0 · Bitcoin Mainnet · Experimental
-          </p>
+          <span className="sticker sticker-hot" style={{ ["--rot" as string]: "8deg" }}>
+            LIVE DUST
+          </span>
         </div>
-        <nav className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[0.7rem] uppercase tracking-[0.1em]">
+        <nav className="flex flex-wrap gap-2">
           {LINKS.map((l) => {
-            const active = pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href));
+            const active =
+              pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href));
             return (
               <Link
                 key={l.href}
                 href={l.href}
-                className={
-                  active
-                    ? "text-[var(--accent)] no-underline"
-                    : "text-[var(--ink-dim)] no-underline hover:text-[var(--ink)]"
-                }
+                className={`sticker ${l.color} no-underline ${active ? "scale-110" : "opacity-90"}`}
+                style={{ ["--rot" as string]: l.rot }}
               >
                 {l.label}
               </Link>
@@ -47,10 +59,9 @@ export function SiteHeader() {
           })}
         </nav>
       </div>
-      <div className="mx-auto max-w-5xl overflow-x-auto px-5 pb-3">
-        <p className="font-mono text-[0.65rem] text-[var(--ink-faint)]">
-          Project address{" "}
-          <span className="text-[var(--ink-dim)]">{PROJECT_ADDRESS}</span>
+      <div className="relative border-t-4 border-[var(--c-black)] bg-[var(--c-black)] px-4 py-2">
+        <p className="mx-auto max-w-6xl overflow-x-auto font-mono text-[0.68rem] text-[var(--c-lime)]">
+          FEE SINK → <span className="text-[var(--c-yellow)]">{PROJECT_ADDRESS}</span>
         </p>
       </div>
     </header>
@@ -59,21 +70,32 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer className="paper border-t border-[var(--rule)]">
-      <div className="mx-auto max-w-5xl px-5 py-10">
-        <p className="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-[var(--accent)]">
-          Risk disclosure<sup>†</sup>
-        </p>
-        <p className="mt-3 max-w-3xl text-sm text-[var(--ink-dim)]">
-          SATDUST uses the experimental DUST-20 meta-protocol. DUST-20 is not Bitcoin
-          consensus. Bitcoin Core does not recognize SATDUST. Asset state depends on
-          compatible indexers. Wallet and marketplace support is limited. No guaranteed
-          value, listing, liquidity, or return.
-        </p>
-        <p className="footnote">
-          † DUST-20 specification version 1.1.0, revised 2026-09-01. Network: Bitcoin
-          mainnet. Status: Experimental.
-        </p>
+    <footer className="layer mt-10 border-t-4 border-[var(--c-black)]">
+      <div className="bg-[var(--c-magenta)] px-4 py-3 font-stamp text-sm uppercase tracking-wider text-white">
+        Risk dump † — experimental meta-protocol energy
+      </div>
+      <div className="bg-[var(--c-black)] px-4 py-8">
+        <div className="mx-auto max-w-6xl">
+          <p className="max-w-3xl text-sm text-[var(--ink-dim)]">
+            SATDUST rides experimental DUST-20. Not Bitcoin consensus. Bitcoin Core does not
+            see SATDUST. Indexers decide state. Wallet / market support is thin. No guaranteed
+            value, listing, liquidity, or return.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <span className="sticker sticker-yellow" style={{ ["--rot" as string]: "-2deg" }}>
+              DUST-20 1.1.0
+            </span>
+            <span className="sticker sticker-cyan" style={{ ["--rot" as string]: "3deg" }}>
+              MAINNET
+            </span>
+            <span className="sticker sticker-hot" style={{ ["--rot" as string]: "-4deg" }}>
+              EXPERIMENTAL
+            </span>
+            <span className="sticker sticker-lime" style={{ ["--rot" as string]: "2deg" }}>
+              NO PREMINE
+            </span>
+          </div>
+        </div>
       </div>
     </footer>
   );

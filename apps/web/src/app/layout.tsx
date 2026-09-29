@@ -1,25 +1,33 @@
 import type { Metadata } from "next";
-import { Newsreader, Source_Serif_4, IBM_Plex_Mono } from "next/font/google";
-import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
+import { Syne, Bricolage_Grotesque, Chivo_Mono, Archivo_Black } from "next/font/google";
+import { SiteFooter, SiteHeader, MarqueeBar } from "@/components/SiteChrome";
 import "./globals.css";
 
-const display = Newsreader({
+const display = Syne({
   subsets: ["latin"],
-  variable: "--font-newsreader",
+  variable: "--font-syne",
+  display: "swap",
+  weight: ["600", "700", "800"],
+});
+
+const body = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage",
   display: "swap",
 });
 
-const body = Source_Serif_4({
+const mono = Chivo_Mono({
   subsets: ["latin"],
-  variable: "--font-source-serif",
+  variable: "--font-chivo",
   display: "swap",
+  weight: ["400", "600", "700"],
 });
 
-const mono = IBM_Plex_Mono({
+const stamp = Archivo_Black({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-ibm-plex-mono",
+  variable: "--font-archivo-black",
   display: "swap",
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -37,17 +45,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${display.variable} ${body.variable} ${mono.variable} antialiased`}
+        className={`${display.variable} ${body.variable} ${mono.variable} ${stamp.variable} antialiased`}
         style={
           {
-            "--font-display": "var(--font-newsreader), serif",
-            "--font-body": "var(--font-source-serif), serif",
-            "--font-mono": "var(--font-ibm-plex-mono), monospace",
+            "--font-display": "var(--font-syne), sans-serif",
+            "--font-body": "var(--font-bricolage), sans-serif",
+            "--font-mono": "var(--font-chivo), monospace",
+            "--font-stamp": "var(--font-archivo-black), Impact, sans-serif",
           } as React.CSSProperties
         }
       >
+        <MarqueeBar />
         <SiteHeader />
-        <main className="paper min-h-[70vh]">{children}</main>
+        <main className="layer min-h-[70vh]">{children}</main>
         <SiteFooter />
       </body>
     </html>

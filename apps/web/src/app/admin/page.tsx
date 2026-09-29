@@ -25,17 +25,15 @@ export default function AdminPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-14">
-      <p className="section-num">§ Admin · Monitor only</p>
-      <h1 className="font-display mt-2 text-4xl">Operations</h1>
-      <p className="mt-3 text-[var(--ink-dim)]">
-        No private keys are stored. This surface is observational.
-      </p>
+    <div className="mx-auto max-w-4xl px-4 py-12">
+      <span className="sticker sticker-orange">OPS DECK</span>
+      <h1 className="hero-title mt-4 text-5xl">ADMIN</h1>
+      <p className="mt-3 text-[var(--ink-dim)]">Monitor only. Zero private keys.</p>
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Tile label="Confirmed mint" value={String(supply?.minted ?? "—")} />
         <Tile label="Pending mint" value={String(supply?.pending ?? "—")} />
-        <Tile label="Remaining supply" value={String(supply?.remaining ?? "—")} />
+        <Tile label="Remaining" value={String(supply?.remaining ?? "—")} />
         <Tile label="Project address" value={`${PROJECT_ADDRESS.slice(0, 12)}…`} />
         <Tile
           label="Deploy tx"
@@ -45,24 +43,19 @@ export default function AdminPage() {
               : "unset"
           }
         />
-        <Tile label="Mint open" value={config?.mintOpen ? "yes" : "no"} />
+        <Tile label="Mint open" value={config?.mintOpen ? "YES" : "NO"} />
       </div>
-
-      <p className="mt-10 font-mono text-[0.75rem] text-[var(--ink-faint)]">
-        Wire Bitcoin node height, indexer lag, oracle health, and revenue aggregates when
-        infrastructure endpoints are connected.
-      </p>
     </div>
   );
 }
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-[var(--rule)] bg-[var(--bg-1)] p-4">
-      <p className="font-mono text-[0.65rem] uppercase tracking-[0.1em] text-[var(--ink-faint)]">
-        {label}
+    <div className="panel-chaos">
+      <p className="font-stamp text-[0.65rem] text-[var(--c-yellow)]">{label}</p>
+      <p className="font-display mt-2 text-xl font-extrabold break-all text-[var(--c-cream)]">
+        {value}
       </p>
-      <p className="font-mono mt-2 text-lg text-[var(--ink)] break-all">{value}</p>
     </div>
   );
 }

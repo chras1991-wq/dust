@@ -35,18 +35,20 @@ export default function ExplorerPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-5xl px-5 py-14">
-      <p className="section-num">§ Explorer</p>
-      <h1 className="font-display mt-2 text-5xl">SATDUST</h1>
-      <p className="mt-3 text-[var(--ink-dim)]">
-        Mint sequence is an ordering convenience for fungible units — not a Token ID.
+    <div className="mx-auto max-w-6xl px-4 py-12">
+      <span className="sticker sticker-cyan" style={{ ["--rot" as string]: "-3deg" }}>
+        EXPLORER RADAR
+      </span>
+      <h1 className="hero-title mt-4 text-6xl sm:text-7xl">SCAN</h1>
+      <p className="mt-3 font-stamp uppercase text-[var(--c-yellow)]">
+        Mint Sequence ≠ Token ID · fungible noise only
       </p>
 
       {data && (
-        <div className="mt-10 grid gap-6 border border-[var(--rule)] bg-[var(--bg-1)] p-5 sm:grid-cols-3">
-          <Stat label="Minted" value={`${data.supply.minted.toLocaleString()} / ${data.supply.totalSupply.toLocaleString()}`} />
-          <Stat label="Remaining" value={data.supply.remaining.toLocaleString()} />
-          <Stat label="Pending" value={String(data.supply.pending)} />
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <Stat label="Minted" value={`${data.supply.minted} / ${data.supply.totalSupply}`} color="var(--c-orange)" />
+          <Stat label="Remaining" value={String(data.supply.remaining)} color="var(--c-lime)" />
+          <Stat label="Pending" value={String(data.supply.pending)} color="var(--c-magenta)" />
         </div>
       )}
 
@@ -71,17 +73,13 @@ export default function ExplorerPage() {
                   <td>{String(row.mintSequence).padStart(6, "0")}</td>
                   <td>
                     {row.txid ? (
-                      <Link href={`/verify?txid=${row.txid}`}>
-                        {row.txid.slice(0, 8)}…
-                      </Link>
+                      <Link href={`/verify?txid=${row.txid}`}>{row.txid.slice(0, 8)}…</Link>
                     ) : (
                       "—"
                     )}
                   </td>
-                  <td className="text-[var(--ink-dim)]">
-                    {row.inscriptionId ? `${row.inscriptionId.slice(0, 10)}…` : "—"}
-                  </td>
-                  <td className="text-[var(--ink-dim)]">
+                  <td>{row.inscriptionId ? `${row.inscriptionId.slice(0, 10)}…` : "—"}</td>
+                  <td>
                     {row.owner.slice(0, 8)}…{row.owner.slice(-4)}
                   </td>
                   <td>{row.amount} SATDUST</td>
@@ -103,11 +101,11 @@ export default function ExplorerPage() {
             ) : (
               <tr>
                 <td colSpan={8} className="text-[var(--ink-dim)]">
-                  No indexed mints yet. After mainnet deploy and first reveals, rows appear
-                  here from confirmed tx + DUST-20 indexer results.
+                  Empty radar. After mainnet deploy + reveals, rows land here from confirmed tx +
+                  indexer.
                   {data?.deployTxid
-                    ? ` Deploy tx: ${data.deployTxid.slice(0, 16)}…`
-                    : " Deploy not yet recorded."}
+                    ? ` Deploy: ${data.deployTxid.slice(0, 16)}…`
+                    : " Deploy not recorded."}
                 </td>
               </tr>
             )}
@@ -118,13 +116,13 @@ export default function ExplorerPage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div>
-      <p className="font-mono text-[0.65rem] uppercase tracking-[0.12em] text-[var(--ink-faint)]">
+    <div className="panel-chaos">
+      <p className="font-stamp text-[0.7rem]" style={{ color }}>
         {label}
       </p>
-      <p className="font-mono mt-1 text-xl text-[var(--ink)]">{value}</p>
+      <p className="font-display mt-2 text-2xl font-extrabold text-[var(--c-cream)]">{value}</p>
     </div>
   );
 }

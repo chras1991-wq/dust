@@ -1,69 +1,88 @@
 import Link from "next/link";
-import { DustField, ParamTable, ProtocolDiagram } from "@/components/Figures";
+import { CollageStampCloud, DustField, ParamTable, ProtocolDiagram } from "@/components/Figures";
 import { PROJECT_ADDRESS, MAX_SATS, SUPPLY, UNIT_SATS } from "@satdust/shared";
 
 export default function HomePage() {
   return (
     <div className="relative">
-      <DustField />
-      <div className="relative mx-auto max-w-5xl px-5 pb-20 pt-16 sm:pt-24">
-        <p className="section-num animate-fade-up">§0 · Abstract</p>
-        <h1 className="font-display animate-fade-up mt-3 text-6xl leading-none tracking-tight text-[var(--ink)] sm:text-8xl">
-          SATDUST
-        </h1>
-        <p className="animate-fade-up-delay mt-6 max-w-xl font-display text-2xl leading-snug text-[var(--ink-dim)] sm:text-3xl">
-          Bitcoin Dust.
-          <br />
-          Carried by Sats.
-        </p>
-        <p className="animate-fade-up-delay-2 mt-6 max-w-2xl text-[var(--ink-dim)]">
-          10,000 units. Born on Bitcoin. No bridge. No sidechain. Just Bitcoin.
-        </p>
+      {/* Full-bleed maximalist hero */}
+      <section className="relative min-h-[88vh] overflow-hidden border-b-4 border-[var(--c-black)]">
+        <DustField />
+        <div className="absolute inset-0 bg-[conic-gradient(from_120deg_at_50%_40%,rgba(255,106,0,0.25),rgba(255,45,149,0.3),rgba(46,242,255,0.2),rgba(184,255,60,0.2),rgba(255,106,0,0.25))] mix-blend-screen opacity-70" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--bg-ink)] to-transparent" />
 
-        <div className="animate-fade-up-delay-2 mt-10 flex flex-wrap gap-3">
-          <Link href="/mint" className="btn btn-solid">
-            Mint SATDUST
-          </Link>
-          <Link href="/docs/dust20" className="btn">
-            Read DUST-20
-          </Link>
-          <Link href="/verify" className="btn btn-ghost">
-            Verify
-          </Link>
-        </div>
+        <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-center px-4 py-16">
+          <div className="absolute right-4 top-8 hidden sm:block">
+            <div
+              className="animate-spin-slow font-stamp text-[5rem] leading-none text-[var(--c-yellow)] opacity-30"
+              aria-hidden
+            >
+              ★
+            </div>
+          </div>
 
-        <div className="mt-16 grid gap-6 border-t border-[var(--rule)] pt-8 font-mono text-[0.75rem] uppercase tracking-[0.08em] text-[var(--ink-dim)] sm:grid-cols-5">
-          <div>
-            <div className="text-[var(--accent)]">{SUPPLY.toLocaleString()}</div>
-            <div className="mt-1">Supply</div>
-          </div>
-          <div>
-            <div className="text-[var(--accent)]">1</div>
-            <div className="mt-1">Per mint</div>
-          </div>
-          <div>
-            <div className="text-[var(--accent)]">{UNIT_SATS}</div>
-            <div className="mt-1">Sats / unit</div>
-          </div>
-          <div>
-            <div className="text-[var(--accent)]">$7</div>
-            <div className="mt-1">Mint fee</div>
-          </div>
-          <div>
-            <div className="text-[var(--accent)]">Mainnet</div>
-            <div className="mt-1">Bitcoin</div>
-          </div>
-        </div>
+          <span
+            className="sticker sticker-lime w-fit animate-wobble"
+            style={{ ["--rot" as string]: "-4deg" }}
+          >
+            BITCOIN DUST PROTOCOL
+          </span>
 
-        <hr className="rule" />
+          <h1 className="hero-title animate-pop mt-5 text-[18vw] sm:text-[9.5rem]">
+            SATDUST
+          </h1>
 
-        <section>
-          <p className="section-num">§1 · Protocol chain</p>
-          <h2 className="font-display mt-2 text-3xl">Mainnet → DUST-20 → Mint → Verify</h2>
-          <p className="mt-3 max-w-2xl text-[var(--ink-dim)]">
-            Phase-1 scope is deliberately narrow. Marketplace, swap, staking, farming,
-            bridges, and DAO mechanisms are out of scope.
+          <p className="mt-4 max-w-xl font-stamp text-2xl uppercase leading-tight text-[var(--c-cream)] sm:text-3xl">
+            Bitcoin Dust.
+            <span className="text-[var(--c-cyan)]"> Carried by Sats.</span>
           </p>
+
+          <p className="mt-4 max-w-lg text-lg text-[var(--ink-dim)]">
+            10,000 units. Born on Bitcoin. No bridge. No sidechain. Just Bitcoin.
+          </p>
+
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link href="/mint" className="btn btn-solid">
+              Mint SATDUST
+            </Link>
+            <Link href="/docs/dust20" className="btn">
+              Read DUST-20
+            </Link>
+            <Link href="/verify" className="btn btn-ghost">
+              Verify
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <div className="section-band">
+        <div className="mx-auto max-w-6xl px-4 py-8">
+          <CollageStampCloud />
+        </div>
+      </div>
+
+      <div className="relative mx-auto max-w-6xl px-4 py-16">
+        <section className="panel-chaos">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <span className="sticker sticker-cyan" style={{ ["--rot" as string]: "2deg" }}>
+                PIPELINE
+              </span>
+              <h2 className="font-display mt-4 text-4xl font-extrabold uppercase leading-none text-[var(--c-yellow)] sm:text-5xl">
+                Mainnet → DUST-20 → Mint → Verify
+              </h2>
+              <p className="mt-3 max-w-2xl text-[var(--ink-dim)]">
+                Phase-1 only. Marketplace, swap, staking, farming, bridges, DAO — not this
+                build.
+              </p>
+            </div>
+            <span
+              className="sticker sticker-hot animate-wobble"
+              style={{ ["--rot" as string]: "8deg" }}
+            >
+              KEEP IT LOUD
+            </span>
+          </div>
           <div className="mt-6">
             <ProtocolDiagram />
           </div>
@@ -71,9 +90,13 @@ export default function HomePage() {
 
         <hr className="rule" />
 
-        <section>
-          <p className="section-num">§2 · Issuance parameters</p>
-          <h2 className="font-display mt-2 text-3xl">Deploy payload</h2>
+        <section className="panel-lime">
+          <span className="sticker sticker-orange" style={{ ["--rot" as string]: "-3deg" }}>
+            DEPLOY JSON
+          </span>
+          <h2 className="font-display mt-4 text-4xl font-extrabold uppercase text-[var(--c-lime)]">
+            Issuance payload
+          </h2>
           <pre className="formula mt-6">{`{
   "p": "dust-20",
   "op": "deploy",
@@ -86,41 +109,51 @@ export default function HomePage() {
           <div className="mt-8 overflow-x-auto">
             <ParamTable />
           </div>
-          <p className="mt-6 font-mono text-sm text-[var(--ink-dim)]">
-            max_sats = supply × unit_sats = {SUPPLY.toLocaleString()} × {UNIT_SATS} ={" "}
-            {MAX_SATS.toLocaleString()} sats = 0.0546 BTC (backing, not revenue).
+          <p className="mt-6 font-mono text-sm text-[var(--c-cyan)]">
+            max_sats = {SUPPLY.toLocaleString()} × {UNIT_SATS} = {MAX_SATS.toLocaleString()} sats
+            = 0.0546 BTC backing (not revenue).
           </p>
         </section>
 
         <hr className="rule" />
 
         <section>
-          <p className="section-num">§3 · Economic decomposition</p>
-          <h2 className="font-display mt-2 text-3xl">Three distinct payments per mint</h2>
-          <ol className="mt-6 list-decimal space-y-4 pl-5 text-[var(--ink-dim)]">
-            <li>
-              <span className="text-[var(--ink)]">SATDUST backing</span> — {UNIT_SATS} sats in
-              the user carrier UTXO. Not project income.
-            </li>
-            <li>
-              <span className="text-[var(--ink)]">Project mint fee</span> — $7 USD equivalent
-              BTC to{" "}
-              <code className="font-mono text-[0.8rem] text-[var(--accent)]">
+          <span className="sticker sticker-yellow" style={{ ["--rot" as string]: "4deg" }}>
+            MONEY SPLIT
+          </span>
+          <h2 className="font-display mt-4 text-4xl font-extrabold uppercase">
+            Three different piles of sats
+          </h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="panel-chaos">
+              <p className="font-stamp text-[var(--c-lime)]">01 BACKING</p>
+              <p className="mt-2 text-3xl font-extrabold text-[var(--c-yellow)]">
+                {UNIT_SATS} sats
+              </p>
+              <p className="mt-2 text-sm text-[var(--ink-dim)]">
+                Lands in your SATDUST carrier UTXO. Not project income.
+              </p>
+            </div>
+            <div className="panel-chaos" style={{ boxShadow: "8px 8px 0 var(--c-orange)" }}>
+              <p className="font-stamp text-[var(--c-magenta)]">02 MINT FEE</p>
+              <p className="mt-2 text-3xl font-extrabold text-[var(--c-magenta)]">$7 ≡ BTC</p>
+              <p className="mt-2 break-all font-mono text-[0.7rem] text-[var(--c-cyan)]">
                 {PROJECT_ADDRESS}
-              </code>
-              .
-            </li>
-            <li>
-              <span className="text-[var(--ink)]">Miner fee</span> — Bitcoin network fee, paid
-              by the user.
-            </li>
-          </ol>
+              </p>
+            </div>
+            <div className="panel-chaos" style={{ boxShadow: "8px 8px 0 var(--c-lime)" }}>
+              <p className="font-stamp text-[var(--c-cyan)]">03 MINER FEE</p>
+              <p className="mt-2 text-3xl font-extrabold text-[var(--c-cyan)]">NETWORK</p>
+              <p className="mt-2 text-sm text-[var(--ink-dim)]">
+                Bitcoin miner fee. You pay it. Separate from $7.
+              </p>
+            </div>
+          </div>
         </section>
 
         <div className="footnote">
-          Ticker identity is case-folded: SATDUST / satdust / SatDust are the same. The first
-          valid deployment wins. Confirm ticker vacancy against an authoritative DUST-20 index
-          before mainnet deploy.
+          Ticker is case-folded: SATDUST / satdust / SatDust = same. First valid deploy wins.
+          Re-check authoritative DUST-20 index before mainnet deploy.
         </div>
       </div>
     </div>
