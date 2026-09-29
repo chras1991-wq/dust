@@ -254,8 +254,9 @@ export default function MintPage() {
             <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
           </p>
           <p className="mt-2 text-sm text-[var(--ink-soft)]">
-            Genesis opens {GENESIS_SUPPLY.toLocaleString()}. Later tranches need milestones + votes.
-            Hard cap {SUPPLY.toLocaleString()}.
+            Genesis opens {GENESIS_SUPPLY.toLocaleString()}. Later tranches need milestones + votes,
+            with mint access prioritizing a whitelist of standout contributors. Hard cap{" "}
+            {SUPPLY.toLocaleString()}.
           </p>
           <p className="mt-4 font-mono text-xs text-[var(--ink-mute)]">
             Open {openCapacity.toLocaleString()} · Pending {supply?.pending ?? 0}

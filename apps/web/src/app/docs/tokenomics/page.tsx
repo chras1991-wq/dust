@@ -32,6 +32,10 @@ S = ${GENESIS_SUPPLY} + Σ Mint_i   ≤   ${SUPPLY}`}</pre>
           Completing a milestone unlocks proposal capacity only. Eligible voters: wallet BTC ≥{" "}
           {VOTE_BTC_THRESHOLD} at the proposal snapshot. Power: 1 wallet = 1 vote.
         </p>
+        <p>
+          After Genesis, later issuance prioritizes a <strong className="text-[var(--ink)]">contributors
+          whitelist</strong> — standout contributors get mint access ahead of the open window.
+        </p>
 
         <div className="scroll-x">
           <table className="table-spec min-w-[32rem]">

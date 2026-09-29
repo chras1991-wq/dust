@@ -143,7 +143,7 @@ function buildLiveSnapshot(): MilestoneSnapshot {
     currentId: genesisStatus === "MINTED" ? "m1" : "genesis",
     stages,
     tagline:
-      "SATDUST cannot be minted by time. It must be earned by progress and approved by holders.",
+      "SATDUST cannot be minted by time. It must be earned by progress and approved by holders. Later rounds prioritize a whitelist of standout contributors.",
     formula: "Mint_i = A_i × I(M_i) × I(Q_i ≥ Q_min) × I(V_i ≥ V_min)",
   };
 }

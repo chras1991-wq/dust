@@ -75,7 +75,11 @@ export function MilestoneRoadmap({
       </h2>
       <p className="deck mt-3 max-w-2xl">{tagline}</p>
       <p className="mt-3 font-mono text-xs text-[var(--ink-mute)] sm:text-sm">{formula}</p>
-      <p className="mt-2 font-sans text-sm text-[var(--ink-soft)]">
+      <p className="mt-3 max-w-2xl border-l-4 border-[var(--accent)] pl-3 font-sans text-sm text-[var(--ink)] sm:text-[0.95rem]">
+        After Genesis, mint access favors a <strong>contributors whitelist</strong> — people who
+        shipped, held, integrated, or otherwise moved the project forward — before open capacity.
+      </p>
+      <p className="mt-3 font-sans text-sm text-[var(--ink-soft)]">
         Genesis {stages[0]?.amount.toLocaleString()} open at launch. Remaining 8,000 only via
         milestones + vote. Completing a milestone unlocks proposal capacity — it does not mint.
       </p>
