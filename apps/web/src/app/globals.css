@@ -682,4 +682,81 @@ body::before {
   .milestone-stem {
     display: none;
   }
+
+  /* Index / Create / modules */
+  .nav-scroll {
+    gap: 0.2rem;
+    margin-inline: -0.5rem;
+    padding-inline: 0.35rem;
+  }
+
+  .nav-scroll a {
+    padding-inline: 0.5rem;
+    letter-spacing: 0.1em;
+    font-size: 0.7rem;
+  }
+
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .stat-strip .panel-edit {
+    padding: 0.7rem 0.55rem;
+  }
+
+  .stat-strip .font-display {
+    font-size: 1.05rem;
+    line-height: 1.15;
+    word-break: break-word;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .feature-card {
+    min-height: 7.5rem;
+  }
+
+  .swap-desk .pill-tag {
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+  }
+
+  .swap-amount {
+    font-size: 1.65rem !important;
+    min-height: 3rem;
+    width: 100%;
+  }
+
+  .swap-asset {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+
+  .swap-flip {
+    width: 100% !important;
+  }
+
+  .create-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .create-grid .formula {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  select.input,
+  textarea.input {
+    font-size: 16px;
+    min-height: 48px;
+  }
+
+  textarea.input {
+    min-height: 6.5rem;
+  }
 }

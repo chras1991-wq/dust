@@ -42,6 +42,7 @@ export function SiteHeader() {
         <nav
           className="nav-scroll font-condensed text-[0.78rem] uppercase tracking-[0.14em]"
           aria-label="Primary"
+          aria-orientation="horizontal"
         >
           {LINKS.map((l) => {
             const moduleRoutes = ["/stake", "/agent", "/compute", "/auction"];

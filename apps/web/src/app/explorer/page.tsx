@@ -67,17 +67,17 @@ export default function ExplorerPage() {
     <div className="page-shell max-w-5xl py-10 sm:py-14">
       <p className="byline">Index · Markets &amp; modules</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Index</h1>
-      <p className="deck mt-4 max-w-2xl">
+      <p className="deck mt-3 max-w-2xl text-[0.95rem] sm:mt-4 sm:text-[1.05rem]">
         Swap SATDUST ⇄ BTC, then enter stake, agent, compute, and auction. Token markets are
         pre-launch — desks are interactive shells until Genesis and pools go live.
       </p>
 
-      <div className="mt-8 grid gap-3 sm:grid-cols-3">
+      <div className="stat-strip mt-8 grid gap-3 sm:grid-cols-3">
         <Stat
           label="Minted"
           value={data ? `${data.supply.minted.toLocaleString()} / ${data.supply.totalSupply.toLocaleString()}` : "—"}
         />
-        <Stat label="Pool status" value="Offline" />
+        <Stat label="Pool" value="Offline" />
         <Stat label="Modules" value="4 gated" />
       </div>
 
@@ -91,7 +91,7 @@ export default function ExplorerPage() {
         <p className="mt-2 max-w-2xl text-sm text-[var(--ink-mute)]">
           Each module opens a full desk. Actions stay disabled until official launch.
         </p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="feature-grid mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4">
           {FEATURES.map((f) => (
             <FeatureEntry key={f.href} {...f} />
           ))}

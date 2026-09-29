@@ -41,7 +41,7 @@ export function FeatureEntry({
   return (
     <Link
       href={href}
-      className="panel-edit group block no-underline transition-colors hover:border-[var(--accent)]"
+      className="panel-edit feature-card group block no-underline transition-colors hover:border-[var(--accent)]"
     >
       <p className="byline text-[var(--accent)]">{code}</p>
       <h3 className="font-display mt-2 text-2xl text-[var(--ink)] group-hover:text-[var(--accent)]">

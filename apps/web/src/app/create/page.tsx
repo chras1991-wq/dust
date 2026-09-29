@@ -41,7 +41,7 @@ export default function CreatePage() {
     <div className="page-shell max-w-4xl py-10 sm:py-14">
       <p className="byline">Create · Launchpad</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Create</h1>
-      <p className="deck mt-4 max-w-2xl">
+      <p className="deck mt-3 max-w-2xl text-[0.95rem] sm:mt-4 sm:text-[1.05rem]">
         Deploy a custom DUST-20 ticker on Bitcoin mainnet using the same liquidity UTXO rules as
         SATDUST — exact carrier sats, offset 0, case-folded identity.
       </p>
@@ -54,7 +54,7 @@ export default function CreatePage() {
         </p>
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1.15fr_0.95fr]">
+      <div className="create-grid mt-8 grid gap-8 lg:grid-cols-[1.15fr_0.95fr]">
         <form
           className="space-y-4"
           onSubmit={(e) => {

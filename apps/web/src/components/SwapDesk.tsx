@@ -26,13 +26,15 @@ export function SwapDesk() {
   }
 
   return (
-    <div className="panel-edit">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
+    <div className="panel-edit swap-desk">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-3">
+        <div className="min-w-0">
           <p className="kicker">Swap</p>
-          <h2 className="font-display mt-1 text-3xl sm:text-4xl">SATDUST ⇄ BTC</h2>
+          <h2 className="font-display mt-1 text-[1.75rem] leading-none sm:text-4xl">
+            SATDUST ⇄ BTC
+          </h2>
         </div>
-        <span className="pill-tag">Pre-launch · Quote only</span>
+        <span className="pill-tag w-fit">Pre-launch · Quote only</span>
       </div>
       <p className="mt-3 max-w-xl text-sm text-[var(--ink-mute)]">
         Bidirectional conversion against liquidity UTXO carriers. Execution unlocks after official
@@ -52,7 +54,7 @@ export function SwapDesk() {
         <div className="flex justify-center">
           <button
             type="button"
-            className="btn btn-ghost !w-auto min-h-11 px-4"
+            className="btn btn-ghost swap-flip min-h-12 sm:!w-auto sm:px-6"
             onClick={flip}
             aria-label="Flip swap direction"
           >
@@ -80,7 +82,7 @@ export function SwapDesk() {
       <button type="button" className="btn btn-solid mt-6" disabled>
         Swap unavailable — pre-launch
       </button>
-      <p className="mt-2 font-mono text-xs text-[var(--ink-mute)]">
+      <p className="mt-2 break-words font-mono text-xs text-[var(--ink-mute)]">
         Placeholder rate uses carrier sats for display only. Not an offer.
       </p>
     </div>
@@ -103,12 +105,12 @@ function SwapLeg({
   editable: boolean;
 }) {
   return (
-    <div className="border border-[var(--ink)] bg-white p-4">
-      <div className="flex items-center justify-between gap-3">
+    <div className="border border-[var(--ink)] bg-white p-3 sm:p-4">
+      <div className="flex items-center justify-between gap-2">
         <p className="byline">{label}</p>
         {editable ? (
           <select
-            className="input !w-auto !py-2 font-condensed text-[0.75rem] uppercase tracking-[0.12em]"
+            className="input swap-asset !w-auto max-w-[45%] !py-2 font-condensed text-[0.75rem] uppercase tracking-[0.12em]"
             value={side}
             onChange={(e) => onSide(e.target.value as Side)}
           >
@@ -122,7 +124,8 @@ function SwapLeg({
         )}
       </div>
       <input
-        className="input mt-3 border-0 bg-transparent px-0 text-2xl font-display tracking-tight sm:text-3xl"
+        className="swap-amount mt-3 w-full border-0 bg-transparent px-0 font-display tracking-tight outline-none disabled:opacity-70 sm:text-3xl"
+        style={{ fontSize: "1.65rem" }}
         inputMode="decimal"
         placeholder="0.0"
         value={amount}
