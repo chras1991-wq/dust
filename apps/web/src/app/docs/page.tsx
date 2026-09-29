@@ -28,7 +28,7 @@ const DOCS = [
   {
     href: "/docs/tokenomics",
     title: "Milestone mint",
-    blurb: "Genesis 5,460 + 12 voted batches to 54,600.",
+    blurb: "Genesis 5,460 + 19 hard gates to 54,600 · $5M+ MC for large unlocks.",
     folio: "05",
   },
   {

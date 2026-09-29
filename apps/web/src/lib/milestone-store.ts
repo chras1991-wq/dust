@@ -58,14 +58,12 @@ function emptyGoals(
   });
 }
 
-/** Authorized capacity = sum of amounts for stages that are Genesis or already voted/minted open. */
 function buildLiveSnapshot(): MilestoneSnapshot {
   const supply = getSupplySnapshot();
   const store = getStore();
   const minted = supply.minted;
   const deployLive = Boolean(store.deployTxid);
 
-  // Launch: only Genesis is open. Later stages unlock after real votes (not mocked).
   const authorized = GENESIS_SUPPLY;
   const openCapacity = Math.max(0, authorized - minted);
 
@@ -78,71 +76,63 @@ function buildLiveSnapshot(): MilestoneSnapshot {
       status: genesisStatus,
       goals: [{ id: "deploy", current: deployLive ? 1 : 0, met: deployLive }],
     },
-    {
-      id: "m1",
-      status: "LOCKED",
-      goals: emptyGoals(["age", "site", "rules", "treasury"]),
-    },
-    {
-      id: "m2",
-      status: "LOCKED",
-      goals: emptyGoals(["holders", "holders14"]),
-    },
-    {
-      id: "m3",
-      status: "LOCKED",
-      goals: emptyGoals(["holders", "holders30", "top10"]),
-    },
-    {
-      id: "m4",
-      status: "LOCKED",
-      goals: emptyGoals(["utility", "users", "holders"]),
-    },
-    {
-      id: "m5",
-      status: "LOCKED",
-      goals: emptyGoals(["holders", "users", "returning"]),
-    },
-    {
-      id: "m6",
-      status: "LOCKED",
-      goals: emptyGoals(["holders", "holders30", "users", "top10"]),
-    },
+    { id: "m1", status: "LOCKED", goals: emptyGoals(["age", "site", "rules", "treasury"]) },
+    { id: "m2", status: "LOCKED", goals: emptyGoals(["holders", "holders14", "top10"]) },
+    { id: "m3", status: "LOCKED", goals: emptyGoals(["eligible", "turnout", "holders"]) },
+    { id: "m4", status: "LOCKED", goals: emptyGoals(["stake_live", "staked", "stakers"]) },
+    { id: "m5", status: "LOCKED", goals: emptyGoals(["agent_live", "agents", "agent_wallets"]) },
+    { id: "m6", status: "LOCKED", goals: emptyGoals(["pool_live", "btc_depth", "token_depth"]) },
     {
       id: "m7",
       status: "LOCKED",
-      goals: emptyGoals(["holders", "external"], { anyOfId: "external", optionCount: 5 }),
+      goals: emptyGoals(["holders", "holders30", "returning", "top10"]),
     },
-    {
-      id: "m8",
-      status: "LOCKED",
-      goals: emptyGoals(["holders", "users", "returning", "holders30"]),
-    },
-    {
-      id: "m9",
-      status: "LOCKED",
-      goals: emptyGoals(["holders", "market"], { anyOfId: "market", optionCount: 5 }),
-    },
+    { id: "m8", status: "LOCKED", goals: emptyGoals(["staked", "stakers", "stake_ratio"]) },
+    { id: "m9", status: "LOCKED", goals: emptyGoals(["agents", "agent_wallets", "agent_actions"]) },
     {
       id: "m10",
       status: "LOCKED",
-      goals: emptyGoals(["holders", "holders30", "users", "top10"]),
+      goals: emptyGoals(["btc_depth", "token_depth", "swaps", "vol30"]),
     },
     {
       id: "m11",
       status: "LOCKED",
-      goals: emptyGoals(["holders", "users", "returning", "growth"], {
-        anyOfId: "growth",
-        optionCount: 4,
-      }),
+      goals: emptyGoals(["compute_live", "compute_bonds", "auction"]),
+    },
+    { id: "m12", status: "LOCKED", goals: emptyGoals(["eligible", "turnout", "holders"]) },
+    { id: "m13", status: "LOCKED", goals: emptyGoals(["mcap", "staked", "btc_depth"]) },
+    {
+      id: "m14",
+      status: "LOCKED",
+      goals: emptyGoals(["holders", "btc_depth", "agents", "vol30"]),
     },
     {
-      id: "m12",
+      id: "m15",
       status: "LOCKED",
-      goals: emptyGoals(["holders", "holders30", "users", "returning", "maturity"], {
-        anyOfId: "maturity",
-        optionCount: 4,
-      }),
+      goals: emptyGoals(["mcap", "staked", "turnout", "top10"]),
+    },
+    {
+      id: "m16",
+      status: "LOCKED",
+      goals: emptyGoals(["mcap", "staked", "btc_depth", "agents", "eligible"]),
+    },
+    {
+      id: "m17",
+      status: "LOCKED",
+      goals: emptyGoals(["mcap", "btc_depth", "vol30", "holders", "staked"]),
+    },
+    {
+      id: "m18",
+      status: "LOCKED",
+      goals: emptyGoals(["mcap", "agents", "staked", "turnout", "btc_depth"]),
+    },
+    {
+      id: "m19",
+      status: "LOCKED",
+      goals: emptyGoals(
+        ["mcap", "holders", "holders30", "staked", "btc_depth", "agents", "maturity"],
+        { anyOfId: "maturity", optionCount: 4 }
+      ),
     },
   ];
 
@@ -153,7 +143,7 @@ function buildLiveSnapshot(): MilestoneSnapshot {
     currentId: genesisStatus === "MINTED" ? "m1" : "genesis",
     stages,
     tagline:
-      "No timed unlocks. Finish the milestone, then holders vote. Later rounds: contributors whitelist first.",
+      "No timed unlocks. Hard gates — stake, agents, AMM depth, vote turnout, secondary market cap — then holders vote. Contributors whitelist first after Genesis.",
     formula: "Mint_i = A_i × I(M_i) × I(Q_i ≥ Q_min) × I(V_i ≥ V_min)",
   };
 }
@@ -195,7 +185,6 @@ export function getMilestoneView() {
     };
   });
 
-  // After genesis fills, surface next locked stage as "current" focus for the rail.
   const current =
     stages.find((s) => s.id === snap.currentId) ??
     stages.find((s) => s.status === "IN_PROGRESS") ??

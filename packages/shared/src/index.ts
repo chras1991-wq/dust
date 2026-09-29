@@ -22,7 +22,8 @@ export const UNIT_SATS = 546;
 export const MAX_SATS = SUPPLY * UNIT_SATS; // 29_811_600
 export const LIM_SATS = UNIT_SATS; // 546 → max 1 SATDUST per mint
 export const MINT_AMT = 1;
-export const MINT_USD = 7;
+/** Mint fee: $1 USD per 1 SATDUST unit (1 unit ≠ BRC-20 “sheet”). */
+export const MINT_USD = 1;
 
 export const QUOTE_TTL_SECONDS = 60;
 

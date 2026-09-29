@@ -72,7 +72,7 @@ export function MilestoneRoadmap({
     <section className="mt-14 border-t-[1.5px] border-[var(--ink)] pt-10 sm:mt-16 sm:pt-12">
       <p className="byline">03 · Milestone mint</p>
       <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl">
-        Holders vote supply open
+        20 hard gates · holders vote
       </h2>
       <p className="deck mt-3 max-w-2xl">{tagline}</p>
       <p className="mt-3 font-mono text-xs text-[var(--ink-mute)] sm:text-sm">{formula}</p>
@@ -81,8 +81,8 @@ export function MilestoneRoadmap({
         after that.
       </p>
       <p className="mt-3 font-sans text-sm text-[var(--ink-soft)]">
-        Genesis {stages[0]?.amount.toLocaleString()} at launch. The rest need a milestone + a yes
-        vote. Hitting the goal only opens a vote — it does not mint.
+        Genesis {stages[0]?.amount.toLocaleString()} units at launch. The other 19 stages need hard
+        measurable gates + a yes vote. Hitting goals only opens a vote — it does not mint.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,14rem)_1fr] lg:gap-10">

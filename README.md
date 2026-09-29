@@ -12,7 +12,7 @@ Experimental **DUST-20** (v1.1.0, 2026-09-01) asset on Bitcoin Mainnet.
 | unit_sats | 546 |
 | max_sats | 29,811,600 |
 | lim_sats | 546 |
-| Mint fee | $7 USD ≡ BTC |
+| Mint fee | $1 USD / unit ≡ BTC |
 | Project address | `bc1pvhl5eemwk4a9d8k225medwye8m4rzw0nhr3nsfw732xzr6zx8rmq5ckdk4` |
 
 ## Monorepo
