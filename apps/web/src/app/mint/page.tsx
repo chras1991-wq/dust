@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import { WalletConnect } from "@/components/WalletConnect";
 import { MilestoneRoadmap } from "@/components/mint/MilestoneRoadmap";
+import { MintMathPlate } from "@/components/mint/MintMathPlate";
 import { SupplyTrack } from "@/components/mint/SupplyTrack";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 import {
@@ -279,6 +280,8 @@ export default function MintPage() {
           </ul>
         </aside>
       </div>
+
+      <MintMathPlate />
 
       <div id="milestones">
         {milestones && (
