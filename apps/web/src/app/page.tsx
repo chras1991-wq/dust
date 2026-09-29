@@ -15,8 +15,7 @@ export default function HomePage() {
             DUST-20 — the first Bitcoin-native protocol that constructs liquidity UTXOs.
           </p>
           <p className="animate-rise-delay-2 mt-3 max-w-xl font-sans text-base leading-relaxed text-[var(--accent-soft)] sm:text-lg">
-            The first Milestone-Based Issuance curve — supply earned by progress, then approved by
-            holders.
+            Milestone-Based Issuance curve — supply earned by progress, then approved by holders.
           </p>
           <p className="animate-rise-delay-2 mt-2 max-w-lg font-sans text-sm leading-relaxed text-[var(--paper)]/75 sm:text-base">
             SATDUST is the opening ticker. Each unit rides a {UNIT_SATS}-sat carrier on L1.
