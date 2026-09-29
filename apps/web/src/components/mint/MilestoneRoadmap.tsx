@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   SUPPLY,
   VOTE_SATDUST_EQUIV_BTC,
@@ -58,6 +58,7 @@ export function MilestoneRoadmap({
   tagline: string;
 }) {
   const [selectedId, setSelectedId] = useState(current.id);
+  const detailRef = useRef<HTMLDivElement>(null);
   const selected = stages.find((s) => s.id === selectedId) ?? current;
   const canPropose =
     !selected.isGenesis &&
@@ -66,6 +67,10 @@ export function MilestoneRoadmap({
 
   function selectStage(id: string) {
     setSelectedId(id);
+    // After remount, bring the detail title into view (late stages / H5).
+    window.setTimeout(() => {
+      detailRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+    }, 0);
   }
 
   return (
@@ -153,7 +158,7 @@ export function MilestoneRoadmap({
         </ol>
 
         {/* Detail panel — remount on select so goal rows never reuse the wrong stage */}
-        <div className="panel-edit" key={selected.id}>
+        <div className="panel-edit scroll-mt-28 sm:scroll-mt-32" key={selected.id} ref={detailRef}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="kicker">
