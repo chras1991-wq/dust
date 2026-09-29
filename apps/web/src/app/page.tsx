@@ -14,9 +14,12 @@ export default function HomePage() {
           <p className="animate-rise-delay-2 mt-4 max-w-2xl font-display text-xl italic leading-snug text-[var(--paper)] sm:mt-5 sm:text-2xl md:text-3xl">
             DUST-20 — the first Bitcoin-native protocol that constructs liquidity UTXOs.
           </p>
-          <p className="animate-rise-delay-2 mt-3 max-w-lg font-sans text-base leading-relaxed text-[var(--accent-soft)] sm:text-lg">
-            SATDUST is the opening ticker. Each unit is bound to a {UNIT_SATS}-sat carrier you can
-            spend on L1.
+          <p className="animate-rise-delay-2 mt-3 max-w-xl font-sans text-base leading-relaxed text-[var(--accent-soft)] sm:text-lg">
+            The first Milestone-Based Issuance curve — supply earned by progress, then approved by
+            holders.
+          </p>
+          <p className="animate-rise-delay-2 mt-2 max-w-lg font-sans text-sm leading-relaxed text-[var(--paper)]/75 sm:text-base">
+            SATDUST is the opening ticker. Each unit rides a {UNIT_SATS}-sat carrier on L1.
           </p>
           <div className="animate-rise-delay-2 btn-row mt-7 sm:mt-8">
             <Link href="/mint" className="btn btn-solid">

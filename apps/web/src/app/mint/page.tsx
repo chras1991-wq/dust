@@ -282,6 +282,7 @@ export default function MintPage() {
       <div id="milestones">
         {milestones && (
           <MilestoneRoadmap
+            key={milestones.currentId}
             stages={milestones.stages}
             current={milestones.current}
             minted={milestones.minted}

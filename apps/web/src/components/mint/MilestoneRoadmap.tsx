@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   VOTE_BTC_THRESHOLD,
   VOTE_PERIOD_DAYS,
@@ -57,10 +57,15 @@ export function MilestoneRoadmap({
   tagline: string;
 }) {
   const [selectedId, setSelectedId] = useState(current.id);
+  // Keep selection on the live current stage when data refreshes (never jump ahead).
+  useEffect(() => {
+    setSelectedId(current.id);
+  }, [current.id]);
   const selected = stages.find((s) => s.id === selectedId) ?? current;
   const canPropose =
-    selected.status === "REACHED" ||
-    (selected.status === "IN_PROGRESS" && selected.goalsComplete);
+    !selected.isGenesis &&
+    (selected.status === "REACHED" ||
+      (selected.status === "IN_PROGRESS" && selected.goalsComplete));
 
   return (
     <section className="mt-14 border-t-[1.5px] border-[var(--ink)] pt-10 sm:mt-16 sm:pt-12">
@@ -169,10 +174,31 @@ export function MilestoneRoadmap({
           )}
 
           {selected.isGenesis && (
-            <p className="mt-6 text-sm text-[var(--ink-soft)]">
-              Genesis capacity opened at deploy. No community vote required for the initial{" "}
-              {selected.amount.toLocaleString()} units.
-            </p>
+            <div className="mt-6 space-y-4">
+              <div className="border-b border-[rgba(17,17,17,0.1)] pb-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-[var(--ink-soft)]">Genesis mint progress</span>
+                  <span className="status-pending">
+                    {minted.toLocaleString()} / {selected.amount.toLocaleString()}
+                  </span>
+                </div>
+                <div className="mt-2 h-1.5 w-full bg-[rgba(17,17,17,0.1)]">
+                  <div
+                    className="h-full bg-[var(--accent)]"
+                    style={{
+                      width: `${Math.min(100, (minted / selected.amount) * 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+              {selected.goals.map((g) => (
+                <GoalRow key={g.id} goal={g} />
+              ))}
+              <p className="text-sm text-[var(--ink-soft)]">
+                Open at launch — no community vote for the first {selected.amount.toLocaleString()}{" "}
+                units. Later stages stay locked until this window fills and their goals are met.
+              </p>
+            </div>
           )}
 
           {!selected.isGenesis && (
