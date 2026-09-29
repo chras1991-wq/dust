@@ -8,7 +8,7 @@
  *
  * Mint_i = A_i × I(M_i) × I(Q_i ≥ Q_min) × I(V_i ≥ V_min)
  *
- * Market-cap goals use live SATDUST secondary price × circulating units
+ * Market-cap goals use live SATDUST secondary price × circulating supply
  * (not the $1 mint-fee mark). Large unlocks need ≥ $5M circ MC.
  */
 
@@ -233,7 +233,7 @@ export const MILESTONES: MilestoneDef[] = [
     index: 4,
     code: "05",
     title: "Stake desk online",
-    blurb: "Stake module live; ≥ 250 SATDUST units locked; ≥ 40 distinct stakers.",
+    blurb: "Stake module live; ≥ 250 SATDUST locked; ≥ 40 distinct stakers.",
     amount: 1_000,
     supplyAfter: 8_260,
     isGenesis: false,
@@ -246,10 +246,10 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "staked",
-        label: "SATDUST units currently locked in Stake",
+        label: "SATDUST currently locked in Stake",
         kind: "ratio",
         target: 250,
-        formula: "Stake_TVL ≥ 250 units",
+        formula: "Stake_TVL ≥ 250",
       },
       {
         id: "stakers",
@@ -303,7 +303,7 @@ export const MILESTONES: MilestoneDef[] = [
     index: 6,
     code: "07",
     title: "Swap pool bootstrap",
-    blurb: "Index swap pool live; BTC leg ≥ 0.5 BTC; SATDUST inventory ≥ 500 units.",
+    blurb: "Index swap pool live; BTC leg ≥ 0.5 BTC; SATDUST inventory ≥ 500.",
     amount: 1_400,
     supplyAfter: 10_860,
     isGenesis: false,
@@ -323,10 +323,10 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "token_depth",
-        label: "SATDUST units held as pool inventory",
+        label: "SATDUST held as pool inventory",
         kind: "ratio",
         target: 500,
-        formula: "Pool_SATDUST ≥ 500 units",
+        formula: "Pool_SATDUST ≥ 500",
       },
     ],
     quorum: 0.25,
@@ -381,17 +381,17 @@ export const MILESTONES: MilestoneDef[] = [
     index: 8,
     code: "09",
     title: "Stake depth",
-    blurb: "≥ 1,500 units staked; ≥ 120 stakers; ≥ 40% of circulating supply staked.",
+    blurb: "≥ 1,500 SATDUST staked; ≥ 120 stakers; ≥ 40% of circulating supply staked.",
     amount: 1_800,
     supplyAfter: 14_260,
     isGenesis: false,
     goals: [
       {
         id: "staked",
-        label: "SATDUST units locked in Stake",
+        label: "SATDUST locked in Stake",
         kind: "ratio",
         target: 1_500,
-        formula: "Stake_TVL ≥ 1500 units",
+        formula: "Stake_TVL ≥ 1500",
       },
       {
         id: "stakers",
@@ -402,7 +402,7 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "stake_ratio",
-        label: "Staked units / circulating minted (%)",
+        label: "Staked / circulating minted (%)",
         kind: "ratio",
         target: 40,
         formula: "Stake% ≥ 40%",
@@ -453,7 +453,7 @@ export const MILESTONES: MilestoneDef[] = [
     index: 10,
     code: "11",
     title: "AMM depth I",
-    blurb: "Pool ≥ 2 BTC + ≥ 2,000 SATDUST units; ≥ 500 completed swaps; 30d volume ≥ 5 BTC.",
+    blurb: "Pool ≥ 2 BTC + ≥ 2,000 SATDUST; ≥ 500 completed swaps; 30d volume ≥ 5 BTC.",
     amount: 2_200,
     supplyAfter: 18_460,
     isGenesis: false,
@@ -467,10 +467,10 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "token_depth",
-        label: "SATDUST units in pool inventory",
+        label: "SATDUST in pool inventory",
         kind: "ratio",
         target: 2_000,
-        formula: "Pool_SATDUST ≥ 2000 units",
+        formula: "Pool_SATDUST ≥ 2000",
       },
       {
         id: "swaps",
@@ -510,10 +510,10 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "compute_bonds",
-        label: "SATDUST units locked as compute collateral",
+        label: "SATDUST locked as compute collateral",
         kind: "ratio",
         target: 300,
-        formula: "ComputeBond ≥ 300 units",
+        formula: "ComputeBond ≥ 300",
       },
       {
         id: "auction",
@@ -568,24 +568,24 @@ export const MILESTONES: MilestoneDef[] = [
     index: 13,
     code: "14",
     title: "MC $1M",
-    blurb: "Circulating market cap ≥ $1,000,000 at live secondary price × minted units.",
+    blurb: "Circulating market cap ≥ $1,000,000 at live secondary price × minted.",
     amount: 2_800,
     supplyAfter: 26_260,
     isGenesis: false,
     goals: [
       {
         id: "mcap",
-        label: "Circulating MC (live SATDUST USD × minted units)",
+        label: "Circulating MC (live SATDUST USD × minted)",
         kind: "ratio",
         target: 1_000_000,
         formula: "CircMC ≥ $1,000,000",
       },
       {
         id: "staked",
-        label: "SATDUST units locked in Stake",
+        label: "SATDUST locked in Stake",
         kind: "ratio",
         target: 3_000,
-        formula: "Stake_TVL ≥ 3000 units",
+        formula: "Stake_TVL ≥ 3000",
       },
       {
         id: "btc_depth",
@@ -647,7 +647,7 @@ export const MILESTONES: MilestoneDef[] = [
     index: 15,
     code: "16",
     title: "MC $2.5M",
-    blurb: "Circ MC ≥ $2.5M; stake ≥ 6,000 units; vote turnout ≥ 45% on last proposal.",
+    blurb: "Circ MC ≥ $2.5M; stake ≥ 6,000 SATDUST; vote turnout ≥ 45% on last proposal.",
     amount: 3_600,
     supplyAfter: 33_060,
     isGenesis: false,
@@ -661,10 +661,10 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "staked",
-        label: "SATDUST units locked in Stake",
+        label: "SATDUST locked in Stake",
         kind: "ratio",
         target: 6_000,
-        formula: "Stake_TVL ≥ 6000 units",
+        formula: "Stake_TVL ≥ 6000",
       },
       {
         id: "turnout",
@@ -704,10 +704,10 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "staked",
-        label: "SATDUST units locked in Stake",
+        label: "SATDUST locked in Stake",
         kind: "ratio",
         target: 10_000,
-        formula: "Stake_TVL ≥ 10000 units",
+        formula: "Stake_TVL ≥ 10000",
       },
       {
         id: "btc_depth",
@@ -775,10 +775,10 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "staked",
-        label: "SATDUST units locked in Stake",
+        label: "SATDUST locked in Stake",
         kind: "ratio",
         target: 15_000,
-        formula: "Stake_TVL ≥ 15000 units",
+        formula: "Stake_TVL ≥ 15000",
       },
     ],
     quorum: 0.4,
@@ -790,7 +790,7 @@ export const MILESTONES: MilestoneDef[] = [
     index: 18,
     code: "19",
     title: "MC $25M",
-    blurb: "Circ MC ≥ $25M; agents ≥ 1,500; stake ≥ 20,000 units; turnout ≥ 50%.",
+    blurb: "Circ MC ≥ $25M; agents ≥ 1,500; stake ≥ 20,000 SATDUST; turnout ≥ 50%.",
     amount: 6_000,
     supplyAfter: 48_260,
     isGenesis: false,
@@ -811,10 +811,10 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "staked",
-        label: "SATDUST units locked in Stake",
+        label: "SATDUST locked in Stake",
         kind: "ratio",
         target: 20_000,
-        formula: "Stake_TVL ≥ 20000 units",
+        formula: "Stake_TVL ≥ 20000",
       },
       {
         id: "turnout",
@@ -868,10 +868,10 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "staked",
-        label: "SATDUST units locked in Stake",
+        label: "SATDUST locked in Stake",
         kind: "ratio",
         target: 25_000,
-        formula: "Stake_TVL ≥ 25000 units",
+        formula: "Stake_TVL ≥ 25000",
       },
       {
         id: "btc_depth",

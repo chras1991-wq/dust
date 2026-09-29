@@ -76,7 +76,7 @@ export function SwapDesk() {
         <Meta label="Route" value="UTXO pool" />
         <Meta label="Slippage" value="0.50% (default)" />
         <Meta label="Network" value="Bitcoin mainnet" />
-        <Meta label="Status" value="Migrates when first mint batch completes" accent />
+        <Meta label="Status" value="Migrates when the first mint batch completes" accent />
       </dl>
 
       <button type="button" className="btn btn-solid mt-6" disabled>

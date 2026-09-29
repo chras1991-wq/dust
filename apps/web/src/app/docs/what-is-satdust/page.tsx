@@ -16,8 +16,9 @@ export default function WhatIsSatdust() {
         <li>Verify against chain + indexer rules</li>
       </ul>
       <p>
-        Not in scope yet: marketplace, swaps, staking, bridges. Price only on{" "}
-        <Link href="/mint">/mint</Link>. Mint sequence in the explorer is order, not a token id.
+        Swap and desks (stake, agent, compute, auction) migrate when the first mint batch completes.
+        No bridges. Price only on <Link href="/mint">/mint</Link>. Mint sequence in the Index is
+        order, not a token id.
       </p>
       <DocBack />
     </DocShell>

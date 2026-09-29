@@ -9,11 +9,11 @@ export function PrelaunchNotice({
 }) {
   return (
     <div className="panel-edit border-[var(--accent)]">
-      <p className="kicker">Pre-launch</p>
-      <h2 className="font-display mt-2 text-2xl sm:text-3xl">{feature} is not live yet</h2>
+      <p className="kicker">Pending migration</p>
+      <h2 className="font-display mt-2 text-2xl sm:text-3xl">{feature} desk</h2>
       <p className="mt-3 max-w-xl text-sm text-[var(--ink-soft)] sm:text-[0.95rem]">
         {detail ??
-          "Not live yet. This desk wires up after Genesis mint and indexer feeds are online."}
+          "Migrates when the first mint batch completes. Desk UI is ready; execution follows Genesis mint and indexer feeds."}
       </p>
       <div className="btn-row mt-6">
         <Link href="/mint" className="btn btn-solid">

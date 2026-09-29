@@ -32,25 +32,25 @@ const FEATURES = [
     href: "/stake",
     code: "01 · Stake",
     title: "Stake",
-    blurb: "Lock SATDUST for weight and rewards after launch.",
+    blurb: "Lock SATDUST for weight and rewards. Migrates with first mint.",
   },
   {
     href: "/agent",
     code: "02 · Agent",
     title: "Agent",
-    blurb: "Agents that watch or act on your SATDUST UTXOs.",
+    blurb: "Agents that watch or act on your SATDUST UTXOs. Migrates with first mint.",
   },
   {
     href: "/compute",
     code: "03 · Compute",
     title: "Compute",
-    blurb: "Commit hashrate against SATDUST collateral.",
+    blurb: "Commit hashrate against SATDUST collateral. Migrates with first mint.",
   },
   {
     href: "/auction",
     code: "04 · Auction",
     title: "Auction",
-    blurb: "Bid on UTXO lots, whitelist seats, and mint batches.",
+    blurb: "Bid on UTXO lots, whitelist seats, and mint batches. Migrates with first mint.",
   },
 ];
 
@@ -89,7 +89,7 @@ export default function ExplorerPage() {
         <p className="byline">Modules</p>
         <h2 className="font-display mt-2 text-3xl sm:text-4xl">Modules</h2>
         <p className="mt-2 max-w-2xl text-sm text-[var(--ink-mute)]">
-          Each opens a full desk. Actions stay off until launch.
+          Each opens a full desk. Execution migrates when the first mint batch completes.
         </p>
         <div className="feature-grid mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4">
           {FEATURES.map((f) => (

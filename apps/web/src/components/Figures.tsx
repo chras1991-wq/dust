@@ -21,8 +21,8 @@ export function ParamTable() {
   const rows = [
     ["p", "dust-20", "Protocol"],
     ["tick", "SATDUST", "Ticker (case ignored)"],
-    ["supply", "54600", "Max mintable units"],
-    ["unit_sats", "546", "Sats per unit"],
+    ["supply", "54600", "Max SATDUST"],
+    ["unit_sats", "546", "Sats per SATDUST"],
     ["max_sats", "29811600", "supply × unit_sats"],
     ["lim_sats", "546", "Per-mint sats cap"],
   ];

@@ -49,7 +49,7 @@ export default function AgentPage() {
         ))}
       </ul>
       <button type="button" className="btn btn-solid mt-6" disabled>
-        Deploy agent — pre-launch
+        Migrates when the first mint batch completes
       </button>
     </ModuleShell>
   );

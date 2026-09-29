@@ -11,7 +11,7 @@ export default function ComputePage() {
     <ModuleShell
       code="Compute"
       title="Compute"
-      deck="Commit hashrate against SATDUST collateral. Settles to UTXOs after launch."
+      deck="Commit hashrate against SATDUST collateral."
     >
       <div className="panel-edit space-y-4">
         <p className="kicker">Compute desk</p>
@@ -38,11 +38,11 @@ export default function ComputePage() {
         <dl className="grid gap-2 font-sans text-sm sm:grid-cols-2">
           <Row label="Epoch" value="—" />
           <Row label="Bond factor" value="TBD" />
-          <Row label="Slashing" value="Off until launch" />
+          <Row label="Slashing" value="Configured at migration" />
           <Row label="Payout asset" value="SATDUST / BTC" />
         </dl>
         <button type="button" className="btn btn-solid" disabled>
-          Commit compute — pre-launch
+          Migrates when the first mint batch completes
         </button>
       </div>
     </ModuleShell>

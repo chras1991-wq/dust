@@ -10,7 +10,7 @@ export default function StakePage() {
     <ModuleShell
       code="Stake"
       title="Stake"
-      deck="Lock SATDUST for weight and rewards. Rules go live after launch."
+      deck="Lock SATDUST for weight and rewards."
     >
       <div className="panel-edit space-y-4">
         <p className="kicker">Stake desk</p>
@@ -26,12 +26,12 @@ export default function StakePage() {
         </label>
         <dl className="grid gap-2 font-sans text-sm sm:grid-cols-2">
           <Row label="Min lock" value="7 days" />
-          <Row label="Est. APR" value="— (pre-launch)" />
+          <Row label="Est. APR" value="—" />
           <Row label="Your staked" value="0 SATDUST" />
           <Row label="UTXO intact" value="Required" />
         </dl>
         <button type="button" className="btn btn-solid" disabled>
-          Stake unavailable
+          Migrates when the first mint batch completes
         </button>
       </div>
     </ModuleShell>

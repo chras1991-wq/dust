@@ -39,7 +39,7 @@ export default function CreatePage() {
 
   return (
     <div className="page-shell max-w-4xl py-10 sm:py-14">
-      <p className="byline">Create · Launchpad</p>
+      <p className="byline">Create · Deploy</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Create</h1>
       <p className="deck mt-3 max-w-2xl text-[0.95rem] sm:mt-4 sm:text-[1.05rem]">
         Deploy your own DUST-20 ticker on mainnet — same rules as SATDUST: exact sats, offset 0,
@@ -47,10 +47,10 @@ export default function CreatePage() {
       </p>
 
       <div className="mt-4 panel-edit border-[var(--accent)]">
-        <p className="kicker">Pre-launch</p>
+        <p className="kicker">Pending migration</p>
         <p className="mt-2 text-sm text-[var(--ink-soft)]">
-          Broadcast is off until the launchpad opens. You can draft the deploy JSON and check the
-          numbers now.
+          Broadcast migrates when the first mint batch completes. You can draft the deploy JSON and
+          check the numbers now.
         </p>
       </div>
 
@@ -94,7 +94,7 @@ export default function CreatePage() {
                 onChange={(e) => setUnitSats(e.target.value.replace(/\D/g, ""))}
               />
               <span className="mt-1 block font-mono text-xs text-[var(--ink-mute)]">
-                Sats per unit (≥ 546)
+                Sats per SATDUST (≥ 546)
               </span>
             </label>
           </div>
@@ -133,7 +133,7 @@ export default function CreatePage() {
 
           <div className="btn-row">
             <button type="submit" className="btn btn-solid" disabled>
-              Deploy — launchpad closed
+              Migrates when the first mint batch completes
             </button>
             <Link href="/docs/dust20" className="btn btn-ghost">
               DUST-20 rules

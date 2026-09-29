@@ -12,7 +12,7 @@ export default function HomePage() {
             SATDUST
           </h1>
           <p className="animate-rise-delay-2 mt-4 max-w-2xl font-display text-xl italic leading-snug text-[var(--paper)] sm:mt-5 sm:text-2xl md:text-3xl">
-            DUST-20 — each unit locks {UNIT_SATS} sats in a UTXO on L1.
+            DUST-20 — each SATDUST locks {UNIT_SATS} sats in a UTXO on L1.
           </p>
           <p className="animate-rise-delay-2 mt-3 max-w-xl font-sans text-base leading-relaxed text-[var(--paper)]/80 sm:text-lg">
             More supply only after milestones and holder votes. Contributors whitelist mints first.
@@ -40,8 +40,8 @@ export default function HomePage() {
             </h2>
             <p className="dropcap deck mt-6">
               DUST-20 shapes a UTXO-native token: each accepted mint binds the asset to a fixed
-              carrier of real sats. That unit is swap inventory on Bitcoin L1 — spendable liquidity,
-              not an empty indexer balance.
+              carrier of real sats. That SATDUST is swap inventory on Bitcoin L1 — spendable
+              liquidity, not an empty indexer balance.
             </p>
             <p className="mt-5 text-[var(--ink-soft)]">
               Transfer is a normal Bitcoin spend of that UTXO. No bridge, no sidechain, no transfer
@@ -56,7 +56,7 @@ export default function HomePage() {
         <section>
           <p className="kicker">L1 swap architecture</p>
           <h2 className="font-display mt-2 max-w-3xl text-[1.85rem] sm:text-4xl md:text-5xl">
-            Pool UTXOs, price invariant, concurrent fills
+            Pool UTXOs, AMM curve, concurrent fills
           </h2>
           <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-5 md:grid-cols-3">
             <div className="panel-edit md:mt-8">
@@ -70,10 +70,11 @@ export default function HomePage() {
             </div>
             <div className="panel-edit slant-block">
               <span className="overlap-label">02</span>
-              <h3 className="font-display mt-4 text-2xl">Price invariant</h3>
+              <h3 className="font-display mt-4 text-2xl">AMM pricing curve</h3>
               <p className="mt-3 text-[0.95rem] text-[var(--ink-soft)]">
-                Spot follows the pool ratio. Each fill must leave reserves on the invariant curve —
-                no silent repricing outside the swap transaction that moves the UTXOs.
+                Price moves with every swap. A constant-product style curve (reserves stay on{" "}
+                <span className="font-mono text-[var(--accent)]">x·y = k</span>) sets how much you
+                get — the rule is fixed, the quote is not.
               </p>
             </div>
             <div className="panel-edit md:mt-12">
@@ -175,7 +176,7 @@ export default function HomePage() {
           <ol className="mt-6 list-decimal space-y-2 pl-5 font-sans text-[0.95rem] text-[var(--ink-soft)]">
             <li>Mainnet tx confirms</li>
             <li>Inscription is dust-20 / mint / SATDUST</li>
-            <li>Amount × unit sats equals declared sats</li>
+            <li>Amount × unit_sats equals declared sats</li>
             <li>UTXO value matches those sats</li>
             <li>Inscription offset is 0</li>
             <li>Deploy exists; supply not exceeded</li>

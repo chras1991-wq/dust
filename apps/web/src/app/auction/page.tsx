@@ -7,7 +7,7 @@ const LOTS = [
   {
     id: "lot-a",
     title: "Genesis leftover",
-    detail: "Unfilled Genesis slots — opens after launch.",
+    detail: "Unfilled Genesis slots — migrates with first mint.",
     status: "Scheduled",
   },
   {
@@ -32,7 +32,7 @@ export default function AuctionPage() {
     <ModuleShell
       code="Auction"
       title="Auction"
-      deck="Bid on UTXO lots, whitelist seats, and mint batches. English auction until holders change the rules."
+      deck="Bid on UTXO lots, whitelist seats, and mint batches."
     >
       <ul className="space-y-3">
         {LOTS.map((l) => (
@@ -65,7 +65,7 @@ export default function AuctionPage() {
           />
         </label>
         <button type="button" className="btn btn-solid" disabled>
-          Place bid — pre-launch
+          Migrates when the first mint batch completes
         </button>
       </div>
     </ModuleShell>
