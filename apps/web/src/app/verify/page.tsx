@@ -57,14 +57,14 @@ function VerifyForm() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-5 py-14">
+    <div className="page-shell max-w-3xl py-10 sm:py-14">
       <p className="byline">Laboratory · Proof</p>
-      <h1 className="masthead mt-2 text-6xl md:text-7xl">Prove</h1>
+      <h1 className="masthead mt-2 text-5xl sm:text-6xl md:text-7xl">Prove</h1>
       <p className="deck mt-4">
         Structural DUST-20 checks. Final word remains confirmed chain + indexer.
       </p>
 
-      <form onSubmit={onSubmit} className="panel-edit mt-10 space-y-4">
+      <form onSubmit={onSubmit} className="panel-edit mt-8 space-y-4 sm:mt-10">
         <label className="block">
           <span className="byline">TXID</span>
           <input
@@ -120,7 +120,7 @@ function VerifyForm() {
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={<div className="px-5 py-14 text-[var(--ink-mute)]">Loading…</div>}>
+    <Suspense fallback={<div className="page-shell py-14 text-[var(--ink-mute)]">Loading…</div>}>
       <VerifyForm />
     </Suspense>
   );

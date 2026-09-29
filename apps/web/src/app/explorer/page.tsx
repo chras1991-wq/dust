@@ -35,22 +35,22 @@ export default function ExplorerPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-14">
+    <div className="page-shell py-10 sm:py-14">
       <p className="byline">Ledger · Indexer view</p>
-      <h1 className="masthead mt-2 text-6xl md:text-7xl">Index</h1>
+      <h1 className="masthead mt-2 text-5xl sm:text-6xl md:text-7xl">Index</h1>
       <p className="deck mt-4 max-w-2xl">
         Confirmed mints. Mint sequence is ordering metadata — never a token id.
       </p>
 
       {data && (
-        <div className="mt-10 grid gap-4 sm:grid-cols-3">
+        <div className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-3 sm:gap-4">
           <Stat label="Minted" value={`${data.supply.minted} / ${data.supply.totalSupply}`} />
           <Stat label="Remaining" value={String(data.supply.remaining)} />
           <Stat label="Pending" value={String(data.supply.pending)} />
         </div>
       )}
 
-      <div className="mt-10 overflow-x-auto">
+      <div className="scroll-x mt-8 sm:mt-10">
         <table className="table-spec min-w-[720px]">
           <thead>
             <tr>

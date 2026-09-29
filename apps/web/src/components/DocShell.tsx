@@ -10,9 +10,9 @@ export function DocShell({
   children: React.ReactNode;
 }) {
   return (
-    <article className="mx-auto max-w-3xl px-5 py-14">
+    <article className="page-shell max-w-3xl py-10 sm:py-14">
       <p className="byline">{section}</p>
-      <h1 className="masthead mt-2 text-5xl md:text-6xl">{title}</h1>
+      <h1 className="masthead mt-2 text-4xl sm:text-5xl md:text-6xl">{title}</h1>
       <div className="mt-8 space-y-5 text-[var(--ink-soft)] [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5 [&_strong]:text-[var(--ink)] [&_code]:font-mono [&_code]:text-[0.9rem] [&_code]:text-[var(--accent)]">
         {children}
       </div>

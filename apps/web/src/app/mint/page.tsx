@@ -108,13 +108,13 @@ export default function MintPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-5 py-14">
+    <div className="page-shell max-w-3xl py-10 sm:py-14">
       <p className="byline">Operations · Mint desk</p>
-      <h1 className="masthead mt-2 text-6xl md:text-7xl">Mint</h1>
+      <h1 className="masthead mt-2 text-5xl sm:text-6xl md:text-7xl">Mint</h1>
       <p className="deck mt-4 max-w-xl">
         Quantity and pricing live here. Protocol essay elsewhere.
       </p>
-      <p className="mt-3 font-mono text-sm text-[var(--accent)]">
+      <p className="mt-3 break-words font-mono text-sm text-[var(--accent)]">
         receive 1 SATDUST · carrier {UNIT_SATS} sats · offset 0
       </p>
 
@@ -129,10 +129,10 @@ export default function MintPage() {
 
       {supply && (
         <div className="panel-edit mt-8">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
             <div>
               <p className="byline">Confirmed</p>
-              <p className="font-display mt-1 text-4xl">
+              <p className="font-display mt-1 text-3xl sm:text-4xl">
                 {supply.minted.toLocaleString()}
                 <span className="text-[var(--ink-mute)]"> / {supply.totalSupply.toLocaleString()}</span>
               </p>
@@ -140,7 +140,9 @@ export default function MintPage() {
             <div className="font-condensed text-[0.75rem] uppercase tracking-[0.12em] text-[var(--ink-mute)]">
               Pending {supply.pending} · Left {supply.remaining}
               {supply.highContention && (
-                <span className="ml-3 text-[var(--accent)]">High contention</span>
+                <span className="mt-1 block text-[var(--accent)] sm:ml-3 sm:mt-0 sm:inline">
+                  High contention
+                </span>
               )}
             </div>
           </div>
@@ -174,7 +176,7 @@ export default function MintPage() {
         </div>
       )}
 
-      <div className="mt-8 flex flex-wrap gap-3">
+      <div className="btn-row mt-8">
         {quoteExpired || !quote ? (
           <button type="button" className="btn btn-solid" onClick={() => void refreshQuote()}>
             Refresh Price
@@ -202,7 +204,7 @@ export default function MintPage() {
           <h2 className="font-display mt-2 text-3xl">Mint prepared</h2>
           <p className="mt-3 text-sm text-[var(--ink-soft)]">{result.notice}</p>
           <p className="mt-3 font-mono text-xs text-[var(--ink-mute)]">mintId {result.mintId}</p>
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="btn-row mt-5">
             <Link href="/verify" className="btn">
               Verify
             </Link>
@@ -221,10 +223,10 @@ export default function MintPage() {
       )}
 
       {confirmOpen && quote && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="panel-edit w-full max-w-md">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="panel-edit modal-sheet mb-[env(safe-area-inset-bottom)] w-full">
             <p className="kicker">Confirmation</p>
-            <h2 className="font-display mt-2 text-3xl">You are minting</h2>
+            <h2 className="font-display mt-2 text-2xl sm:text-3xl">You are minting</h2>
             <ul className="mt-5 space-y-2 font-sans text-sm text-[var(--ink-soft)]">
               <li className="text-[var(--ink)]">1 SATDUST</li>
               <li>{UNIT_SATS} sats backing</li>
@@ -237,7 +239,7 @@ export default function MintPage() {
             <p className="mt-4 break-all font-mono text-xs text-[var(--ink-mute)]">
               Fee → {PROJECT_ADDRESS}
             </p>
-            <div className="mt-6 flex gap-3">
+            <div className="btn-row mt-6">
               <button type="button" className="btn btn-solid" disabled={busy} onClick={() => void prepareMint()}>
                 Confirm &amp; Sign
               </button>

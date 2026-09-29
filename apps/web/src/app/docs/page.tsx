@@ -41,23 +41,23 @@ const DOCS = [
 
 export default function DocsIndex() {
   return (
-    <div className="mx-auto max-w-3xl px-5 py-14">
+    <div className="page-shell max-w-3xl py-10 sm:py-14">
       <p className="byline">Archive · Technical papers</p>
-      <h1 className="masthead mt-2 text-6xl">Archive</h1>
+      <h1 className="masthead mt-2 text-5xl sm:text-6xl">Archive</h1>
       <p className="deck mt-4">
         Protocol notes for implementers. Pricing remains on the mint desk only.
       </p>
-      <ol className="mt-12 space-y-0">
+      <ol className="mt-8 space-y-0 sm:mt-12">
         {DOCS.map((d) => (
           <li
             key={d.href}
-            className="grid grid-cols-[auto_1fr] gap-5 border-t border-[var(--ink)] py-6"
+            className="grid grid-cols-[2.5rem_1fr] gap-3 border-t border-[var(--ink)] py-5 sm:grid-cols-[auto_1fr] sm:gap-5 sm:py-6"
           >
-            <span className="folio text-2xl">{d.folio}</span>
-            <div>
+            <span className="folio text-xl sm:text-2xl">{d.folio}</span>
+            <div className="min-w-0">
               <Link
                 href={d.href}
-                className="font-display text-2xl text-[var(--ink)] no-underline hover:text-[var(--accent)] md:text-3xl"
+                className="font-display text-xl text-[var(--ink)] no-underline hover:text-[var(--accent)] sm:text-2xl md:text-3xl"
               >
                 {d.title}
               </Link>

@@ -25,9 +25,9 @@ export default function AdminPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-14">
+    <div className="page-shell max-w-4xl py-10 sm:py-14">
       <p className="byline">Back office · Monitor</p>
-      <h1 className="masthead mt-2 text-5xl">Admin</h1>
+      <h1 className="masthead mt-2 text-4xl sm:text-5xl">Admin</h1>
       <p className="deck mt-3">Observational only. Zero private keys.</p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

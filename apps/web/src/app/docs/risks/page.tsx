@@ -2,9 +2,9 @@ import Link from "next/link";
 
 export default function RisksDoc() {
   return (
-    <article className="mx-auto max-w-3xl px-5 py-14">
+    <article className="page-shell max-w-3xl py-10 sm:py-14">
       <p className="byline">Archive · 06</p>
-      <h1 className="masthead mt-2 text-5xl">Risks</h1>
+      <h1 className="masthead mt-2 text-4xl sm:text-5xl">Risks</h1>
       <div className="mt-8 space-y-5 text-[var(--ink-soft)]">
         <ul className="list-disc space-y-3 pl-5">
           <li>DUST-20 is experimental, not consensus.</li>

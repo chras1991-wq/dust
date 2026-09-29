@@ -75,17 +75,17 @@ export function WalletConnect({ onAccount }: Props) {
       {error && <p className="mt-3 font-sans text-sm text-[var(--invalid)]">{error}</p>}
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="panel-edit w-full max-w-md">
-            <div className="flex items-start justify-between gap-4">
-              <div>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="panel-edit modal-sheet mb-[env(safe-area-inset-bottom)] w-full">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
                 <p className="kicker">Wallet</p>
-                <h2 className="font-display mt-2 text-3xl">Select adapter</h2>
+                <h2 className="font-display mt-2 text-2xl sm:text-3xl">Select adapter</h2>
                 <p className="mt-2 text-sm text-[var(--ink-mute)]">
                   Sign PSBT only. Never seed / private key / WIF.
                 </p>
               </div>
-              <button type="button" className="btn btn-ghost" onClick={() => setOpen(false)}>
+              <button type="button" className="btn btn-ghost !w-auto shrink-0 px-3" onClick={() => setOpen(false)}>
                 Close
               </button>
             </div>
@@ -96,7 +96,7 @@ export function WalletConnect({ onAccount }: Props) {
                   <li key={w.id}>
                     <button
                       type="button"
-                      className="flex w-full items-center justify-between border border-[var(--ink)] px-4 py-3 text-left hover:bg-[var(--ink)] hover:text-[var(--paper)]"
+                      className="flex min-h-12 w-full items-center justify-between border border-[var(--ink)] px-4 py-3 text-left hover:bg-[var(--ink)] hover:text-[var(--paper)]"
                       onClick={() => connect(w)}
                     >
                       <span className="font-display text-lg">{w.name}</span>

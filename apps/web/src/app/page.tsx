@@ -7,16 +7,16 @@ export default function HomePage() {
     <div>
       {/* Full-bleed editorial opener */}
       <section className="hero-media">
-        <div className="relative z-[1] mx-auto flex min-h-[70vh] max-w-6xl flex-col justify-end px-5 pb-14 pt-20">
+        <div className="page-shell relative z-[1] flex min-h-[62vh] flex-col justify-end pb-10 pt-12 sm:min-h-[70vh] sm:pb-14 sm:pt-20">
           <p className="animate-rise kicker text-[var(--accent-soft)]">Cover story · Protocol</p>
-          <h1 className="animate-rise-delay masthead mt-3 max-w-4xl text-[18vw] text-[var(--paper)] md:text-[7.5rem]">
+          <h1 className="animate-rise-delay masthead mt-3 max-w-4xl text-[clamp(3.25rem,15vw,7.5rem)] text-[var(--paper)]">
             SATDUST
           </h1>
-          <p className="animate-rise-delay-2 mt-5 max-w-xl font-display text-2xl italic leading-snug text-[var(--paper)] md:text-3xl">
+          <p className="animate-rise-delay-2 mt-4 max-w-xl font-display text-xl italic leading-snug text-[var(--paper)] sm:mt-5 sm:text-2xl md:text-3xl">
             Sat-bound assets on Bitcoin L1.
             <span className="not-italic text-[var(--accent-soft)]"> Indexed, not consensus.</span>
           </p>
-          <div className="animate-rise-delay-2 mt-8 flex flex-wrap gap-3">
+          <div className="animate-rise-delay-2 btn-row mt-7 sm:mt-8">
             <Link href="/docs/dust20" className="btn btn-solid">
               Read the Spec
             </Link>
@@ -36,12 +36,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl px-5 py-14">
+      <div className="page-shell py-10 sm:py-14">
         {/* Irregular two-column opener */}
-        <div className="grid items-start gap-10 lg:grid-cols-[1.35fr_0.9fr]">
+        <div className="grid items-start gap-8 lg:grid-cols-[1.35fr_0.9fr] lg:gap-10">
           <article>
             <p className="byline">Essay · 01</p>
-            <h2 className="font-display mt-2 text-4xl leading-tight md:text-5xl">
+            <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl md:text-5xl">
               A meta-protocol that rides satoshis, not a virtual machine
             </h2>
             <p className="dropcap deck mt-6">
@@ -64,15 +64,15 @@ export default function HomePage() {
         <section className="relative">
           <div className="absolute -left-2 top-0 page-mark hidden md:block">pp. 04–07</div>
           <p className="kicker">Architecture</p>
-          <h2 className="font-display mt-2 max-w-3xl text-4xl italic md:text-5xl">
+          <h2 className="font-display mt-2 max-w-3xl text-[1.85rem] italic sm:text-4xl md:text-5xl">
             From confirmation to meaning
           </h2>
-          <div className="mt-8 grid gap-6 md:grid-cols-12">
-            <div className="md:col-span-7">
+          <div className="mt-6 grid gap-6 sm:mt-8 md:grid-cols-12">
+            <div className="scroll-x md:col-span-7">
               <ProtocolDiagram />
             </div>
             <div className="flex flex-col justify-between gap-6 md:col-span-5 md:pt-8">
-              <p className="pull-quote m-0 text-[1.45rem]">
+              <p className="pull-quote m-0 text-[1.25rem] sm:text-[1.45rem]">
                 Carrier value must equal declared sats. Offset must be zero. Everything else is
                 commentary.
               </p>
@@ -91,11 +91,11 @@ export default function HomePage() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="kicker">Invariants</p>
-              <h2 className="font-display mt-2 text-4xl">Three hard rules</h2>
+              <h2 className="font-display mt-2 text-[1.85rem] sm:text-4xl">Three hard rules</h2>
             </div>
             <p className="folio text-xl">Fig. A</p>
           </div>
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
+          <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-5 md:grid-cols-3">
             <div className="panel-edit md:mt-8">
               <span className="overlap-label">01</span>
               <h3 className="font-display mt-4 text-2xl">Exact carrier</h3>
@@ -125,10 +125,10 @@ export default function HomePage() {
 
         <hr className="mag-rule" />
 
-        <section className="grid gap-10 lg:grid-cols-[0.9fr_1.3fr]">
+        <section className="grid gap-8 lg:grid-cols-[0.9fr_1.3fr] lg:gap-10">
           <div>
             <p className="kicker">Deploy schema</p>
-            <h2 className="font-display mt-2 text-4xl leading-tight">
+            <h2 className="font-display mt-2 text-[1.85rem] leading-tight sm:text-4xl">
               The issuance object, locked in ink
             </h2>
             <p className="mt-4 text-[var(--ink-soft)]">
@@ -139,7 +139,7 @@ export default function HomePage() {
               assert → {SUPPLY} × {UNIT_SATS} = {MAX_SATS}
             </p>
           </div>
-          <div>
+          <div className="min-w-0">
             <pre className="formula">{`{
   "p": "dust-20",
   "op": "deploy",
@@ -149,7 +149,7 @@ export default function HomePage() {
   "max_sats": "5460000",
   "lim_sats": "546"
 }`}</pre>
-            <div className="mt-6 overflow-x-auto">
+            <div className="scroll-x mt-6">
               <ParamTable />
             </div>
           </div>
@@ -159,10 +159,10 @@ export default function HomePage() {
 
         <section>
           <p className="kicker">Execution</p>
-          <h2 className="font-display mt-2 text-4xl md:text-5xl">
+          <h2 className="font-display mt-2 text-[1.85rem] sm:text-4xl md:text-5xl">
             Transfer without a transfer opcode
           </h2>
-          <div className="mt-8 columns-1 gap-10 md:columns-2">
+          <div className="mt-6 columns-1 gap-10 sm:mt-8 md:columns-2">
             <p className="mb-5 text-[var(--ink-soft)]">
               Asset movement is derived from ordinary Bitcoin spends. Input sat ranges are ordered
               into outputs; DUST units ride those ranges. There is no{" "}
@@ -190,7 +190,9 @@ export default function HomePage() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="kicker">Verification</p>
-              <h2 className="font-display mt-2 text-3xl md:text-4xl">Acceptance checklist</h2>
+              <h2 className="font-display mt-2 text-2xl sm:text-3xl md:text-4xl">
+                Acceptance checklist
+              </h2>
             </div>
             <span className="pill-tag">Prove</span>
           </div>
@@ -203,7 +205,7 @@ export default function HomePage() {
             <li>deploy exists ∧ supply not exceeded</li>
             <li>indexer.accept(mint) == true</li>
           </ol>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="btn-row mt-8">
             <Link href="/verify" className="btn btn-solid">
               Run verifier
             </Link>

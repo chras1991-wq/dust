@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Playfair_Display,
   Literata,
@@ -47,6 +47,14 @@ export const metadata: Metadata = {
   description:
     "SATDUST — sat-bound DUST-20 meta-protocol asset on Bitcoin Mainnet. Inscription predicates, exact carrier invariants, indexer state.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://satdust.vercel.app"),
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#f3f1ec",
 };
 
 export default function RootLayout({

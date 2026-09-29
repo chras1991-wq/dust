@@ -28,15 +28,20 @@ export function SiteHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="layer border-b-[1.5px] border-[var(--ink)] bg-[var(--paper)]/90 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-5 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="byline">The Satoshi Review · Special Issue</p>
+    <header className="layer sticky top-0 z-40 border-b-[1.5px] border-[var(--ink)] bg-[var(--paper)]/95 backdrop-blur-md pt-[env(safe-area-inset-top)]">
+      <div className="page-shell flex flex-col gap-3 py-3 sm:gap-4 sm:py-4 md:flex-row md:items-end md:justify-between md:py-5">
+        <div className="min-w-0">
+          <p className="byline truncate">The Satoshi Review · Special Issue</p>
           <Link href="/" className="no-underline text-[var(--ink)]">
-            <span className="masthead text-4xl md:text-5xl">SATDUST</span>
+            <span className="masthead text-[2.35rem] leading-none sm:text-4xl md:text-5xl">
+              SATDUST
+            </span>
           </Link>
         </div>
-        <nav className="flex flex-wrap gap-x-5 gap-y-2 font-condensed text-[0.8rem] uppercase tracking-[0.16em]">
+        <nav
+          className="nav-scroll font-condensed text-[0.78rem] uppercase tracking-[0.14em]"
+          aria-label="Primary"
+        >
           {LINKS.map((l) => {
             const active =
               pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href));
@@ -46,7 +51,7 @@ export function SiteHeader() {
                 href={l.href}
                 className={
                   active
-                    ? "text-[var(--accent)] no-underline"
+                    ? "bg-[var(--ink)] text-[var(--paper)] no-underline"
                     : "text-[var(--ink)] no-underline hover:text-[var(--accent)]"
                 }
               >
@@ -62,13 +67,13 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer className="layer mt-16 border-t-[1.5px] border-[var(--ink)]">
-      <div className="bg-[var(--ink)] px-5 py-3">
-        <p className="font-condensed text-[0.72rem] uppercase tracking-[0.16em] text-[var(--paper)]">
+    <footer className="layer mt-12 border-t-[1.5px] border-[var(--ink)] sm:mt-16">
+      <div className="bg-[var(--ink)] px-4 py-3 sm:px-5">
+        <p className="font-condensed text-[0.65rem] uppercase leading-relaxed tracking-[0.12em] text-[var(--paper)] sm:text-[0.72rem] sm:tracking-[0.16em]">
           Colophon · Not Bitcoin consensus · Indexer-dependent state
         </p>
       </div>
-      <div className="mx-auto max-w-6xl px-5 py-10">
+      <div className="page-shell py-8 sm:py-10">
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr]">
           <p className="max-w-xl text-[0.95rem] text-[var(--ink-soft)]">
             SATDUST is a DUST-20 meta-protocol asset. Bitcoin Core does not interpret SATDUST
@@ -77,7 +82,7 @@ export function SiteFooter() {
           </p>
           <div className="md:text-right">
             <p className="byline">Spec</p>
-            <p className="font-display mt-2 text-2xl italic">DUST-20 v1.1.0</p>
+            <p className="font-display mt-2 text-xl italic sm:text-2xl">DUST-20 v1.1.0</p>
             <p className="mt-1 font-sans text-sm text-[var(--ink-mute)]">
               Revised 2026-09-01 · Mainnet · Experimental
             </p>
