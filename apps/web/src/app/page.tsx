@@ -44,8 +44,10 @@ export default function HomePage() {
               liquidity, not an empty indexer balance.
             </p>
             <p className="mt-5 text-[var(--ink-soft)]">
-              Transfer is a normal Bitcoin spend of that UTXO. No bridge, no sidechain, no transfer
-              opcode.
+              At mint, the BTC that backs the token must actually sit in the same output that
+              carries it — {UNIT_SATS} sats locked in that UTXO, not an indexer IOU. Afterward,
+              moving SATDUST is mostly a normal Bitcoin spend of that UTXO, not a separate transfer
+              inscription.
             </p>
           </article>
           <EditorialAside />
@@ -155,8 +157,9 @@ export default function HomePage() {
             Spend the UTXO. The asset moves with it.
           </h2>
           <p className="mt-6 max-w-2xl text-[var(--ink-soft)]">
-            No <code className="font-mono text-sm">op:transfer</code>. Sat ranges move in a normal
-            spend; DUST follows those ranges. Mint price only on{" "}
+            No separate transfer inscription — and no{" "}
+            <code className="font-mono text-sm">op:transfer</code>. You spend the carrier UTXO like
+            any other Bitcoin output; the token moves with those sats. Mint price only on{" "}
             <Link href="/mint">/mint</Link>. Swap migrates when the first mint batch completes.
           </p>
         </section>
