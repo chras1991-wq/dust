@@ -1,3 +1,7 @@
+/**
+ * Public site constants only — safe to import from any layer.
+ * Secrets live in `@/lib/server/secrets` (server-only).
+ */
 import {
   DEPLOY_PAYLOAD,
   MINT_USD,
@@ -11,7 +15,7 @@ import {
 } from "@satdust/shared";
 
 export const SITE = {
-  name: PROJECT_NAME_SAFE(),
+  name: "SATDUST",
   tick: TICK,
   slogan: "Bitcoin Dust. Carried by Sats.",
   network: NETWORK,
@@ -23,14 +27,6 @@ export const SITE = {
   mintUsd: MINT_USD,
   deploy: DEPLOY_PAYLOAD,
 } as const;
-
-function PROJECT_NAME_SAFE() {
-  return "SATDUST";
-}
-
-export function getQuoteSecret(): string {
-  return process.env.QUOTE_SECRET || "satdust-dev-quote-secret-change-me";
-}
 
 export function isMainnetEnforced(): boolean {
   return (process.env.NETWORK || "mainnet") === "mainnet";

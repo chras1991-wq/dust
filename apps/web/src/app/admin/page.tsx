@@ -28,7 +28,7 @@ export default function AdminPage() {
     <div className="page-shell max-w-4xl py-10 sm:py-14">
       <p className="byline">Back office · Monitor</p>
       <h1 className="masthead mt-2 text-4xl sm:text-5xl">Admin</h1>
-      <p className="deck mt-3">Observational only. Zero private keys.</p>
+      <p className="deck mt-3">Observational only. Zero private keys. Authorized access only.</p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Tile label="Confirmed mint" value={String(supply?.minted ?? "—")} />

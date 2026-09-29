@@ -1,3 +1,4 @@
+import "server-only";
 import type { ProviderPrice } from "@satdust/quote";
 import { aggregateBtcUsd } from "@satdust/quote";
 

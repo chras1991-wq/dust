@@ -1,3 +1,4 @@
+import "server-only";
 import type { QuoteRecord } from "@satdust/quote";
 import type { MintStatus } from "@satdust/bitcoin";
 import { SUPPLY } from "@satdust/shared";
