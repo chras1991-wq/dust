@@ -1,4 +1,5 @@
 import { listMints } from "@/lib/store";
+import { reconcileWalletChainCredits } from "@/lib/server/chain-reconcile";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
 import {
   getWalletBalancePersisted,
@@ -37,7 +38,11 @@ export async function GET(req: Request) {
     return noStoreJson({ error: "Invalid address" }, { status: 400 });
   }
 
-  await hydrateMintStore();
+  const credited = await reconcileWalletChainCredits(
+    address,
+    searchParams.get("sync") === "1"
+  );
+  await hydrateMintStore(true);
   const addr = address.toLowerCase();
   const mints = listMints().filter(
     (m) => m.walletAddress.toLowerCase() === addr && CREDITED.has(m.status)
@@ -61,6 +66,7 @@ export async function GET(req: Request) {
     balance,
     btcSats,
     records,
+    credited: credited.units,
   });
 }
 

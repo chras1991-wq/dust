@@ -2,6 +2,11 @@ import { noStoreJson, rateLimit, readJsonBody } from "@/lib/server/guard";
 import { publicErrorMessage } from "@/lib/server/safe-error";
 import { listMints } from "@/lib/store";
 import {
+  claimMintCredit,
+  markMintCredit,
+  releaseMintCredit,
+} from "@/lib/server/chain-reconcile";
+import {
   hydrateMintStore,
   persistMintRecord,
   recordMintBroadcast,
@@ -37,6 +42,7 @@ export async function POST(req: Request) {
     const amount = parsed.body.amount ?? mint.amount;
     const wasPending =
       mint.status === "PSBT_CREATED" || mint.status === "QUOTE_CREATED";
+    const txid = (parsed.body.revealTxid ?? parsed.body.commitTxid ?? "").trim();
 
     const updated = {
       ...mint,
@@ -48,7 +54,17 @@ export async function POST(req: Request) {
     };
 
     if (wasPending) {
-      await recordMintBroadcast(updated, amount);
+      const claimed = await claimMintCredit(txid);
+      if (!claimed) {
+        return noStoreJson({ ok: true, mintId, status: mint.status, duplicate: true });
+      }
+      try {
+        await recordMintBroadcast(updated, amount);
+        await markMintCredit(txid);
+      } catch (err) {
+        await releaseMintCredit(txid);
+        throw err;
+      }
     } else {
       await persistMintRecord(updated);
     }

@@ -80,18 +80,22 @@ export default function MintPage() {
     setSupply(await res.json());
   }, []);
 
-  const refreshWalletBalance = useCallback(async (address: string) => {
-    const res = await fetch(`/api/wallet/balance?address=${encodeURIComponent(address)}`);
-    if (res.ok) {
-      const data = (await res.json()) as {
-        balance?: number;
-        btcSats?: number | null;
-        records?: MintRecordView[];
-      };
-      setWalletBalance(data.balance ?? 0);
-      setBtcSats(typeof data.btcSats === "number" ? data.btcSats : null);
-      setMintRecords(Array.isArray(data.records) ? data.records : []);
-    }
+  const refreshWalletBalance = useCallback(async (address: string, sync = false) => {
+    const q = sync ? "&sync=1" : "";
+    const res = await fetch(
+      `/api/wallet/balance?address=${encodeURIComponent(address)}${q}`
+    );
+    if (!res.ok) return 0;
+    const data = (await res.json()) as {
+      balance?: number;
+      btcSats?: number | null;
+      records?: MintRecordView[];
+      credited?: number;
+    };
+    setWalletBalance(data.balance ?? 0);
+    setBtcSats(typeof data.btcSats === "number" ? data.btcSats : null);
+    setMintRecords(Array.isArray(data.records) ? data.records : []);
+    return data.credited ?? 0;
   }, []);
 
   const refreshMilestones = useCallback(async () => {
@@ -208,7 +212,29 @@ export default function MintPage() {
       await refreshReal();
       await refreshWalletBalance(account.address);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Mint payment failed");
+      const msg = e instanceof Error ? e.message : "Mint payment failed";
+      const cancelled = /cancel/i.test(msg);
+      if (!cancelled) {
+        let credited = 0;
+        for (const waitMs of [0, 3000, 8000]) {
+          if (waitMs) await new Promise((r) => setTimeout(r, waitMs));
+          credited = await refreshWalletBalance(account.address, true);
+          if (credited > 0) break;
+        }
+        if (credited > 0) {
+          setError(null);
+          setConfirmOpen(false);
+          setResult({
+            mintId: "chain",
+            notice: `Payment found on-chain. ${credited.toLocaleString()} SATDUST credited to this wallet.`,
+          });
+          bumpReal(credited);
+          await refreshReal();
+          setProgress(null);
+          return;
+        }
+      }
+      setError(msg);
       setProgress(null);
     } finally {
       setBusy(false);
