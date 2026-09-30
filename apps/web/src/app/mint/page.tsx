@@ -60,6 +60,8 @@ export default function MintPage() {
   const [supply, setSupply] = useState<SupplySnap | null>(null);
   const { liveMinted, authorized: progressAuthorized, progressReady, bumpReal, refreshReal } = useSmoothMintProgress();
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [btcSats, setBtcSats] = useState<number | null>(null);
+  const [mintRecords, setMintRecords] = useState<MintRecordView[]>([]);
   const [milestones, setMilestones] = useState<MilestonePayload | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -81,8 +83,14 @@ export default function MintPage() {
   const refreshWalletBalance = useCallback(async (address: string) => {
     const res = await fetch(`/api/wallet/balance?address=${encodeURIComponent(address)}`);
     if (res.ok) {
-      const data = await res.json();
+      const data = (await res.json()) as {
+        balance?: number;
+        btcSats?: number | null;
+        records?: MintRecordView[];
+      };
       setWalletBalance(data.balance ?? 0);
+      setBtcSats(typeof data.btcSats === "number" ? data.btcSats : null);
+      setMintRecords(Array.isArray(data.records) ? data.records : []);
     }
   }, []);
 
@@ -127,7 +135,11 @@ export default function MintPage() {
 
   useEffect(() => {
     if (account) void refreshWalletBalance(account.address);
-    else setWalletBalance(null);
+    else {
+      setWalletBalance(null);
+      setBtcSats(null);
+      setMintRecords([]);
+    }
   }, [account, refreshWalletBalance]);
 
   useEffect(() => {
@@ -250,7 +262,7 @@ export default function MintPage() {
               <span className="pb-1 font-sans text-sm text-[var(--ink-mute)]">SATDUST</span>
               {walletBalance !== null && account && (
                 <span className="pb-1 font-sans text-xs text-[var(--valid)] sm:text-sm">
-                  Balance {walletBalance.toLocaleString()}
+                  SATDUST {walletBalance.toLocaleString()}
                 </span>
               )}
             </div>
@@ -274,6 +286,7 @@ export default function MintPage() {
 
             <WalletConnect
               headlessUntilConnected
+              balanceText={account ? formatBtcBalance(btcSats) : null}
               onAccount={(acc, ad) => {
                 setAccount(acc);
                 setAdapter(ad);
@@ -309,6 +322,44 @@ export default function MintPage() {
           )}
 
           {error && <p className="mt-4 font-sans text-sm text-[var(--invalid)]">{error}</p>}
+
+          {account && (
+            <section className="mt-4">
+              <p className="byline">Your mints</p>
+              {mintRecords.length === 0 ? (
+                <p className="mt-2 font-sans text-sm text-[var(--ink-mute)]">
+                  {walletBalance
+                    ? `${walletBalance.toLocaleString()} SATDUST already on this wallet.`
+                    : "No mints from this wallet yet."}
+                </p>
+              ) : (
+                <ul className="mt-2 divide-y divide-[var(--ink)]/15 border-t border-[var(--ink)]/20 font-sans text-sm">
+                  {mintRecords.map((row) => (
+                    <li key={row.mintId} className="flex items-baseline justify-between gap-3 py-2">
+                      <span className="text-[var(--ink)]">{row.amount.toLocaleString()} SATDUST</span>
+                      <span className="text-right text-xs text-[var(--ink-mute)]">
+                        {formatMintWhen(row.createdAt)}
+                        {row.revealTxid ? (
+                          <>
+                            {" · "}
+                            <a
+                              href={`https://mempool.space/tx/${row.revealTxid}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {row.revealTxid.slice(0, 8)}…
+                            </a>
+                          </>
+                        ) : (
+                          ` · ${mintStatusLabel(row.status)}`
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
 
           {result && (
             <div className="panel-edit mt-8 border-[var(--valid)]">
@@ -424,6 +475,35 @@ export default function MintPage() {
       )}
     </div>
   );
+}
+
+type MintRecordView = {
+  mintId: string;
+  amount: number;
+  status: string;
+  createdAt: number;
+  revealTxid: string | null;
+};
+
+function formatBtcBalance(sats: number | null): string {
+  if (sats == null) return "BTC …";
+  return `${(sats / 100_000_000).toFixed(8)} BTC`;
+}
+
+function formatMintWhen(unixSeconds: number): string {
+  if (!unixSeconds) return "";
+  const d = new Date(unixSeconds * 1000);
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const h = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+  return `${m}-${day} ${h}:${min}`;
+}
+
+function mintStatusLabel(status: string): string {
+  if (status.includes("VALID") || status.includes("CONFIRMED")) return "Counted";
+  if (status.includes("BROADCAST") || status.includes("MEMPOOL")) return "Paid";
+  return "Pending";
 }
 
 function parseMintQuantity(raw: string): number {

@@ -2,6 +2,17 @@
 
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 
+function walletErrorText(e: unknown): string {
+  if (typeof e === "string" && e.trim()) return e.trim();
+  if (e instanceof Error && e.message.trim()) return e.message.trim();
+  if (e && typeof e === "object") {
+    const rec = e as { message?: unknown; error?: unknown };
+    if (typeof rec.message === "string" && rec.message.trim()) return rec.message.trim();
+    if (typeof rec.error === "string" && rec.error.trim()) return rec.error.trim();
+  }
+  return "Wallet payment failed";
+}
+
 export type MintPayProgress = "preparing" | "awaiting_wallet" | "done";
 
 export type MintPayResult = {
@@ -59,7 +70,7 @@ export async function executeMintPayment(args: {
   try {
     txid = await adapter.sendBitcoin(payTo, paySats);
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Wallet payment failed";
+    const msg = walletErrorText(e);
     if (/reject|cancel|denied/i.test(msg)) {
       throw new Error("Payment cancelled in wallet");
     }

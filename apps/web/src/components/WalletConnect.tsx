@@ -24,9 +24,11 @@ type Props = {
   registerOpen?: (open: () => void) => void;
   /** Hide standalone Connect button — parent provides the only CTA. */
   headlessUntilConnected?: boolean;
+  /** Replaces the address in the connected pill. Mint desk passes the BTC balance. */
+  balanceText?: string | null;
 };
 
-export function WalletConnect({ onAccount, registerOpen, headlessUntilConnected }: Props) {
+export function WalletConnect({ onAccount, registerOpen, headlessUntilConnected, balanceText }: Props) {
   const { ready: privyReady } = usePrivy();
   const [open, setOpen] = useState(false);
   const [account, setAccount] = useState<Account | null>(null);
@@ -79,7 +81,7 @@ export function WalletConnect({ onAccount, registerOpen, headlessUntilConnected 
       {account ? (
         <div className="flex flex-wrap items-center gap-3">
           <span className="pill-tag">
-            {adapterId} · {account.address.slice(0, 6)}…{account.address.slice(-4)}
+            {balanceText || `${adapterId} · ${account.address.slice(0, 6)}…${account.address.slice(-4)}`}
           </span>
           <button type="button" className="btn btn-ghost" onClick={() => setOpen(true)}>
             Switch

@@ -1,6 +1,11 @@
 import { listMints } from "@/lib/store";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
-import { getWalletBalancePersisted, hydrateMintStore } from "@/lib/server/mint-persist";
+import {
+  getWalletBalancePersisted,
+  hydrateMintStore,
+  listWalletMints,
+  type WalletMintEntry,
+} from "@/lib/server/mint-persist";
 
 export const dynamic = "force-dynamic";
 
@@ -33,21 +38,63 @@ export async function GET(req: Request) {
   }
 
   await hydrateMintStore();
-  const mints = listMints().filter((m) => m.walletAddress === address && CREDITED.has(m.status));
+  const addr = address.toLowerCase();
+  const mints = listMints().filter(
+    (m) => m.walletAddress.toLowerCase() === addr && CREDITED.has(m.status)
+  );
   const localBalance = mints.reduce((s, m) => s + m.amount, 0);
   const persisted = await getWalletBalancePersisted(address);
   const balance = persisted != null ? Math.max(localBalance, persisted) : localBalance;
-  const records = mints.map((m) => ({
+  const indexed = await listWalletMints(address);
+  const fromStore: WalletMintEntry[] = mints.map((m) => ({
     mintId: m.id,
     amount: m.amount,
     status: m.status,
     createdAt: m.createdAt,
     revealTxid: m.revealTxid ?? null,
   }));
+  const records = mergeMintRecords(indexed, fromStore);
+  const btcSats = await fetchBtcSats(addr);
 
   return noStoreJson({
     address: `${address.slice(0, 6)}…${address.slice(-4)}`,
     balance,
+    btcSats,
     records,
   });
+}
+
+function mergeMintRecords(primary: WalletMintEntry[], extra: WalletMintEntry[]): WalletMintEntry[] {
+  const seen = new Set<string>();
+  const out: WalletMintEntry[] = [];
+  for (const row of [...primary, ...extra]) {
+    if (seen.has(row.mintId)) continue;
+    seen.add(row.mintId);
+    out.push(row);
+  }
+  return out.sort((a, b) => b.createdAt - a.createdAt).slice(0, 20);
+}
+
+async function fetchBtcSats(address: string): Promise<number | null> {
+  try {
+    const res = await fetch(`https://mempool.space/api/address/${address}`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(8_000),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      chain_stats?: { funded_txo_sum?: number; spent_txo_sum?: number };
+      mempool_stats?: { funded_txo_sum?: number; spent_txo_sum?: number };
+    };
+    const chain = data.chain_stats ?? {};
+    const mempool = data.mempool_stats ?? {};
+    const sats =
+      (chain.funded_txo_sum ?? 0) -
+      (chain.spent_txo_sum ?? 0) +
+      (mempool.funded_txo_sum ?? 0) -
+      (mempool.spent_txo_sum ?? 0);
+    return Number.isFinite(sats) ? Math.max(0, sats) : null;
+  } catch {
+    return null;
+  }
 }

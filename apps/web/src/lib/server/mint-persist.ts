@@ -106,6 +106,45 @@ export async function tryConsumeQuoteUnits(
   return true;
 }
 
+export type WalletMintEntry = {
+  mintId: string;
+  amount: number;
+  status: string;
+  createdAt: number;
+  revealTxid: string | null;
+};
+
+function walletMintKey(address: string): string {
+  return `${WALLET_KEY_PREFIX}${address.toLowerCase()}:mints`;
+}
+
+async function pushWalletMint(mint: MintRecord): Promise<void> {
+  const kv = getKv();
+  if (!kv || !mint.walletAddress) return;
+  const entry: WalletMintEntry = {
+    mintId: mint.id,
+    amount: mint.amount,
+    status: mint.status,
+    createdAt: mint.createdAt,
+    revealTxid: mint.revealTxid ?? null,
+  };
+  const key = walletMintKey(mint.walletAddress);
+  await kv.lpush(key, entry);
+  await kv.ltrim(key, 0, 19);
+}
+
+export async function listWalletMints(address: string): Promise<WalletMintEntry[]> {
+  const kv = getKv();
+  if (!kv) return [];
+  const raw = await kv.lrange<WalletMintEntry | string>(walletMintKey(address), 0, 19);
+  if (!raw?.length) return [];
+  return raw.flatMap((item) => {
+    const entry = typeof item === "string" ? (JSON.parse(item) as WalletMintEntry) : item;
+    if (!entry || typeof entry.amount !== "number" || !entry.mintId) return [];
+    return [entry];
+  });
+}
+
 export async function recordMintBroadcast(
   mint: MintRecord,
   pendingUnits: number
@@ -121,6 +160,7 @@ export async function recordMintBroadcast(
         pendingUnits
       );
     }
+    await pushWalletMint(mint);
   }
 }
 
