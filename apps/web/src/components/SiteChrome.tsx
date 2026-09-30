@@ -71,6 +71,14 @@ export function SiteHeader() {
   );
 }
 
+function TwitterIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
 export function SiteFooter() {
   return (
     <footer className="layer mt-12 border-t-[1.5px] border-[var(--ink)] sm:mt-16">
@@ -88,9 +96,21 @@ export function SiteFooter() {
           <div className="md:text-right">
             <p className="byline">Spec</p>
             <p className="font-display mt-2 text-xl italic sm:text-2xl">DUST-20 v1.1.0</p>
-            <p className="mt-1 font-sans text-sm text-[var(--ink-mute)]">
-              Revised 2026-09-01 · Mainnet · Experimental
-            </p>
+            <div className="mt-3 flex items-center gap-3 md:justify-end">
+              <p className="font-sans text-sm text-[var(--ink-mute)]">
+                Revised 2026-09-01 · Mainnet · Experimental
+              </p>
+              <a
+                href="https://x.com/sat_dust20"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Official X / Twitter — @sat_dust20"
+                title="@sat_dust20"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--ink)] bg-white text-[var(--ink)] no-underline transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"
+              >
+                <TwitterIcon className="h-4 w-4" />
+              </a>
+            </div>
           </div>
         </div>
       </div>
