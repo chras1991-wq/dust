@@ -9,9 +9,14 @@ export async function GET(req: Request) {
   if (limited) return limited;
 
   const realMinted = getSupplySnapshot().minted + getSupplySnapshot().pending;
+  const holders = buildHolderTop10(realMinted).map(({ rank, address, amount }) => ({
+    rank,
+    address,
+    amount,
+  }));
   return noStoreJson({
     title: "Holder Top 10",
-    holders: buildHolderTop10(realMinted),
+    holders,
     updatedAt: Date.now(),
   });
 }
