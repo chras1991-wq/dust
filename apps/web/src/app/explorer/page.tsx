@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FeatureEntry } from "@/components/PrelaunchNotice";
 import { SwapDesk } from "@/components/SwapDesk";
 import { useSmoothMintProgress } from "@/hooks/useSmoothMintProgress";
@@ -72,25 +71,6 @@ export default function ExplorerPage() {
           {FEATURES.map((f) => (
             <FeatureEntry key={f.href} {...f} />
           ))}
-        </div>
-      </section>
-
-      <section className="mt-14">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="byline">Ledger</p>
-            <h2 className="font-display mt-1 text-2xl sm:text-3xl">Mint activity</h2>
-          </div>
-          <Link href="/verify" className="font-condensed text-[0.75rem] uppercase tracking-[0.12em]">
-            Prove a tx →
-          </Link>
-        </div>
-        <div className="panel-edit mt-5">
-          <p className="byline">Minted</p>
-          <p className="font-display mt-2 text-4xl sm:text-5xl">{progressLabel}</p>
-          <p className="mt-3 font-sans text-sm text-[var(--ink-mute)]">
-            Same mint progress as the mint desk.
-          </p>
         </div>
       </section>
     </div>
