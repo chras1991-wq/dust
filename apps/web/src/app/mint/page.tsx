@@ -58,7 +58,7 @@ export default function MintPage() {
   const [quantityInput, setQuantityInput] = useState("1");
   const [quote, setQuote] = useState<Quote | null>(null);
   const [supply, setSupply] = useState<SupplySnap | null>(null);
-  const { liveMinted, progressReady, bumpReal, refreshReal } = useSmoothMintProgress();
+  const { liveMinted, authorized: progressAuthorized, progressReady, bumpReal, refreshReal } = useSmoothMintProgress();
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [milestones, setMilestones] = useState<MilestonePayload | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -157,7 +157,7 @@ export default function MintPage() {
   const quoteExpired = secondsLeft <= 0;
   const openCapacity = milestones?.openCapacity ?? 0;
   const displayMinted = liveMinted ?? 0;
-  const authorized = milestones?.authorized ?? GENESIS_SUPPLY;
+  const authorized = progressAuthorized ?? milestones?.authorized ?? GENESIS_SUPPLY;
 
   function requestMint() {
     setError(null);
@@ -338,9 +338,6 @@ export default function MintPage() {
           <p className="mt-2 text-sm text-[var(--ink-soft)]">
             Genesis {GENESIS_SUPPLY.toLocaleString()} SATDUST. Per-wallet mint has no cap in this
             window — enter any quantity above.
-          </p>
-          <p className="mt-4 font-mono text-xs text-[var(--ink-mute)]">
-            Real confirmed {supply?.minted ?? 0} · Pending {supply?.pending ?? 0}
           </p>
           <hr className="mag-rule my-5" />
           <p className="byline">Notes</p>

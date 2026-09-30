@@ -5,6 +5,7 @@ import {
   VIRTUAL_PROGRESS_START_MS,
 } from "@/lib/virtual-progress";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
+import { GENESIS_SUPPLY } from "@satdust/shared";
 import { getRealMintTotals, syncBackend } from "@/lib/server/mint-persist";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export async function GET(req: Request) {
     ...progress,
     virtualCap: VIRTUAL_CAP,
     virtualFloor: VIRTUAL_FLOOR,
+    authorized: GENESIS_SUPPLY,
     campaignStartMs: VIRTUAL_PROGRESS_START_MS,
     serverTimeMs: nowMs,
     sync: {

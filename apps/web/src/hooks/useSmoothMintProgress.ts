@@ -7,6 +7,7 @@ type ProgressPayload = {
   realMinted?: number;
   displayMinted?: number;
   serverTimeMs?: number;
+  authorized?: number;
 };
 
 /**
@@ -15,6 +16,7 @@ type ProgressPayload = {
  */
 export function useSmoothMintProgress() {
   const [shown, setShown] = useState<number | null>(null);
+  const [authorized, setAuthorized] = useState<number | null>(null);
   const [progressReady, setProgressReady] = useState(false);
   const realRef = useRef(0);
 
@@ -26,6 +28,7 @@ export function useSmoothMintProgress() {
         : displayMintProgress(real, data.serverTimeMs ?? Date.now()).displayMinted;
     realRef.current = real;
     setShown(display);
+    if (typeof data.authorized === "number") setAuthorized(data.authorized);
     setProgressReady(true);
   }, []);
 
@@ -55,6 +58,7 @@ export function useSmoothMintProgress() {
 
   return {
     liveMinted: shown,
+    authorized,
     progressReady,
     bumpReal,
     refreshReal: syncProgress,

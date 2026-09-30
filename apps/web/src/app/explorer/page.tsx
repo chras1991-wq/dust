@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FeatureEntry } from "@/components/PrelaunchNotice";
 import { SwapDesk } from "@/components/SwapDesk";
+import { useSmoothMintProgress } from "@/hooks/useSmoothMintProgress";
+import { GENESIS_SUPPLY } from "@satdust/shared";
 
 type ActivityItem = {
   mintSequence: number;
@@ -56,6 +58,7 @@ const FEATURES = [
 
 export default function ExplorerPage() {
   const [data, setData] = useState<Payload | null>(null);
+  const { liveMinted, authorized, progressReady } = useSmoothMintProgress();
 
   useEffect(() => {
     void fetch("/api/activity")
@@ -75,7 +78,11 @@ export default function ExplorerPage() {
       <div className="stat-strip mt-8 grid gap-3 sm:grid-cols-3">
         <Stat
           label="Minted"
-          value={data ? `${data.supply.minted.toLocaleString()} / ${data.supply.totalSupply.toLocaleString()}` : "—"}
+          value={
+            progressReady && liveMinted != null
+              ? `${liveMinted.toLocaleString()} / ${(authorized ?? GENESIS_SUPPLY).toLocaleString()}`
+              : "…"
+          }
         />
         <Stat label="Pool" value="Migrating" />
         <Stat label="Modules" value="4 desks" />
