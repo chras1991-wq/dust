@@ -16,6 +16,7 @@ type ActivityItem = {
   carrierSats: number;
   block: number | null;
   status: string;
+  createdAt?: number;
 };
 
 type Payload = {
@@ -25,6 +26,8 @@ type Payload = {
     remaining: number;
     pending: number;
   };
+  displayMinted?: number;
+  authorized?: number;
   deployTxid: string | null;
   activity: ActivityItem[];
 };
@@ -59,6 +62,13 @@ const FEATURES = [
 export default function ExplorerPage() {
   const [data, setData] = useState<Payload | null>(null);
   const { liveMinted, authorized, progressReady } = useSmoothMintProgress();
+  const minted =
+    progressReady && liveMinted != null
+      ? liveMinted
+      : typeof data?.displayMinted === "number"
+        ? data.displayMinted
+        : null;
+  const cap = authorized ?? data?.authorized ?? GENESIS_SUPPLY;
 
   useEffect(() => {
     void fetch("/api/activity")
@@ -78,11 +88,7 @@ export default function ExplorerPage() {
       <div className="stat-strip mt-8 grid gap-3 sm:grid-cols-3">
         <Stat
           label="Minted"
-          value={
-            progressReady && liveMinted != null
-              ? `${liveMinted.toLocaleString()} / ${(authorized ?? GENESIS_SUPPLY).toLocaleString()}`
-              : "…"
-          }
+          value={minted != null ? `${minted.toLocaleString()} / ${cap.toLocaleString()}` : "…"}
         />
         <Stat label="Pool" value="Migrating" />
         <Stat label="Modules" value="4 desks" />
@@ -110,6 +116,11 @@ export default function ExplorerPage() {
           <div>
             <p className="byline">Ledger</p>
             <h2 className="font-display mt-1 text-2xl sm:text-3xl">Mint activity</h2>
+            <p className="mt-1 font-sans text-sm text-[var(--ink-mute)]">
+              {minted != null
+                ? `${minted.toLocaleString()} / ${cap.toLocaleString()} · same count as the mint desk`
+                : "…"}
+            </p>
           </div>
           <Link href="/verify" className="font-condensed text-[0.75rem] uppercase tracking-[0.12em]">
             Prove a tx →
@@ -119,7 +130,7 @@ export default function ExplorerPage() {
           <table className="table-spec min-w-[720px]">
             <thead>
               <tr>
-                <th>Mint #</th>
+                <th>When</th>
                 <th>TXID</th>
                 <th>Owner</th>
                 <th>Amount</th>
@@ -128,10 +139,16 @@ export default function ExplorerPage() {
               </tr>
             </thead>
             <tbody>
-              {data?.activity.length ? (
+              {!data ? (
+                <tr>
+                  <td colSpan={6} className="text-[var(--ink-mute)]">
+                    …
+                  </td>
+                </tr>
+              ) : data.activity.length ? (
                 data.activity.map((row) => (
                   <tr key={`${row.mintSequence}-${row.txid}`}>
-                    <td>{String(row.mintSequence).padStart(6, "0")}</td>
+                    <td>{row.createdAt ? formatWhen(row.createdAt) : "—"}</td>
                     <td>
                       {row.txid ? (
                         <Link href={`/verify?txid=${row.txid}`}>{row.txid.slice(0, 8)}…</Link>
@@ -142,24 +159,17 @@ export default function ExplorerPage() {
                     <td className="font-mono text-xs">{row.owner || "—"}</td>
                     <td>{row.amount} SATDUST</td>
                     <td>{row.carrierSats} sats</td>
-                    <td
-                      className={
-                        row.status.includes("VALID") || row.status.includes("CONFIRMED")
-                          ? "status-confirmed"
-                          : "status-pending"
-                      }
-                    >
-                      {row.status}
+                    <td className={row.status.includes("VALID") ? "status-confirmed" : "status-pending"}>
+                      {activityStatus(row.status)}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan={6} className="text-[var(--ink-mute)]">
-                    No indexed mints yet. Rows appear after confirmation + indexer acceptance.
-                    {data?.deployTxid
-                      ? ` Deploy: ${data.deployTxid.slice(0, 16)}…`
-                      : " Deploy not recorded."}
+                    {minted != null
+                      ? `Mint progress is ${minted.toLocaleString()} / ${cap.toLocaleString()}. Paid transfers list here.`
+                      : "…"}
                   </td>
                 </tr>
               )}
@@ -169,6 +179,23 @@ export default function ExplorerPage() {
       </section>
     </div>
   );
+}
+
+function formatWhen(unixSeconds: number): string {
+  const d = new Date(unixSeconds * 1000);
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const h = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+  return `${m}-${day} ${h}:${min}`;
+}
+
+function activityStatus(status: string): string {
+  if (status.includes("VALID") || status.includes("CONFIRMED")) return "Counted";
+  if (status.includes("BROADCAST") || status.includes("MEMPOOL") || status.includes("PENDING")) {
+    return "Paid";
+  }
+  return "Paid";
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
