@@ -158,12 +158,11 @@ export default function MintPage() {
   const paySatsTotal = quote ? Math.round(Number(quote.feeSats)) : 0;
   const carrierSats = UNIT_SATS * qty;
   const unitPaySats = qty > 0 && paySatsTotal > 0 ? Math.round(paySatsTotal / qty) : 0;
-  const projectFeeSats = Math.max(0, paySatsTotal - carrierSats);
   const unitProjectFeeSats =
     quote?.unitFeeSats && Number(quote.unitFeeSats) < unitPaySats
       ? Number(quote.unitFeeSats)
       : qty > 0
-        ? Math.round(projectFeeSats / qty)
+        ? Math.max(0, Math.round((paySatsTotal - carrierSats) / qty))
         : 0;
   const totalSats = paySatsTotal;
   const btcPrice = quote ? Number(quote.btcUsd) : 0;
@@ -230,9 +229,9 @@ export default function MintPage() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.35fr_0.9fr] lg:gap-10">
         <div>
-          <div className="panel-edit">
+          <div className="panel-edit space-y-3">
             <label className="byline" htmlFor="mint-qty">Amount</label>
-            <div className="mt-2 flex flex-wrap items-end gap-4">
+            <div className="flex flex-wrap items-end gap-3">
               <input
                 id="mint-qty"
                 type="text"
@@ -249,76 +248,49 @@ export default function MintPage() {
                   setQuantityInput(String(q));
                   void refreshQuote();
                 }}
-                className="font-display w-28 border border-[var(--ink)] bg-transparent px-3 py-2 text-3xl tracking-tight outline-none"
+                className="font-display w-24 border border-[var(--ink)] bg-transparent px-2 py-1.5 text-2xl tracking-tight outline-none sm:w-28 sm:text-3xl"
               />
-              <span className="pb-2 font-sans text-sm text-[var(--ink-mute)]">SATDUST</span>
+              <span className="pb-1 font-sans text-sm text-[var(--ink-mute)]">SATDUST</span>
               {walletBalance !== null && account && (
-                <span className="pb-2 font-sans text-sm text-[var(--valid)]">
-                  Your balance · {walletBalance.toLocaleString()} SATDUST
+                <span className="pb-1 font-sans text-xs text-[var(--valid)] sm:text-sm">
+                  Balance {walletBalance.toLocaleString()}
                 </span>
               )}
             </div>
-          </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div className="panel-edit">
-              <p className="byline">Backing (carrier)</p>
-              <p className="font-display mt-2 text-2xl">{carrierSats.toLocaleString()} sats</p>
+            <div className="space-y-1 border-t border-[var(--ink)]/25 pt-2 font-sans text-[0.7rem] leading-snug text-[var(--ink-mute)] sm:text-xs">
+              {quote ? (
+                <>
+                  <p className="text-[var(--ink-soft)]">
+                    Pay{" "}
+                    <span className="font-medium text-[var(--ink)]">
+                      ≈ {totalSats.toLocaleString()} sats · ${Number(quote.usd).toFixed(2)} ·{" "}
+                      {totalBtc.toFixed(8)} BTC
+                    </span>
+                    {" "}
+                    (all-in, {unitPaySats.toLocaleString()}/ea = {UNIT_SATS} carrier +{" "}
+                    {unitProjectFeeSats.toLocaleString()} fee)
+                  </p>
+                  <p>
+                    One wallet transfer · miner fee ~$0.3–$1 extra · BTC $
+                    {btcPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    {quoteExpired ? (
+                      <span className="text-[var(--invalid)]"> · quote expired</span>
+                    ) : (
+                      <span className="text-[var(--accent)]">
+                        {" "}
+                        · lock{" "}
+                        {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:
+                        {String(secondsLeft % 60).padStart(2, "0")}
+                      </span>
+                    )}
+                  </p>
+                </>
+              ) : (
+                <p>Loading price…</p>
+              )}
             </div>
-            <div className="panel-edit">
-              <p className="byline">Mint price (all-in)</p>
-              <p className="font-display mt-2 text-2xl">
-                {quote ? `$${Number(quote.usd).toFixed(2)}` : "…"}
-              </p>
-              <p className="mt-1 text-xs text-[var(--ink-mute)]">
-                {unitPaySats > 0
-                  ? `${unitPaySats.toLocaleString()} sats / token total (${UNIT_SATS} carrier + ${unitProjectFeeSats.toLocaleString()} project)`
-                  : "—"}
-              </p>
-            </div>
-          </div>
 
-          <div className="panel-edit mt-4 space-y-3 font-sans text-sm">
-            <Row
-              label="Wallet transfer (mint)"
-              value={
-                quote
-                  ? `${totalSats.toLocaleString()} sats · $${Number(quote.usd).toFixed(2)}`
-                  : "loading…"
-              }
-            />
-            <p className="text-xs text-[var(--ink-mute)]">
-              One BTC payment for {qty} tokens — price includes {UNIT_SATS} sats carrier per token
-              (locked in your UTXO, not miner gas). OKX/UniSat network fee is usually ~$0.3–$1 and
-              is charged separately by the wallet.
-            </p>
-            <div className="border-t border-[var(--ink)] pt-3 mt-3">
-              <Row
-                label="Estimated total"
-                value={
-                  quote
-                    ? `≈ ${totalSats.toLocaleString()} sats · ${totalBtc.toFixed(8)} BTC`
-                    : "…"
-                }
-                emph
-              />
-            </div>
-          </div>
-
-          {quote && (
-            <div className="mt-4 flex flex-wrap gap-4 font-condensed text-[0.75rem] uppercase tracking-[0.12em] text-[var(--ink-mute)]">
-              <span>BTC/USD ${btcPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-              <span>
-                1 SAT = {(1 / 100_000_000).toFixed(8)} BTC
-              </span>
-              <span className="text-[var(--accent)]">
-                Locked {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:
-                {String(secondsLeft % 60).padStart(2, "0")}
-              </span>
-            </div>
-          )}
-
-          <div className="mt-6">
             <WalletConnect
               onAccount={(acc, ad) => {
                 setAccount(acc);
@@ -328,43 +300,40 @@ export default function MintPage() {
                 walletOpenRef.current = open;
               }}
             />
-            {!account && (
-              <p className="mt-2 text-sm text-[var(--ink-mute)]">
-                UniSat or OKX on Bitcoin mainnet. Payment is sent from your wallet — no address copy
-                on this page.
-              </p>
-            )}
+
+            <div className="btn-row flex-col items-stretch gap-2 pt-1 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                className="btn btn-solid w-full sm:w-auto"
+                disabled={busy || quoteExpired}
+                onClick={requestMint}
+              >
+                {account ? `Pay & Mint ${qty}` : "Connect & Mint"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost w-full sm:w-auto"
+                onClick={() => void refreshQuote()}
+              >
+                Refresh
+              </button>
+            </div>
           </div>
 
-          <div className="panel-edit mt-6 border-[var(--ink)]">
-            <p className="byline">Mint progress</p>
-            <p className="font-display mt-1 text-4xl tracking-tight sm:text-5xl">
+          <p className="mt-3 font-sans text-xs text-[var(--ink-mute)]">
+            Progress{" "}
+            <span className="font-display text-base text-[var(--ink)]">
               {displayMinted.toLocaleString()}
-              <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
-            </p>
-            <p className="mt-2 font-sans text-sm text-[var(--ink-mute)]">
-              Open slots {openCapacity.toLocaleString()}
-              {supply?.pending ? ` · Pending ${supply.pending}` : ""}
-              {" · "}Cap {SUPPLY.toLocaleString()}
-            </p>
-          </div>
-
-          <div className="btn-row mt-4 flex-col items-stretch sm:flex-row sm:items-center">
-            <button
-              type="button"
-              className="btn btn-solid"
-              disabled={busy}
-              onClick={requestMint}
-            >
-              {account ? `Pay & Mint ${qty} SATDUST` : "Connect & Mint"}
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={() => void refreshQuote()}>
-              Refresh price
-            </button>
-            <Link href="#milestones" className="btn btn-ghost">
-              Milestone roadmap
+            </span>
+            <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
+            {" · "}
+            slots {openCapacity.toLocaleString()}
+            {supply?.pending ? ` · pending ${supply.pending}` : ""}
+            {" · "}
+            <Link href="#milestones" className="underline underline-offset-2">
+              roadmap
             </Link>
-          </div>
+          </p>
           {busy && progress && (
             <p className="mt-3 font-sans text-sm text-[var(--accent)]">
               {PROGRESS_LABEL[progress]}
@@ -510,13 +479,3 @@ function parseMintQuantity(raw: string): number {
   return n;
 }
 
-function Row({ label, value, emph }: { label: string; value: string; emph?: boolean }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4">
-      <span className="text-[var(--ink-mute)]">{label}</span>
-      <span className={emph ? "font-display text-base text-[var(--accent)]" : "text-[var(--ink)]"}>
-        {value}
-      </span>
-    </div>
-  );
-}
