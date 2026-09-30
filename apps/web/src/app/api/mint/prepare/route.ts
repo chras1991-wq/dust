@@ -1,5 +1,6 @@
 import { isQuoteExpired, verifyQuoteSignature } from "@satdust/quote";
-import { PROJECT_ADDRESS, UNIT_SATS, NETWORK } from "@satdust/shared";
+import { PROJECT_ADDRESS, UNIT_SATS, NETWORK, MINT_USD } from "@satdust/shared";
+import { consumeQuoteUnits, getQuoteUnitsConsumed } from "@/lib/store";
 import { buildRevealPlan, assertPreBroadcast } from "@satdust/bitcoin";
 import { getQuoteSecret } from "@/lib/server/secrets";
 import { assertMintIntegrity } from "@/lib/server/integrity";
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
       address?: string;
       publicKey?: string;
       quoteId?: string;
+      amount?: number;
     }>(req);
     if (!parsed.ok) return parsed.response;
 
@@ -54,9 +56,22 @@ export async function POST(req: Request) {
     if (quote.network !== NETWORK) {
       return noStoreJson({ error: "Wrong network" }, { status: 400 });
     }
-    if (Number(quote.usd) !== 1) {
-      return noStoreJson({ error: "ABORT: unexpected mint fee" }, { status: 400 });
+    const amount = Math.floor(Number(parsed.body.amount ?? 1));
+    if (!Number.isFinite(amount) || amount < 1 || amount > 500) {
+      return noStoreJson({ error: "Invalid mint amount" }, { status: 400 });
     }
+    const quoteUnits = Math.round(Number(quote.usd) / MINT_USD);
+    if (quoteUnits < 1) {
+      return noStoreJson({ error: "ABORT: invalid quote units" }, { status: 400 });
+    }
+    const consumed = getQuoteUnitsConsumed(quoteId);
+    if (consumed + amount > quoteUnits) {
+      return noStoreJson(
+        { error: "Quote does not cover this mint batch — refresh price" },
+        { status: 400 }
+      );
+    }
+    consumeQuoteUnits(quoteId, amount);
 
     const supply = getSupplySnapshot();
     const milestones = getMilestoneSnapshot();
@@ -102,7 +117,7 @@ export async function POST(req: Request) {
       id: mintId,
       walletAddress: address,
       quoteId: quote.quoteId,
-      amount: 1,
+      amount,
       carrierSats: UNIT_SATS,
       projectFeeSats: feeSats,
       minerFeeSats,

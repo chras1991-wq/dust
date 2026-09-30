@@ -55,10 +55,18 @@ export async function executeMintPayment(args: {
   quoteId: string;
   projectFeeSats: number;
   revealMinerFeeSats: number;
+  quantity?: number;
   onProgress?: (step: MintPayProgress) => void;
 }): Promise<MintPayResult> {
-  const { account, adapter, quoteId, projectFeeSats, revealMinerFeeSats, onProgress } =
-    args;
+  const {
+    account,
+    adapter,
+    quoteId,
+    projectFeeSats,
+    revealMinerFeeSats,
+    quantity = 1,
+    onProgress,
+  } = args;
 
   if (!adapter.sendBitcoin) {
     throw new Error(
@@ -68,74 +76,105 @@ export async function executeMintPayment(args: {
 
   onProgress?.("preparing");
 
-  const prepareRes = await fetch("/api/mint/prepare", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      address: account.address,
-      publicKey: account.publicKey,
-      quoteId,
-    }),
-  });
-  const prepareData = await prepareRes.json();
-  if (!prepareRes.ok) {
-    throw new Error(prepareData.error || "Mint prepare failed");
-  }
+  const qty = Math.max(1, Math.floor(quantity));
+  const unitProjectFeeSats = Math.round(projectFeeSats / qty);
+  let lastMintId = "";
+  let lastCommitTxid = "";
+  let lastRevealTxid = "";
+  let lastPlanFunding = 0;
+  let lastCommitAddress = "";
+  let notice =
+    "Mint broadcast. Validity still depends on confirmation and indexer acceptance.";
 
-  const mintJson = JSON.stringify(MINT_PAYLOAD);
-  const plan: MintInscribePlan = await createMintInscribePlan({
-    mintJson,
-    projectFeeSats,
-    revealMinerFeeSats,
-  });
-
-  onProgress?.("awaiting_wallet");
-  let commitTxid: string;
-  try {
-    commitTxid = await adapter.sendBitcoin(plan.commitAddress, plan.fundingSats);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Wallet payment failed";
-    if (/reject|cancel|denied/i.test(msg)) {
-      throw new Error("Payment cancelled in wallet");
+  for (let i = 0; i < qty; i++) {
+    const prepareRes = await fetch("/api/mint/prepare", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        address: account.address,
+        publicKey: account.publicKey,
+        quoteId,
+        amount: 1,
+      }),
+    });
+    const prepareData = await prepareRes.json();
+    if (!prepareRes.ok) {
+      throw new Error(prepareData.error || "Mint prepare failed");
     }
-    throw new Error(msg);
-  }
 
-  onProgress?.("funding");
-  const utxo = await waitForCommitUtxo(commitTxid, plan.commitAddress);
+    const mintJson = JSON.stringify(MINT_PAYLOAD);
+    const plan: MintInscribePlan = await createMintInscribePlan({
+      mintJson,
+      projectFeeSats: unitProjectFeeSats,
+      revealMinerFeeSats,
+    });
 
-  onProgress?.("revealing");
-  const reveal = await buildAndSignRevealTx({
-    plan,
-    commitTxid,
-    commitVout: utxo.vout,
-    commitValue: utxo.value,
-    userAddress: account.address,
-  });
+    onProgress?.("awaiting_wallet");
+    let commitTxid: string;
+    try {
+      commitTxid = await adapter.sendBitcoin(plan.commitAddress, plan.fundingSats);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Wallet payment failed";
+      if (/reject|cancel|denied/i.test(msg)) {
+        throw new Error("Payment cancelled in wallet");
+      }
+      throw new Error(msg);
+    }
 
-  onProgress?.("broadcasting");
-  let revealTxid = reveal.txid;
-  try {
-    if (adapter.pushTx) {
-      revealTxid = await adapter.pushTx(reveal.txHex);
-    } else {
+    onProgress?.("funding");
+    const utxo = await waitForCommitUtxo(commitTxid, plan.commitAddress);
+
+    onProgress?.("revealing");
+    const reveal = await buildAndSignRevealTx({
+      plan,
+      commitTxid,
+      commitVout: utxo.vout,
+      commitValue: utxo.value,
+      userAddress: account.address,
+    });
+
+    onProgress?.("broadcasting");
+    let revealTxid = reveal.txid;
+    try {
+      if (adapter.pushTx) {
+        revealTxid = await adapter.pushTx(reveal.txHex);
+      } else {
+        revealTxid = await broadcastTx(reveal.txHex);
+      }
+    } catch {
       revealTxid = await broadcastTx(reveal.txHex);
     }
-  } catch {
-    // Fallback to public broadcaster if wallet push fails
-    revealTxid = await broadcastTx(reveal.txHex);
+
+    lastMintId = prepareData.mintId as string;
+    lastCommitTxid = commitTxid;
+    lastRevealTxid = revealTxid;
+    lastPlanFunding = plan.fundingSats;
+    lastCommitAddress = plan.commitAddress;
+    notice = prepareData.notice || notice;
+
+    await fetch("/api/mint/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mintId: lastMintId,
+        commitTxid,
+        revealTxid,
+        amount: 1,
+      }),
+    });
   }
 
   onProgress?.("done");
 
   return {
-    mintId: prepareData.mintId as string,
-    commitTxid,
-    revealTxid,
-    commitAddress: plan.commitAddress,
-    fundingSats: plan.fundingSats,
+    mintId: lastMintId,
+    commitTxid: lastCommitTxid,
+    revealTxid: lastRevealTxid,
+    commitAddress: lastCommitAddress,
+    fundingSats: lastPlanFunding,
     notice:
-      prepareData.notice ||
-      "Mint broadcast. Validity still depends on confirmation and indexer acceptance.",
+      qty > 1
+        ? `${qty} mint payments broadcast. ${notice}`
+        : notice,
   };
 }

@@ -24,6 +24,8 @@ export type MintRecord = {
 
 type Store = {
   quotes: Map<string, QuoteRecord>;
+  /** Units already reserved from a signed quote (1 SATDUST = 1 unit). */
+  quoteUnitsConsumed: Map<string, number>;
   mints: MintRecord[];
   /** Confirmed DUST-valid mint count. Chain/indexer is source of truth; this is cache. */
   confirmedMinted: number;
@@ -39,6 +41,7 @@ declare global {
 function createStore(): Store {
   return {
     quotes: new Map(),
+    quoteUnitsConsumed: new Map(),
     mints: [],
     // Real confirmed count only — default 0 until indexer/mints update it.
     confirmedMinted: Number(process.env.MOCK_MINTED ?? 0),
@@ -74,6 +77,16 @@ export function saveQuote(quote: QuoteRecord) {
 
 export function getQuote(quoteId: string): QuoteRecord | undefined {
   return getStore().quotes.get(quoteId);
+}
+
+export function getQuoteUnitsConsumed(quoteId: string): number {
+  return getStore().quoteUnitsConsumed.get(quoteId) ?? 0;
+}
+
+export function consumeQuoteUnits(quoteId: string, units: number) {
+  const store = getStore();
+  const prev = store.quoteUnitsConsumed.get(quoteId) ?? 0;
+  store.quoteUnitsConsumed.set(quoteId, prev + units);
 }
 
 export function listMints(): MintRecord[] {

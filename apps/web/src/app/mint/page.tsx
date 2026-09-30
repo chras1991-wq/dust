@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import { WalletConnect } from "@/components/WalletConnect";
+import { HolderTop10 } from "@/components/mint/HolderTop10";
 import { MilestoneRoadmap } from "@/components/mint/MilestoneRoadmap";
 import { MintMathPlate } from "@/components/mint/MintMathPlate";
 import { SupplyTrack } from "@/components/mint/SupplyTrack";
@@ -21,6 +22,8 @@ type Quote = {
   feeSats: string;
   expiresAt: number;
   signature: string;
+  quantity?: number;
+  unitFeeSats?: string;
 };
 
 type SupplySnap = {
@@ -30,6 +33,13 @@ type SupplySnap = {
   pending: number;
   availableEstimated: number;
   highContention: boolean;
+};
+
+type ProgressSnap = {
+  displayMinted: number;
+  virtualMinted: number;
+  realMinted: number;
+  virtualFrozen: boolean;
 };
 
 type MilestonePayload = {
@@ -56,8 +66,12 @@ const PROGRESS_LABEL: Record<MintPayProgress, string> = {
 export default function MintPage() {
   const [account, setAccount] = useState<Account | null>(null);
   const [adapter, setAdapter] = useState<BitcoinWalletAdapter | null>(null);
+  const [quantity, setQuantity] = useState(1);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [supply, setSupply] = useState<SupplySnap | null>(null);
+  const [progressSnap, setProgressSnap] = useState<ProgressSnap | null>(null);
+  const [holders, setHolders] = useState<{ rank: number; address: string; amount: number }[]>([]);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [milestones, setMilestones] = useState<MilestonePayload | null>(null);
   const [minerFee, setMinerFee] = useState<number>(2500);
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -78,6 +92,27 @@ export default function MintPage() {
     setSupply(await res.json());
   }, []);
 
+  const refreshProgress = useCallback(async () => {
+    const res = await fetch("/api/mint/progress");
+    if (res.ok) setProgressSnap(await res.json());
+  }, []);
+
+  const refreshHolders = useCallback(async () => {
+    const res = await fetch("/api/holders/top");
+    if (res.ok) {
+      const data = await res.json();
+      setHolders(data.holders ?? []);
+    }
+  }, []);
+
+  const refreshWalletBalance = useCallback(async (address: string) => {
+    const res = await fetch(`/api/wallet/balance?address=${encodeURIComponent(address)}`);
+    if (res.ok) {
+      const data = await res.json();
+      setWalletBalance(data.balance ?? 0);
+    }
+  }, []);
+
   const refreshMilestones = useCallback(async () => {
     const res = await fetch("/api/milestones");
     setMilestones(await res.json());
@@ -85,7 +120,11 @@ export default function MintPage() {
 
   const refreshQuote = useCallback(async () => {
     setError(null);
-    const res = await fetch("/api/quote", { method: "POST" });
+    const res = await fetch("/api/quote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ quantity }),
+    });
     if (!res.ok) {
       setError("Failed to fetch signed quote");
       return;
@@ -96,16 +135,33 @@ export default function MintPage() {
       return;
     }
     setQuote(q);
-  }, []);
+  }, [quantity]);
 
   useEffect(() => {
     void refreshSupply();
     void refreshMilestones();
     void refreshQuote();
+    void refreshProgress();
+    void refreshHolders();
     void fetch("/api/network/fee")
       .then((r) => r.json())
       .then((d: { estimatedMinerFeeSats: number }) => setMinerFee(d.estimatedMinerFeeSats));
-  }, [refreshQuote, refreshSupply, refreshMilestones]);
+  }, [refreshQuote, refreshSupply, refreshMilestones, refreshProgress, refreshHolders]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      void refreshProgress();
+      void refreshHolders();
+      void refreshSupply();
+      if (account) void refreshWalletBalance(account.address);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [account, refreshProgress, refreshHolders, refreshSupply, refreshWalletBalance]);
+
+  useEffect(() => {
+    if (account) void refreshWalletBalance(account.address);
+    else setWalletBalance(null);
+  }, [account, refreshWalletBalance]);
 
   useEffect(() => {
     if (!quote) return;
@@ -118,11 +174,21 @@ export default function MintPage() {
     return () => clearInterval(id);
   }, [quote]);
 
-  const feeSats = Number(quote?.feeSats ?? 0);
-  const total = UNIT_SATS + feeSats + minerFee;
+  const qty = Math.max(1, Math.floor(quantity) || 1);
+  const unitFeeSats = quote?.unitFeeSats
+    ? Number(quote.unitFeeSats)
+    : quote
+      ? Math.round(Number(quote.feeSats) / qty)
+      : 0;
+  const totalFeeSats = unitFeeSats * qty;
+  const carrierSats = UNIT_SATS * qty;
+  const totalMiner = minerFee * qty;
+  const totalSats = carrierSats + totalFeeSats + totalMiner;
+  const btcPrice = quote ? Number(quote.btcUsd) : 0;
+  const totalBtc = btcPrice > 0 ? totalSats / 100_000_000 : 0;
   const quoteExpired = secondsLeft <= 0;
   const openCapacity = milestones?.openCapacity ?? 0;
-  const minted = supply?.minted ?? milestones?.minted ?? 0;
+  const displayMinted = progressSnap?.displayMinted ?? supply?.minted ?? 0;
   const authorized = milestones?.authorized ?? GENESIS_SUPPLY;
 
   function requestMint() {
@@ -134,7 +200,7 @@ export default function MintPage() {
     }
     if (!quote || quoteExpired) {
       void refreshQuote();
-      setError("Price locked expired — refreshed. Tap Mint again.");
+      setError("Price lock expired — refreshed. Tap Mint again.");
       return;
     }
     setConfirmOpen(true);
@@ -152,6 +218,7 @@ export default function MintPage() {
         quoteId: quote.quoteId,
         projectFeeSats: Number(quote.feeSats),
         revealMinerFeeSats: Math.max(minerFee, 400),
+        quantity: qty,
         onProgress: setProgress,
       });
       setResult({
@@ -164,6 +231,9 @@ export default function MintPage() {
       await refreshSupply();
       await refreshMilestones();
       await refreshQuote();
+      await refreshProgress();
+      await refreshHolders();
+      await refreshWalletBalance(account.address);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Mint payment failed");
       setProgress(null);
@@ -177,42 +247,82 @@ export default function MintPage() {
       <p className="byline">02 · Mint desk</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Mint</h1>
       <p className="deck mt-4 max-w-2xl">
-        Mint <strong className="text-[var(--ink)]">1 SATDUST</strong> — {UNIT_SATS} sats locked in
-        the UTXO. Slots come from Genesis or a passed vote.
+        Mint <strong className="text-[var(--ink)]">SATDUST</strong> on Bitcoin L1 — {UNIT_SATS} sats
+        locked per token in a carrier UTXO.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.35fr_0.9fr] lg:gap-10">
         <div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="panel-edit">
+            <label className="byline" htmlFor="mint-qty">Amount</label>
+            <div className="mt-2 flex flex-wrap items-end gap-4">
+              <input
+                id="mint-qty"
+                type="number"
+                min={1}
+                max={500}
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+                onBlur={() => void refreshQuote()}
+                className="font-display w-28 border border-[var(--ink)] bg-transparent px-3 py-2 text-3xl tracking-tight outline-none"
+              />
+              <span className="pb-2 font-sans text-sm text-[var(--ink-mute)]">SATDUST</span>
+              {walletBalance !== null && account && (
+                <span className="pb-2 font-sans text-sm text-[var(--valid)]">
+                  Your balance · {walletBalance.toLocaleString()} SATDUST
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="panel-edit">
-              <p className="byline">You receive</p>
-              <p className="font-display mt-2 text-2xl">1 SATDUST</p>
+              <p className="byline">Backing (carrier)</p>
+              <p className="font-display mt-2 text-2xl">{carrierSats.toLocaleString()} sats</p>
             </div>
             <div className="panel-edit">
-              <p className="byline">SATDUST backing</p>
-              <p className="font-display mt-2 text-2xl">{UNIT_SATS} sats</p>
-              <p className="mt-1 text-xs text-[var(--ink-mute)]">One UTXO · offset 0</p>
+              <p className="byline">Mint fee</p>
+              <p className="font-display mt-2 text-2xl">
+                {quote ? `$${(qty * 1).toFixed(2)}` : "…"}
+              </p>
+              <p className="mt-1 text-xs text-[var(--ink-mute)]">
+                {unitFeeSats.toLocaleString()} sats / token
+              </p>
             </div>
           </div>
 
           <div className="panel-edit mt-4 space-y-3 font-sans text-sm">
             <Row
-              label="Mint fee (1 SATDUST)"
+              label="Mint fee (total)"
               value={
                 quote
-                  ? `$${Number(quote.usd).toFixed(2)} ≈ ${Number(quote.feeSats).toLocaleString()} sats`
+                  ? `${totalFeeSats.toLocaleString()} sats · $${Number(quote.usd).toFixed(2)}`
                   : "loading…"
               }
             />
-            <Row label="Bitcoin network fee" value={`≈ ${minerFee.toLocaleString()} sats`} />
+            <Row
+              label="Network fee (est.)"
+              value={`≈ ${totalMiner.toLocaleString()} sats`}
+            />
             <div className="border-t border-[var(--ink)] pt-3">
-              <Row label="Estimated total" value={`≈ ${total.toLocaleString()} sats`} emph />
+              <Row
+                label="Estimated total"
+                value={
+                  quote
+                    ? `≈ ${totalSats.toLocaleString()} sats · ${totalBtc.toFixed(8)} BTC`
+                    : "…"
+                }
+                emph
+              />
             </div>
           </div>
 
           {quote && (
             <div className="mt-4 flex flex-wrap gap-4 font-condensed text-[0.75rem] uppercase tracking-[0.12em] text-[var(--ink-mute)]">
-              <span>BTC ${Number(quote.btcUsd).toLocaleString()}</span>
+              <span>BTC/USD ${btcPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+              <span>
+                1 SAT = {(1 / 100_000_000).toFixed(8)} BTC
+              </span>
               <span className="text-[var(--accent)]">
                 Locked {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:
                 {String(secondsLeft % 60).padStart(2, "0")}
@@ -232,33 +342,33 @@ export default function MintPage() {
             />
             {!account && (
               <p className="mt-2 text-sm text-[var(--ink-mute)]">
-                Mint needs UniSat or OKX on Bitcoin mainnet. The wallet popup is the payment step.
+                UniSat or OKX on Bitcoin mainnet. Payment is sent from your wallet — no address copy
+                on this page.
               </p>
             )}
           </div>
 
-          {/* Confirmed / authorized — directly above mint CTA */}
           <div className="panel-edit mt-6 border-[var(--ink)]">
-            <p className="byline">Confirmed / authorized</p>
+            <p className="byline">Mint progress</p>
             <p className="font-display mt-1 text-4xl tracking-tight sm:text-5xl">
-              {minted.toLocaleString()}
+              {displayMinted.toLocaleString()}
               <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
             </p>
             <p className="mt-2 font-sans text-sm text-[var(--ink-mute)]">
-              Open now {openCapacity.toLocaleString()}
+              Open slots {openCapacity.toLocaleString()}
               {supply?.pending ? ` · Pending ${supply.pending}` : ""}
-              {" · "}Hard cap {SUPPLY.toLocaleString()}
+              {" · "}Cap {SUPPLY.toLocaleString()}
             </p>
           </div>
 
-          <div className="btn-row mt-4">
+          <div className="btn-row mt-4 flex-col items-stretch sm:flex-row sm:items-center">
             {openCapacity <= 0 ? (
               <button type="button" className="btn" disabled>
                 No open mint capacity
               </button>
             ) : quoteExpired || !quote ? (
               <button type="button" className="btn btn-solid" onClick={() => void refreshQuote()}>
-                Refresh Price
+                Refresh price
               </button>
             ) : (
               <button
@@ -267,13 +377,16 @@ export default function MintPage() {
                 disabled={busy}
                 onClick={requestMint}
               >
-                {account ? "Mint 1 SATDUST" : "Connect & Mint"}
+                {account ? `Mint ${qty} SATDUST` : "Connect & Mint"}
               </button>
             )}
             <Link href="#milestones" className="btn btn-ghost">
               Milestone roadmap
             </Link>
           </div>
+          <p className="mt-2 text-sm font-semibold text-red-600" role="note">
+            mint进度部分为虚拟进度
+          </p>
           {busy && progress && (
             <p className="mt-3 font-sans text-sm text-[var(--accent)]">
               {PROGRESS_LABEL[progress]}
@@ -282,8 +395,7 @@ export default function MintPage() {
 
           {openCapacity <= 0 && (
             <p className="mt-3 text-sm text-[var(--ink-mute)]">
-              This window is full ({minted.toLocaleString()} / {authorized.toLocaleString()}). Next
-              tokens need a passed milestone vote.
+              This window is full. Next tokens need a passed milestone vote.
             </p>
           )}
 
@@ -321,20 +433,22 @@ export default function MintPage() {
               )}
             </div>
           )}
+
+          <HolderTop10 holders={holders} />
         </div>
 
         <aside className="panel-edit h-fit">
-          <p className="kicker">Open mint</p>
+          <p className="kicker">Live desk</p>
           <p className="font-display mt-2 text-4xl">
-            {minted.toLocaleString()}
-            <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
+            {displayMinted.toLocaleString()}
+            <span className="text-[var(--ink-mute)]"> minted</span>
           </p>
           <p className="mt-2 text-sm text-[var(--ink-soft)]">
-            Genesis opens {GENESIS_SUPPLY.toLocaleString()} SATDUST. Later batches need hard gates +
-            vote; contributors whitelist mints first. Cap {SUPPLY.toLocaleString()}.
+            Genesis {GENESIS_SUPPLY.toLocaleString()} SATDUST. Per-wallet mint has no cap in this
+            window — enter any quantity above.
           </p>
           <p className="mt-4 font-mono text-xs text-[var(--ink-mute)]">
-            Open {openCapacity.toLocaleString()} · Pending {supply?.pending ?? 0}
+            Real confirmed {supply?.minted ?? 0} · Pending {supply?.pending ?? 0}
           </p>
           <hr className="mag-rule my-5" />
           <p className="byline">Notes</p>
@@ -383,17 +497,18 @@ export default function MintPage() {
             <p className="kicker">Confirmation</p>
             <h2 className="font-display mt-2 text-2xl sm:text-3xl">You are minting</h2>
             <ul className="mt-5 space-y-2 font-sans text-sm text-[var(--ink-soft)]">
-              <li className="text-[var(--ink)]">1 SATDUST</li>
-              <li>{UNIT_SATS} sats backing</li>
-              <li>Mint fee {feeSats.toLocaleString()} sats</li>
-              <li>Network ≈ {minerFee.toLocaleString()} sats</li>
+              <li className="text-[var(--ink)]">{qty} SATDUST</li>
+              <li>{carrierSats.toLocaleString()} sats backing</li>
+              <li>Mint fee {totalFeeSats.toLocaleString()} sats</li>
+              <li>Network ≈ {totalMiner.toLocaleString()} sats</li>
               <li className="font-display text-lg text-[var(--accent)]">
-                Total ≈ {total.toLocaleString()} sats
+                Total ≈ {totalSats.toLocaleString()} sats
               </li>
             </ul>
-            <p className="mt-4 text-sm text-[var(--ink-soft)]">
-              Next: confirm in your wallet. We then broadcast the reveal (546-sat carrier + mint
-              fee) automatically.
+            <p className="mt-3 text-sm font-semibold text-red-600">mint进度部分为虚拟进度</p>
+            <p className="mt-2 text-sm text-[var(--ink-soft)]">
+              Confirm in your wallet. We broadcast the reveal (546-sat carrier + mint fee) for each
+              token.
             </p>
             {busy && progress && (
               <p className="mt-3 font-sans text-sm text-[var(--accent)]">
