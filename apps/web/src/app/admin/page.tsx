@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSmoothMintProgress } from "@/hooks/useSmoothMintProgress";
+import { GENESIS_SUPPLY } from "@satdust/shared";
 
 type Supply = {
   minted: number;
@@ -12,6 +14,7 @@ type Supply = {
 export default function AdminPage() {
   const [supply, setSupply] = useState<Supply | null>(null);
   const [config, setConfig] = useState<Record<string, unknown> | null>(null);
+  const { liveMinted, authorized, progressReady } = useSmoothMintProgress();
 
   useEffect(() => {
     void Promise.all([
@@ -30,7 +33,15 @@ export default function AdminPage() {
       <p className="deck mt-3">Observational only. Zero private keys. Authorized access only.</p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Tile label="Confirmed mint" value={String(supply?.minted ?? "—")} />
+        <Tile
+          label="Mint progress"
+          value={
+            progressReady && liveMinted != null
+              ? `${liveMinted.toLocaleString()} / ${(authorized ?? GENESIS_SUPPLY).toLocaleString()}`
+              : "…"
+          }
+        />
+        <Tile label="Chain confirmed" value={String(supply?.minted ?? "—")} />
         <Tile label="Pending mint" value={String(supply?.pending ?? "—")} />
         <Tile label="Remaining" value={String(supply?.remaining ?? "—")} />
         <Tile
