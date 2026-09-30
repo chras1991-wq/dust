@@ -14,7 +14,7 @@ const LINKS = [
 
 export function MarqueeBar() {
   const text =
-    "DUST-20  ·  First liquidity UTXO protocol  ·  Bitcoin Mainnet  ·  SATDUST  ·  Offset-0  ·  Experimental  ·  ";
+    "DUST-20  ·  Sats locked in the UTXO  ·  Bitcoin Mainnet  ·  SATDUST  ·  Offset-0  ·  Experimental  ·  ";
   return (
     <div className="issue-bar layer" aria-hidden>
       <div className="issue-track">

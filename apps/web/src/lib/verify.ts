@@ -89,7 +89,7 @@ export function verifyMintLocal(input: VerifyInput): VerifyResult {
     },
     {
       id: "carrier",
-      label: "carrier output = 546 sats",
+      label: "UTXO output = 546 sats",
       pass: carrier === UNIT_SATS,
       detail:
         carrier === UNIT_SATS

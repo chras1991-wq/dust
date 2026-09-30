@@ -6,18 +6,19 @@ export default function WhatIsSatdust() {
   return (
     <DocShell title="What is SATDUST" section="Archive · 01">
       <p>
-        <strong>SATDUST</strong> is the opening fungible ticker under DUST-20. A mint gives you one
-        unit on a {UNIT_SATS}-sat carrier output on Bitcoin mainnet.
+        <strong>SATDUST</strong> is the first fungible ticker under DUST-20. A mint gives you 1
+        SATDUST on a {UNIT_SATS}-sat UTXO on Bitcoin mainnet.
       </p>
       <p>Phase 1:</p>
       <ul>
         <li>Deploy the ticker</li>
-        <li>Mint with exact carrier and offset 0</li>
+        <li>Mint with exact sats and offset 0</li>
         <li>Verify against chain + indexer rules</li>
       </ul>
       <p>
-        Out of scope: marketplace, swaps, staking, bridges. Price only on{" "}
-        <Link href="/mint">/mint</Link>. Mint sequence in the explorer is order, not a token id.
+        Swap and desks (stake, agent, compute, auction) migrate when the first mint batch completes.
+        No bridges. Price only on <Link href="/mint">/mint</Link>. Mint sequence in the Index is
+        order, not a token id.
       </p>
       <DocBack />
     </DocShell>

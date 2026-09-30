@@ -34,11 +34,11 @@ export function SwapDesk() {
             SATDUST ⇄ BTC
           </h2>
         </div>
-        <span className="pill-tag w-fit">Pre-launch · Quote only</span>
+        <span className="pill-tag w-fit">UTXO pool</span>
       </div>
       <p className="mt-3 max-w-xl text-sm text-[var(--ink-mute)]">
-        Bidirectional conversion against liquidity UTXO carriers. Execution unlocks after official
-        launch and pool bootstrap.
+        SATDUST ⇄ BTC against the liquidity UTXO pool. Migrates when the first mint batch
+        completes.
       </p>
 
       <div className="mt-6 space-y-3">
@@ -73,17 +73,17 @@ export function SwapDesk() {
       </div>
 
       <dl className="mt-5 grid gap-2 font-sans text-sm sm:grid-cols-2">
-        <Meta label="Route" value="Liquidity UTXO pool" />
+        <Meta label="Route" value="UTXO pool" />
         <Meta label="Slippage" value="0.50% (default)" />
         <Meta label="Network" value="Bitcoin mainnet" />
-        <Meta label="Status" value="Markets offline" accent />
+        <Meta label="Status" value="Migrates when the first mint batch completes" accent />
       </dl>
 
       <button type="button" className="btn btn-solid mt-6" disabled>
-        Swap unavailable — pre-launch
+        Migrates when the first mint batch completes
       </button>
       <p className="mt-2 break-words font-mono text-xs text-[var(--ink-mute)]">
-        Placeholder rate uses carrier sats for display only. Not an offer.
+        Preview rate for layout only — execution migrates with the first mint batch.
       </p>
     </div>
   );

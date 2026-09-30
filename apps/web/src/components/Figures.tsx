@@ -6,14 +6,14 @@ export function ProtocolDiagram() {
 Inscription (commit → reveal)
    │  dust-20 mint JSON
    ▼
-Carrier UTXO
+Mint UTXO
    │  value == declared sats
    │  inscription offset == 0
    ▼
 Indexer accept
    → SATDUST + spendable sats
    ▼
-Transfer = spend the carrier`}</pre>
+Transfer = spend that UTXO`}</pre>
   );
 }
 
@@ -21,9 +21,9 @@ export function ParamTable() {
   const rows = [
     ["p", "dust-20", "Protocol"],
     ["tick", "SATDUST", "Ticker (case ignored)"],
-    ["supply", "10000", "Max mintable units"],
-    ["unit_sats", "546", "Sats per unit"],
-    ["max_sats", "5460000", "supply × unit_sats"],
+    ["supply", "54600", "Max SATDUST"],
+    ["unit_sats", "546", "Sats per SATDUST"],
+    ["max_sats", "29811600", "supply × unit_sats"],
     ["lim_sats", "546", "Per-mint sats cap"],
   ];
 
@@ -52,11 +52,11 @@ export function ParamTable() {
 export function EditorialAside() {
   return (
     <aside className="panel-edit slant-block-r">
-      <p className="kicker">Not BRC-20</p>
+      <p className="kicker">L1 inventory</p>
       <p className="font-display mt-3 text-2xl italic leading-snug">
-        No empty ledger entry — fixed sats ride with every unit.
+        A UTXO-shaped token built to seed BTC L1 swap inventory.
       </p>
-      <p className="byline mt-4">Liquidity in the carrier</p>
+      <p className="byline mt-4">Carrier sats · pool-ready</p>
     </aside>
   );
 }

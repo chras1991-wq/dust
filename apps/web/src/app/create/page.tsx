@@ -6,7 +6,7 @@ import { UNIT_SATS } from "@satdust/shared";
 
 export default function CreatePage() {
   const [tick, setTick] = useState("");
-  const [supply, setSupply] = useState("10000");
+  const [supply, setSupply] = useState("54600");
   const [unitSats, setUnitSats] = useState(String(UNIT_SATS));
   const [limSats, setLimSats] = useState(String(UNIT_SATS));
   const [blurb, setBlurb] = useState("");
@@ -39,18 +39,18 @@ export default function CreatePage() {
 
   return (
     <div className="page-shell max-w-4xl py-10 sm:py-14">
-      <p className="byline">Create · Launchpad</p>
+      <p className="byline">Create · Deploy</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Create</h1>
       <p className="deck mt-3 max-w-2xl text-[0.95rem] sm:mt-4 sm:text-[1.05rem]">
-        Deploy a custom DUST-20 ticker on Bitcoin mainnet using the same liquidity UTXO rules as
-        SATDUST — exact carrier sats, offset 0, case-folded identity.
+        Deploy your own DUST-20 ticker on mainnet — same rules as SATDUST: exact sats, offset 0,
+        case-insensitive ticker.
       </p>
 
       <div className="mt-4 panel-edit border-[var(--accent)]">
-        <p className="kicker">Pre-launch</p>
+        <p className="kicker">Pending migration</p>
         <p className="mt-2 text-sm text-[var(--ink-soft)]">
-          Broadcast is disabled until the launchpad opens. You can design the deploy payload and
-          validate invariants now.
+          Broadcast migrates when the first mint batch completes. You can draft the deploy JSON and
+          check the numbers now.
         </p>
       </div>
 
@@ -94,7 +94,7 @@ export default function CreatePage() {
                 onChange={(e) => setUnitSats(e.target.value.replace(/\D/g, ""))}
               />
               <span className="mt-1 block font-mono text-xs text-[var(--ink-mute)]">
-                Carrier sats per unit (≥ 546)
+                Sats per SATDUST (≥ 546)
               </span>
             </label>
           </div>
@@ -133,7 +133,7 @@ export default function CreatePage() {
 
           <div className="btn-row">
             <button type="submit" className="btn btn-solid" disabled>
-              Deploy — launchpad closed
+              Migrates when the first mint batch completes
             </button>
             <Link href="/docs/dust20" className="btn btn-ghost">
               DUST-20 rules
@@ -143,11 +143,11 @@ export default function CreatePage() {
 
         <aside className="space-y-4">
           <div className="panel-edit">
-            <p className="kicker">Liquidity UTXO rules</p>
+            <p className="kicker">Mint rules</p>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-[var(--ink-soft)]">
-              <li>Each mint builds a carrier UTXO of exactly unit_sats.</li>
+              <li>Each mint builds a UTXO of exactly unit_sats.</li>
               <li>Inscription offset must be 0.</li>
-              <li>Transfer = spend the carrier — no transfer opcode.</li>
+              <li>Transfer = spend that UTXO — no transfer opcode.</li>
               <li>First valid deploy for a ticker wins.</li>
             </ul>
           </div>

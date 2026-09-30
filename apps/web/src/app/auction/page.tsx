@@ -6,20 +6,20 @@ import { ModuleShell } from "@/components/ModuleShell";
 const LOTS = [
   {
     id: "lot-a",
-    title: "Genesis residual lot",
-    detail: "Unfilled Genesis capacity slices — opens after launch.",
+    title: "Genesis leftover",
+    detail: "Unfilled Genesis slots — migrates with first mint.",
     status: "Scheduled",
   },
   {
     id: "lot-b",
-    title: "Contributor whitelist seat",
-    detail: "Priority mint access for later milestone rounds.",
+    title: "Whitelist seat",
+    detail: "Priority mint for later milestone rounds.",
     status: "Queued",
   },
   {
     id: "lot-c",
-    title: "Carrier bundle",
-    detail: "Packaged liquidity UTXO lots for market makers.",
+    title: "UTXO bundle",
+    detail: "Packed mint UTXOs for market makers.",
     status: "Queued",
   },
 ];
@@ -32,7 +32,7 @@ export default function AuctionPage() {
     <ModuleShell
       code="Auction"
       title="Auction"
-      deck="Bid on carrier lots, whitelist seats, and milestone capacity. Clearing is English-style until governance sets otherwise."
+      deck="Bid on UTXO lots, whitelist seats, and mint batches."
     >
       <ul className="space-y-3">
         {LOTS.map((l) => (
@@ -65,7 +65,7 @@ export default function AuctionPage() {
           />
         </label>
         <button type="button" className="btn btn-solid" disabled>
-          Place bid — pre-launch
+          Migrates when the first mint batch completes
         </button>
       </div>
     </ModuleShell>

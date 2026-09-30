@@ -11,19 +11,17 @@ export default function Dust20Doc() {
       </p>
       <div className="mt-8 space-y-5 text-[var(--ink-soft)]">
         <p>
-          <strong className="text-[var(--ink)]">DUST-20</strong> is the first Bitcoin-native
-          protocol that constructs liquidity UTXOs: each accepted mint builds a carrier output of
-          real sats and binds the asset to it.
+          <strong className="text-[var(--ink)]">DUST-20</strong> mints tokens that lock real sats
+          in a UTXO. Accept a mint and that output holds the asset and the sats together.
         </p>
         <p>
-          Bitcoin Core does not execute DUST-20. The chain confirms transactions; compatible
-          indexers decide which mints count. A wrong carrier or nonzero inscription offset can
-          confirm on L1 and still fail.
+          Bitcoin Core does not run DUST-20. The chain confirms txs; indexers decide which mints
+          count. Wrong sats or a nonzero inscription offset can confirm on L1 and still fail.
         </p>
         <p>
-          Transfers use ordinary spends of the carrier — there is no transfer opcode. Tickers are
-          case-insensitive; first valid deploy wins. SATDUST opens the set: one unit on a{" "}
-          {UNIT_SATS}-sat carrier.
+          Transfer is a normal spend of that UTXO — there is no transfer opcode. Tickers ignore
+          case; first valid deploy wins. SATDUST is the opening ticker: 1 SATDUST on a{" "}
+          {UNIT_SATS}-sat UTXO.
         </p>
         <p>
           <Link href="/docs" className="btn btn-ghost">

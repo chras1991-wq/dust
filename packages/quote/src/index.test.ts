@@ -8,8 +8,8 @@ import {
 } from "./index";
 
 describe("quote math", () => {
-  it("converts $7 at $100000 BTC to 7000 sats", () => {
-    expect(usdToFeeSats(7, 100_000)).toBe(7000);
+  it("converts $1 at $100000 BTC to 1000 sats", () => {
+    expect(usdToFeeSats(1, 100_000)).toBe(1000);
   });
 
   it("uses median of provider prices", () => {

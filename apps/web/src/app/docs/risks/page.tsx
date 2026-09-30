@@ -11,7 +11,7 @@ export default function RisksDoc() {
           <li>Balances depend on indexers.</li>
           <li>Wallet and market support may be thin.</li>
           <li>No guaranteed value, listing, or return.</li>
-          <li>Wrong carrier or nonzero offset → invalid mint.</li>
+          <li>Wrong UTXO sats or nonzero offset → invalid mint.</li>
         </ul>
         <p>
           <Link href="/docs" className="btn btn-ghost">
