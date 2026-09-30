@@ -1,5 +1,6 @@
 import "server-only";
 import { listMints } from "@/lib/store";
+import { mergeTop10Holders } from "@/lib/holder-top10-merge";
 import { displayMintProgress } from "@/lib/virtual-progress";
 
 export type HolderRow = {
@@ -78,7 +79,6 @@ function aggregateRealHolders(): { address: string; amount: number }[] {
     .sort((a, b) => b.amount - a.amount);
 }
 
-/** Top-10 bags use round mint sizes; ranks are uneven, not arithmetic -2 steps. */
 function syntheticTop10Amounts(displayMinted: number): number[] {
   const seed = Math.floor(displayMinted / 19) + 11;
   const targetSum = Math.round(displayMinted * (0.32 + mulberry(seed) * 0.06));
@@ -99,58 +99,28 @@ function syntheticTop10Amounts(displayMinted: number): number[] {
       const lower = pickNiceBag(seed + i * 7, raw[i - 1]! * 0.72, raw[i - 1]! - 1);
       raw[i] = Math.max(5, Math.min(raw[i]!, lower));
     }
-    if (i > 1 && raw[i - 1]! - raw[i]! === 2) {
-      raw[i] = Math.max(5, raw[i]! - randInt(seed + i, 3, 11));
-      if (!NICE_MINT_BAGS.includes(raw[i]!)) {
-        raw[i] = pickNiceBag(seed + i * 13, raw[i]!, raw[i - 1]! - 1);
-      }
-    }
   }
 
-  const sum = raw.reduce((s, n) => s + n, 0);
-  if (sum > targetSum * 1.08) {
-    const trimEach = Math.ceil((sum - targetSum) / 10);
-    for (let i = 0; i < 10; i++) {
-      raw[i] = Math.max(5, raw[i]! - trimEach);
-    }
-  }
-
-  raw.sort((a, b) => b - a);
-  return raw;
+  return raw.sort((a, b) => b - a);
 }
 
-/** Top 10 holders; round-number bags, organic spacing. */
+/** Top 10: real minters ranked by true balance; synthetics only fill empty slots below them. */
 export function buildHolderTop10(realMinted: number): HolderRow[] {
   const { displayMinted } = displayMintProgress(realMinted);
-  const amounts = syntheticTop10Amounts(displayMinted);
+  const ladder = syntheticTop10Amounts(displayMinted);
   const real = aggregateRealHolders();
+  const seed = Math.floor(displayMinted / 11) + 99;
 
-  const rows: { address: string; amount: number; synthetic: boolean }[] = [];
-  let seed = Math.floor(displayMinted / 11) + 99;
+  const merged = mergeTop10Holders({
+    reals: real,
+    syntheticLadder: ladder,
+    syntheticAddress,
+    seed,
+  });
 
-  for (let i = 0; i < 10; i++) {
-    const realAt = real[i];
-    if (realAt && realAt.amount >= amounts[i]! * 0.85) {
-      rows.push({
-        address: realAt.address,
-        amount: Math.max(amounts[i]!, realAt.amount),
-        synthetic: false,
-      });
-    } else {
-      rows.push({
-        address: syntheticAddress(seed),
-        amount: amounts[i]!,
-        synthetic: true,
-      });
-      seed += 97;
-    }
-  }
-
-  rows.sort((a, b) => b.amount - a.amount);
-
-  return rows.map((r, i) => ({
+  return merged.map((r, i) => ({
     rank: i + 1,
-    address: shortenAddress(r.address),
+    address: r.synthetic ? shortenAddress(r.address) : shortenAddress(r.address),
     amount: r.amount,
     synthetic: r.synthetic,
   }));
