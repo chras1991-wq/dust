@@ -7,6 +7,9 @@ export const VIRTUAL_PROGRESS_START_MS = Date.parse("2026-09-30T07:10:00.000Z");
 export const VIRTUAL_CAP = 4500;
 /** 18h onboarding window; ~70% of growth in the long tail. */
 export const VIRTUAL_WINDOW_MS = 18 * 60 * 60 * 1000;
+/** After 4500: slow display-only creep for a few hours (real mint not shown on progress). */
+export const POST_CAP_WINDOW_MS = 5 * 60 * 60 * 1000;
+export const POST_CAP_BONUS_MAX = 360;
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -73,14 +76,39 @@ export function virtualMintCountAt(nowMs: number = Date.now()): number {
   return Math.min(VIRTUAL_CAP, Math.round(target));
 }
 
+function postCapDisplayBonus(nowMs: number): number {
+  const capPhaseEnd = VIRTUAL_PROGRESS_START_MS + VIRTUAL_WINDOW_MS;
+  if (nowMs <= capPhaseEnd) return 0;
+  const postElapsed = Math.min(nowMs - capPhaseEnd, POST_CAP_WINDOW_MS);
+  const t = postElapsed / POST_CAP_WINDOW_MS;
+  const eased = 1 - (1 - t) ** 2.3;
+  return Math.round(POST_CAP_BONUS_MAX * eased);
+}
+
 export function displayMintProgress(realMinted: number, nowMs: number = Date.now()): {
   displayMinted: number;
   virtualMinted: number;
   realMinted: number;
   virtualFrozen: boolean;
 } {
-  const virtualMinted = virtualMintCountAt(nowMs);
-  const virtualFrozen = virtualMinted >= VIRTUAL_CAP;
-  const displayMinted = Math.max(virtualMinted, realMinted);
-  return { displayMinted, virtualMinted, realMinted, virtualFrozen };
+  const baseVirtual = virtualMintCountAt(nowMs);
+  const virtualFrozen = baseVirtual >= VIRTUAL_CAP;
+
+  if (virtualFrozen) {
+    const displayMinted = VIRTUAL_CAP + postCapDisplayBonus(nowMs);
+    return {
+      displayMinted,
+      virtualMinted: displayMinted,
+      realMinted,
+      virtualFrozen: true,
+    };
+  }
+
+  const displayMinted = Math.max(baseVirtual, realMinted);
+  return {
+    displayMinted,
+    virtualMinted: baseVirtual,
+    realMinted,
+    virtualFrozen: false,
+  };
 }

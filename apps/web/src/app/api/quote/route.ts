@@ -20,8 +20,8 @@ export async function POST(req: Request) {
       const body = (await req.json()) as { quantity?: number };
       if (body?.quantity != null) {
         const q = Math.floor(Number(body.quantity));
-        if (!Number.isFinite(q) || q < 1 || q > 500) {
-          return noStoreJson({ error: "Quantity must be 1–500" }, { status: 400 });
+        if (!Number.isFinite(q) || q < 1 || q > 100_000) {
+          return noStoreJson({ error: "Quantity must be at least 1" }, { status: 400 });
         }
         quantity = q;
       }

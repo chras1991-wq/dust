@@ -18,7 +18,6 @@ export async function GET(req: Request) {
     virtualCap: VIRTUAL_CAP,
     campaignStartMs: VIRTUAL_PROGRESS_START_MS,
     serverTimeMs: nowMs,
-    disclaimer: "mint进度部分为虚拟进度",
     sync: {
       backend: syncBackend(),
       virtualSource: "server_clock",

@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       return noStoreJson({ error: "Wrong network" }, { status: 400 });
     }
     const amount = Math.floor(Number(parsed.body.amount ?? 1));
-    if (!Number.isFinite(amount) || amount < 1 || amount > 500) {
+    if (!Number.isFinite(amount) || amount < 1 || amount > 100_000) {
       return noStoreJson({ error: "Invalid mint amount" }, { status: 400 });
     }
     const quoteUnits = Math.round(Number(quote.usd) / MINT_USD);

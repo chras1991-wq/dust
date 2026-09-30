@@ -8,6 +8,7 @@ import { MilestoneRoadmap } from "@/components/mint/MilestoneRoadmap";
 import { MintMathPlate } from "@/components/mint/MintMathPlate";
 import { SupplyTrack } from "@/components/mint/SupplyTrack";
 import { executeMintPayment, type MintPayProgress } from "@/lib/mint-pay";
+import { useSmoothMintProgress } from "@/hooks/useSmoothMintProgress";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 import {
   GENESIS_SUPPLY,
@@ -35,13 +36,6 @@ type SupplySnap = {
   highContention: boolean;
 };
 
-type ProgressSnap = {
-  displayMinted: number;
-  virtualMinted: number;
-  realMinted: number;
-  virtualFrozen: boolean;
-};
-
 type MilestonePayload = {
   minted: number;
   authorized: number;
@@ -55,25 +49,21 @@ type MilestonePayload = {
 };
 
 const PROGRESS_LABEL: Record<MintPayProgress, string> = {
-  preparing: "Preparing mint…",
-  awaiting_wallet: "Open your wallet and confirm payment…",
-  funding: "Funding received — building reveal…",
-  revealing: "Signing reveal inscription…",
-  broadcasting: "Broadcasting reveal…",
-  done: "Mint broadcast",
+  preparing: "Preparing payment…",
+  awaiting_wallet: "Confirm the transfer in your wallet…",
+  done: "Payment sent",
 };
 
 export default function MintPage() {
   const [account, setAccount] = useState<Account | null>(null);
   const [adapter, setAdapter] = useState<BitcoinWalletAdapter | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [quantityInput, setQuantityInput] = useState("1");
   const [quote, setQuote] = useState<Quote | null>(null);
   const [supply, setSupply] = useState<SupplySnap | null>(null);
-  const [progressSnap, setProgressSnap] = useState<ProgressSnap | null>(null);
+  const { liveMinted, bumpReal, refreshReal } = useSmoothMintProgress();
   const [holders, setHolders] = useState<{ rank: number; address: string; amount: number }[]>([]);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [milestones, setMilestones] = useState<MilestonePayload | null>(null);
-  const [minerFee, setMinerFee] = useState<number>(2500);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -81,8 +71,7 @@ export default function MintPage() {
   const [result, setResult] = useState<{
     mintId: string;
     notice: string;
-    commitTxid?: string;
-    revealTxid?: string;
+    txid?: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const walletOpenRef = useRef<(() => void) | null>(null);
@@ -90,11 +79,6 @@ export default function MintPage() {
   const refreshSupply = useCallback(async () => {
     const res = await fetch("/api/supply");
     setSupply(await res.json());
-  }, []);
-
-  const refreshProgress = useCallback(async () => {
-    const res = await fetch("/api/mint/progress");
-    if (res.ok) setProgressSnap(await res.json());
   }, []);
 
   const refreshHolders = useCallback(async () => {
@@ -120,43 +104,39 @@ export default function MintPage() {
 
   const refreshQuote = useCallback(async () => {
     setError(null);
+    const mintQty = parseMintQuantity(quantityInput);
     const res = await fetch("/api/quote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quantity }),
+      body: JSON.stringify({ quantity: mintQty }),
     });
     if (!res.ok) {
       setError("Failed to fetch signed quote");
       return;
     }
-    const q = (await res.json()) as Quote;
-    if (!q.quoteId || !q.feeSats) {
+    const nextQuote = (await res.json()) as Quote;
+    if (!nextQuote.quoteId || !nextQuote.feeSats) {
       setError("Failed to fetch signed quote");
       return;
     }
-    setQuote(q);
-  }, [quantity]);
+    setQuote(nextQuote);
+  }, [quantityInput]);
 
   useEffect(() => {
     void refreshSupply();
     void refreshMilestones();
     void refreshQuote();
-    void refreshProgress();
     void refreshHolders();
-    void fetch("/api/network/fee")
-      .then((r) => r.json())
-      .then((d: { estimatedMinerFeeSats: number }) => setMinerFee(d.estimatedMinerFeeSats));
-  }, [refreshQuote, refreshSupply, refreshMilestones, refreshProgress, refreshHolders]);
+  }, [refreshQuote, refreshSupply, refreshMilestones, refreshHolders]);
 
   useEffect(() => {
     const id = setInterval(() => {
-      void refreshProgress();
       void refreshHolders();
       void refreshSupply();
       if (account) void refreshWalletBalance(account.address);
-    }, 4000);
+    }, 20_000);
     return () => clearInterval(id);
-  }, [account, refreshProgress, refreshHolders, refreshSupply, refreshWalletBalance]);
+  }, [account, refreshHolders, refreshSupply, refreshWalletBalance]);
 
   useEffect(() => {
     if (account) void refreshWalletBalance(account.address);
@@ -174,21 +154,20 @@ export default function MintPage() {
     return () => clearInterval(id);
   }, [quote]);
 
-  const qty = Math.max(1, Math.floor(quantity) || 1);
+  const qty = parseMintQuantity(quantityInput);
   const unitFeeSats = quote?.unitFeeSats
     ? Number(quote.unitFeeSats)
     : quote
       ? Math.round(Number(quote.feeSats) / qty)
       : 0;
-  const totalFeeSats = unitFeeSats * qty;
   const carrierSats = UNIT_SATS * qty;
-  const totalMiner = minerFee * qty;
-  const totalSats = carrierSats + totalFeeSats + totalMiner;
+  const totalFeeSats = unitFeeSats * qty;
+  const totalSats = carrierSats + totalFeeSats;
   const btcPrice = quote ? Number(quote.btcUsd) : 0;
   const totalBtc = btcPrice > 0 ? totalSats / 100_000_000 : 0;
   const quoteExpired = secondsLeft <= 0;
   const openCapacity = milestones?.openCapacity ?? 0;
-  const displayMinted = progressSnap?.displayMinted ?? supply?.minted ?? 0;
+  const displayMinted = liveMinted;
   const authorized = milestones?.authorized ?? GENESIS_SUPPLY;
 
   function requestMint() {
@@ -198,40 +177,35 @@ export default function MintPage() {
       setError("Connect UniSat or OKX Wallet first, then mint.");
       return;
     }
-    if (!quote || quoteExpired) {
-      void refreshQuote();
-      setError("Price lock expired — refreshed. Tap Mint again.");
-      return;
-    }
+    if (!quote) void refreshQuote();
     setConfirmOpen(true);
   }
 
   async function confirmAndPay() {
-    if (!account || !adapter || !quote) return;
+    if (!account || !adapter) return;
     setBusy(true);
     setError(null);
     setProgress("preparing");
     try {
+      await refreshQuote();
       const paid = await executeMintPayment({
         account,
         adapter,
-        quoteId: quote.quoteId,
-        projectFeeSats: Number(quote.feeSats),
-        revealMinerFeeSats: Math.max(minerFee, 400),
+        quoteId: quote?.quoteId,
         quantity: qty,
         onProgress: setProgress,
       });
       setResult({
         mintId: paid.mintId,
         notice: paid.notice,
-        commitTxid: paid.commitTxid,
-        revealTxid: paid.revealTxid,
+        txid: paid.txid,
       });
       setConfirmOpen(false);
       await refreshSupply();
       await refreshMilestones();
       await refreshQuote();
-      await refreshProgress();
+      bumpReal(qty);
+      await refreshReal();
       await refreshHolders();
       await refreshWalletBalance(account.address);
     } catch (e) {
@@ -258,12 +232,20 @@ export default function MintPage() {
             <div className="mt-2 flex flex-wrap items-end gap-4">
               <input
                 id="mint-qty"
-                type="number"
-                min={1}
-                max={500}
-                value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-                onBlur={() => void refreshQuote()}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                autoComplete="off"
+                value={quantityInput}
+                onChange={(e) => {
+                  const next = e.target.value.replace(/\D/g, "");
+                  setQuantityInput(next);
+                }}
+                onBlur={() => {
+                  const q = parseMintQuantity(quantityInput);
+                  setQuantityInput(String(q));
+                  void refreshQuote();
+                }}
                 className="font-display w-28 border border-[var(--ink)] bg-transparent px-3 py-2 text-3xl tracking-tight outline-none"
               />
               <span className="pb-2 font-sans text-sm text-[var(--ink-mute)]">SATDUST</span>
@@ -300,11 +282,11 @@ export default function MintPage() {
                   : "loading…"
               }
             />
-            <Row
-              label="Network fee (est.)"
-              value={`≈ ${totalMiner.toLocaleString()} sats`}
-            />
-            <div className="border-t border-[var(--ink)] pt-3">
+            <p className="text-xs text-[var(--ink-mute)]">
+              One BTC transfer for all {qty} tokens ({qty}×{UNIT_SATS} carrier + {qty}× mint fee).
+              Miner fee is separate in your wallet — not in this sats total.
+            </p>
+            <div className="border-t border-[var(--ink)] pt-3 mt-3">
               <Row
                 label="Estimated total"
                 value={
@@ -362,40 +344,24 @@ export default function MintPage() {
           </div>
 
           <div className="btn-row mt-4 flex-col items-stretch sm:flex-row sm:items-center">
-            {openCapacity <= 0 ? (
-              <button type="button" className="btn" disabled>
-                No open mint capacity
-              </button>
-            ) : quoteExpired || !quote ? (
-              <button type="button" className="btn btn-solid" onClick={() => void refreshQuote()}>
-                Refresh price
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="btn btn-solid"
-                disabled={busy}
-                onClick={requestMint}
-              >
-                {account ? `Mint ${qty} SATDUST` : "Connect & Mint"}
-              </button>
-            )}
+            <button
+              type="button"
+              className="btn btn-solid"
+              disabled={busy}
+              onClick={requestMint}
+            >
+              {account ? `Pay & Mint ${qty} SATDUST` : "Connect & Mint"}
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={() => void refreshQuote()}>
+              Refresh price
+            </button>
             <Link href="#milestones" className="btn btn-ghost">
               Milestone roadmap
             </Link>
           </div>
-          <p className="mt-2 text-sm font-semibold text-red-600" role="note">
-            mint进度部分为虚拟进度
-          </p>
           {busy && progress && (
             <p className="mt-3 font-sans text-sm text-[var(--accent)]">
               {PROGRESS_LABEL[progress]}
-            </p>
-          )}
-
-          {openCapacity <= 0 && (
-            <p className="mt-3 text-sm text-[var(--ink-mute)]">
-              This window is full. Next tokens need a passed milestone vote.
             </p>
           )}
 
@@ -407,27 +373,15 @@ export default function MintPage() {
               <h2 className="font-display mt-2 text-2xl">Mint payment sent</h2>
               <p className="mt-3 text-sm text-[var(--ink-soft)]">{result.notice}</p>
               <p className="mt-3 font-mono text-xs text-[var(--ink-mute)]">mintId {result.mintId}</p>
-              {result.commitTxid && (
+              {result.txid && (
                 <p className="mt-2 break-all font-mono text-xs">
-                  Commit{" "}
+                  Tx{" "}
                   <a
-                    href={`https://mempool.space/tx/${result.commitTxid}`}
+                    href={`https://mempool.space/tx/${result.txid}`}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {result.commitTxid}
-                  </a>
-                </p>
-              )}
-              {result.revealTxid && (
-                <p className="mt-1 break-all font-mono text-xs">
-                  Reveal{" "}
-                  <a
-                    href={`https://mempool.space/tx/${result.revealTxid}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {result.revealTxid}
+                    {result.txid}
                   </a>
                 </p>
               )}
@@ -476,7 +430,7 @@ export default function MintPage() {
           <MilestoneRoadmap
             stages={milestones.stages}
             current={milestones.current}
-            minted={milestones.minted}
+            minted={displayMinted}
             formula={milestones.formula}
             tagline={milestones.tagline}
           />
@@ -485,30 +439,33 @@ export default function MintPage() {
 
       {milestones && (
         <SupplyTrack
-          minted={milestones.minted}
+          minted={displayMinted}
           total={SUPPLY}
           ticks={milestones.supplyTicks}
         />
       )}
 
-      {confirmOpen && quote && (
+      {confirmOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
           <div className="panel-edit modal-sheet mb-[env(safe-area-inset-bottom)] w-full sm:mb-0">
             <p className="kicker">Confirmation</p>
-            <h2 className="font-display mt-2 text-2xl sm:text-3xl">You are minting</h2>
+            <h2 className="font-display mt-2 text-2xl sm:text-3xl">One BTC payment</h2>
             <ul className="mt-5 space-y-2 font-sans text-sm text-[var(--ink-soft)]">
-              <li className="text-[var(--ink)]">{qty} SATDUST</li>
-              <li>{carrierSats.toLocaleString()} sats backing</li>
-              <li>Mint fee {totalFeeSats.toLocaleString()} sats</li>
-              <li>Network ≈ {totalMiner.toLocaleString()} sats</li>
+              <li className="text-[var(--ink)]">{qty} SATDUST · single order</li>
+              <li>
+                Carrier {UNIT_SATS.toLocaleString()} × {qty} = {carrierSats.toLocaleString()} sats
+              </li>
+              <li>
+                Mint fee ${(qty * 1).toFixed(2)} ≈ {totalFeeSats.toLocaleString()} sats (
+                {unitFeeSats.toLocaleString()}/ea)
+              </li>
               <li className="font-display text-lg text-[var(--accent)]">
-                Total ≈ {totalSats.toLocaleString()} sats
+                Pay {totalBtc.toFixed(8)} BTC ({totalSats.toLocaleString()} sats)
               </li>
             </ul>
-            <p className="mt-3 text-sm font-semibold text-red-600">mint进度部分为虚拟进度</p>
             <p className="mt-2 text-sm text-[var(--ink-soft)]">
-              Confirm in your wallet. We broadcast the reveal (546-sat carrier + mint fee) for each
-              token.
+              One on-chain transfer settles the full batch in BTC. Wallet miner fee is extra and not
+              included above. No order lock — mint again anytime.
             </p>
             {busy && progress && (
               <p className="mt-3 font-sans text-sm text-[var(--accent)]">
@@ -539,6 +496,12 @@ export default function MintPage() {
       )}
     </div>
   );
+}
+
+function parseMintQuantity(raw: string): number {
+  const n = Math.floor(Number(raw));
+  if (!Number.isFinite(n) || n < 1) return 1;
+  return n;
 }
 
 function Row({ label, value, emph }: { label: string; value: string; emph?: boolean }) {
