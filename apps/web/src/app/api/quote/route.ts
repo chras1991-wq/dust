@@ -1,5 +1,5 @@
 import { createSignedQuote } from "@satdust/quote";
-import { MINT_USD, PROJECT_ADDRESS } from "@satdust/shared";
+import { MINT_USD } from "@satdust/shared";
 import { fetchBtcUsdMedian } from "@/lib/prices";
 import { getQuoteSecret } from "@/lib/server/secrets";
 import { assertMintIntegrity } from "@/lib/server/integrity";
@@ -24,7 +24,6 @@ export async function POST(req: Request) {
     });
     saveQuote(quote);
 
-    // Intentionally omit provider price list & secret material.
     return noStoreJson({
       quoteId: quote.quoteId,
       usd: quote.usd,
@@ -33,7 +32,7 @@ export async function POST(req: Request) {
       expiresAt: quote.expiresAt,
       network: quote.network,
       signature: quote.signature,
-      projectAddress: PROJECT_ADDRESS,
+      mintUsd: MINT_USD,
       providerCount: providerPrices.length,
     });
   } catch (e) {
