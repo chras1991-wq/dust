@@ -71,13 +71,38 @@ export function SiteHeader() {
   );
 }
 
+function TwitterIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
 export function SiteFooter() {
   return (
     <footer className="layer mt-12 border-t-[1.5px] border-[var(--ink)] sm:mt-16">
-      <div className="bg-[var(--ink)] px-4 py-3 sm:px-5">
-        <p className="font-condensed text-[0.65rem] uppercase leading-relaxed tracking-[0.12em] text-[var(--paper)] sm:text-[0.72rem] sm:tracking-[0.16em]">
-          Colophon · Not Bitcoin consensus · Indexer-dependent state
-        </p>
+      <div className="bg-[var(--ink)]">
+        <div className="page-shell flex items-center justify-between gap-4 py-3">
+          <p className="min-w-0 font-condensed text-[0.65rem] uppercase leading-relaxed tracking-[0.12em] text-[var(--paper)] sm:text-[0.72rem] sm:tracking-[0.16em]">
+            Colophon · Not Bitcoin consensus · Indexer-dependent state
+          </p>
+          <a
+            href="https://x.com/sat_dust20"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Official Twitter / X — @sat_dust20"
+            title="@sat_dust20"
+            className="social-x inline-flex shrink-0 items-center justify-center text-[var(--paper)] no-underline opacity-75 transition-opacity hover:text-[var(--paper)] hover:opacity-100"
+          >
+            <TwitterIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          </a>
+        </div>
       </div>
       <div className="page-shell py-8 sm:py-10">
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr]">
