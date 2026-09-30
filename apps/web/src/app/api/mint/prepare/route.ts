@@ -1,5 +1,6 @@
 import { isQuoteExpired, verifyQuoteSignature } from "@satdust/quote";
-import { PROJECT_ADDRESS, UNIT_SATS, NETWORK, MINT_USD } from "@satdust/shared";
+import { UNIT_SATS, NETWORK, MINT_USD } from "@satdust/shared";
+import { PROJECT_ADDRESS } from "@satdust/shared/project";
 import { hydrateMintStore, persistMintRecord, tryConsumeQuoteUnits } from "@/lib/server/mint-persist";
 import { buildRevealPlan, assertPreBroadcast } from "@satdust/bitcoin";
 import { getQuoteSecret } from "@/lib/server/secrets";

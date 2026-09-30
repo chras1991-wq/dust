@@ -6,6 +6,27 @@
 export const VIRTUAL_PROGRESS_START_MS = Date.parse("2026-09-30T08:45:00.000Z");
 export const VIRTUAL_FLOOR = 1000;
 export const VIRTUAL_CAP = 4500;
+/**
+ * Completed pause time subtracted from the clock.
+ * On resume, add (resumeMs - pause.atMs) here so the 18h curve continues
+ * from the frozen point instead of skipping the night.
+ */
+export const MINT_CLOCK_OFFSET_MS = 0;
+/**
+ * Public counter is held here until resume. null = running.
+ * Wallet credits still save; they do not move this number while paused.
+ */
+export const MINT_PROGRESS_PAUSE: {
+  atMs: number;
+  displayMinted: number;
+  virtualMinted: number;
+  realMinted: number;
+} | null = {
+  atMs: 1_790_767_020_903,
+  displayMinted: 1683,
+  virtualMinted: 1605,
+  realMinted: 78,
+};
 /** 18h onboarding window after anchor. */
 export const VIRTUAL_WINDOW_MS = 18 * 60 * 60 * 1000;
 /** After 4500: display-only bonus in discrete steps. */
@@ -39,7 +60,12 @@ function curveCount(elapsedMs: number): number {
  * Each wave: quiet → faster → quiet (parabola), then a short rest.
  * Same timestamp → same count. Spends only the 18h budget.
  */
+function clockMs(nowMs: number): number {
+  return nowMs - MINT_CLOCK_OFFSET_MS;
+}
+
 export function virtualMintCountAt(nowMs: number = Date.now()): number {
+  nowMs = clockMs(nowMs);
   if (nowMs < VIRTUAL_PROGRESS_START_MS) return VIRTUAL_FLOOR;
 
   const elapsed = nowMs - VIRTUAL_PROGRESS_START_MS;
@@ -91,6 +117,7 @@ export function virtualMintCountAt(nowMs: number = Date.now()): number {
 }
 
 function postCapDisplayBonus(nowMs: number): number {
+  nowMs = clockMs(nowMs);
   const capPhaseEnd = VIRTUAL_PROGRESS_START_MS + VIRTUAL_WINDOW_MS;
   if (nowMs <= capPhaseEnd) return 0;
   const postElapsed = Math.min(nowMs - capPhaseEnd, POST_CAP_WINDOW_MS);
@@ -107,11 +134,12 @@ function postCapDisplayBonus(nowMs: number): number {
   return bonus;
 }
 
-export function displayMintProgress(realMinted: number, nowMs: number = Date.now()): {
+export function movingMintProgress(realMinted: number, nowMs: number = Date.now()): {
   displayMinted: number;
   virtualMinted: number;
   realMinted: number;
   virtualFrozen: boolean;
+  paused: boolean;
 } {
   const baseVirtual = virtualMintCountAt(nowMs);
   const virtualFrozen = baseVirtual >= VIRTUAL_CAP;
@@ -126,6 +154,7 @@ export function displayMintProgress(realMinted: number, nowMs: number = Date.now
       virtualMinted: displayMinted,
       realMinted: real,
       virtualFrozen: true,
+      paused: false,
     };
   }
 
@@ -137,5 +166,26 @@ export function displayMintProgress(realMinted: number, nowMs: number = Date.now
     virtualMinted: baseVirtual,
     realMinted: real,
     virtualFrozen: false,
+    paused: false,
   };
+}
+
+/** Number the site shows. While paused, every caller gets the same snapshot. */
+export function displayMintProgress(realMinted: number, nowMs: number = Date.now()): {
+  displayMinted: number;
+  virtualMinted: number;
+  realMinted: number;
+  virtualFrozen: boolean;
+  paused: boolean;
+} {
+  if (MINT_PROGRESS_PAUSE) {
+    return {
+      displayMinted: MINT_PROGRESS_PAUSE.displayMinted,
+      virtualMinted: MINT_PROGRESS_PAUSE.virtualMinted,
+      realMinted: MINT_PROGRESS_PAUSE.realMinted,
+      virtualFrozen: false,
+      paused: true,
+    };
+  }
+  return movingMintProgress(realMinted, nowMs);
 }

@@ -7,10 +7,10 @@ import {
   MILESTONES,
   MINT_USD,
   NETWORK,
-  PROJECT_ADDRESS,
   SUPPLY,
   UNIT_SATS,
 } from "@satdust/shared";
+import { PROJECT_ADDRESS } from "@satdust/shared/project";
 
 export type IntegrityReport = {
   ok: boolean;

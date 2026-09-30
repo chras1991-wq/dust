@@ -25,15 +25,6 @@ type Quote = {
   unitFeeSats?: string;
 };
 
-type SupplySnap = {
-  totalSupply: number;
-  minted: number;
-  remaining: number;
-  pending: number;
-  availableEstimated: number;
-  highContention: boolean;
-};
-
 type MilestonePayload = {
   minted: number;
   authorized: number;
@@ -57,7 +48,6 @@ export default function MintPage() {
   const [adapter, setAdapter] = useState<BitcoinWalletAdapter | null>(null);
   const [quantityInput, setQuantityInput] = useState("1");
   const [quote, setQuote] = useState<Quote | null>(null);
-  const [supply, setSupply] = useState<SupplySnap | null>(null);
   const { liveMinted, authorized: progressAuthorized, progressReady, bumpReal, refreshReal } = useSmoothMintProgress();
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [btcSats, setBtcSats] = useState<number | null>(null);
@@ -74,27 +64,25 @@ export default function MintPage() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const walletOpenRef = useRef<(() => void) | null>(null);
-
-  const refreshSupply = useCallback(async () => {
-    const res = await fetch("/api/supply");
-    setSupply(await res.json());
-  }, []);
+  const walletReq = useRef(0);
 
   const refreshWalletBalance = useCallback(async (address: string, sync = false) => {
+    const reqId = ++walletReq.current;
     const q = sync ? "&sync=1" : "";
     const res = await fetch(
       `/api/wallet/balance?address=${encodeURIComponent(address)}${q}`
     );
-    if (!res.ok) return 0;
+    if (!res.ok || reqId !== walletReq.current) return 0;
     const data = (await res.json()) as {
       balance?: number;
       btcSats?: number | null;
       records?: MintRecordView[];
       credited?: number;
     };
-    setWalletBalance(data.balance ?? 0);
-    setBtcSats(typeof data.btcSats === "number" ? data.btcSats : null);
-    setMintRecords(Array.isArray(data.records) ? data.records : []);
+    if (reqId !== walletReq.current) return 0;
+    if (typeof data.balance === "number") setWalletBalance(data.balance);
+    if (typeof data.btcSats === "number") setBtcSats(data.btcSats);
+    if (Array.isArray(data.records)) setMintRecords(data.records);
     return data.credited ?? 0;
   }, []);
 
@@ -124,22 +112,21 @@ export default function MintPage() {
   }, [quantityInput]);
 
   useEffect(() => {
-    void refreshSupply();
     void refreshMilestones();
     void refreshQuote();
-  }, [refreshQuote, refreshSupply, refreshMilestones]);
+  }, [refreshQuote, refreshMilestones]);
 
   useEffect(() => {
     const id = setInterval(() => {
-      void refreshSupply();
       if (account) void refreshWalletBalance(account.address);
     }, 20_000);
     return () => clearInterval(id);
-  }, [account, refreshSupply, refreshWalletBalance]);
+  }, [account, refreshWalletBalance]);
 
   useEffect(() => {
     if (account) void refreshWalletBalance(account.address);
     else {
+      walletReq.current += 1;
       setWalletBalance(null);
       setBtcSats(null);
       setMintRecords([]);
@@ -171,9 +158,9 @@ export default function MintPage() {
   const btcPrice = quote ? Number(quote.btcUsd) : 0;
   const totalBtc = btcPrice > 0 ? totalSats / 100_000_000 : 0;
   const quoteExpired = secondsLeft <= 0;
-  const openCapacity = milestones?.openCapacity ?? 0;
-  const displayMinted = liveMinted ?? 0;
   const authorized = progressAuthorized ?? milestones?.authorized ?? GENESIS_SUPPLY;
+  const displayMinted = progressReady && liveMinted != null ? liveMinted : null;
+  const openSlots = displayMinted != null ? Math.max(0, authorized - displayMinted) : null;
 
   function requestMint() {
     setError(null);
@@ -205,7 +192,6 @@ export default function MintPage() {
         txid: paid.txid,
       });
       setConfirmOpen(false);
-      await refreshSupply();
       await refreshMilestones();
       await refreshQuote();
       bumpReal(qty);
@@ -256,13 +242,12 @@ export default function MintPage() {
             <p className="font-sans text-xs text-[var(--ink-mute)] sm:text-sm">
               Minted{" "}
               <span className="font-display text-lg text-[var(--ink)] tabular-nums">
-                {progressReady ? displayMinted.toLocaleString() : "…"}
+                {displayMinted != null ? displayMinted.toLocaleString() : "…"}
               </span>
               <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
               <span className="hidden sm:inline">
                 {" "}
-                · slots {openCapacity.toLocaleString()}
-                {supply?.pending ? ` · pending ${supply.pending}` : ""}
+                · slots {openSlots != null ? openSlots.toLocaleString() : "…"}
               </span>
             </p>
             <label className="byline" htmlFor="mint-qty">Amount</label>
@@ -435,7 +420,7 @@ export default function MintPage() {
       </div>
 
       <div id="milestones">
-        {milestones && (
+        {milestones && displayMinted != null && (
           <MilestoneRoadmap
             stages={milestones.stages}
             current={milestones.current}
@@ -446,7 +431,7 @@ export default function MintPage() {
         )}
       </div>
 
-      {milestones && (
+      {milestones && displayMinted != null && (
         <SupplyTrack
           minted={displayMinted}
           total={SUPPLY}

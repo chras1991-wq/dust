@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "paths": {
       "@satdust/shared": ["./packages/shared/src/index.ts"],
+      "@satdust/shared/project": ["./packages/shared/src/project.ts"],
       "@satdust/dust20": ["./packages/dust20/src/index.ts"],
       "@satdust/quote": ["./packages/quote/src/index.ts"],
       "@satdust/bitcoin": ["./packages/bitcoin/src/index.ts"],

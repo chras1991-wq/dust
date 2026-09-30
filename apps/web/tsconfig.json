@@ -17,6 +17,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@satdust/shared": ["../../packages/shared/src/index.ts"],
+      "@satdust/shared/project": ["../../packages/shared/src/project.ts"],
       "@satdust/dust20": ["../../packages/dust20/src/index.ts"],
       "@satdust/quote": ["../../packages/quote/src/index.ts"],
       "@satdust/wallet": ["../../packages/wallet/src/index.ts"],

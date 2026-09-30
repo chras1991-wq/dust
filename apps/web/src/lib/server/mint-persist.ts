@@ -130,13 +130,13 @@ async function pushWalletMint(mint: MintRecord): Promise<void> {
   };
   const key = walletMintKey(mint.walletAddress);
   await kv.lpush(key, entry);
-  await kv.ltrim(key, 0, 19);
+  await kv.ltrim(key, 0, 99);
 }
 
 export async function listWalletMints(address: string): Promise<WalletMintEntry[]> {
   const kv = getKv();
   if (!kv) return [];
-  const raw = await kv.lrange<WalletMintEntry | string>(walletMintKey(address), 0, 19);
+  const raw = await kv.lrange<WalletMintEntry | string>(walletMintKey(address), 0, 99);
   if (!raw?.length) return [];
   return raw.flatMap((item) => {
     const entry = typeof item === "string" ? (JSON.parse(item) as WalletMintEntry) : item;
@@ -172,7 +172,14 @@ export async function getWalletBalancePersisted(address: string): Promise<number
 }
 
 export async function getRealMintTotals(): Promise<{ minted: number; pending: number }> {
-  await hydrateMintStore();
+  const kv = getKv();
+  if (kv) {
+    const counters = await kv.hgetall<Record<string, string>>(COUNTER_KEY);
+    return {
+      minted: Number(counters?.confirmed) || 0,
+      pending: Number(counters?.pending) || 0,
+    };
+  }
   const s = getStore();
   return { minted: s.confirmedMinted, pending: s.pendingMinted };
 }

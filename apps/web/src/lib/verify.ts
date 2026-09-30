@@ -2,10 +2,10 @@ import "server-only";
 import {
   DEPLOY_PAYLOAD,
   MINT_PAYLOAD,
-  PROJECT_ADDRESS,
   UNIT_SATS,
   normalizeTick,
 } from "@satdust/shared";
+import { PROJECT_ADDRESS } from "@satdust/shared/project";
 import { validateMintAcceptance } from "@satdust/dust20";
 import { getStore } from "./store";
 

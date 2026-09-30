@@ -4,7 +4,8 @@ import {
   usdToFeeSats,
   verifyQuoteSignature,
 } from "@satdust/quote";
-import { MINT_USD, NETWORK, PROJECT_ADDRESS } from "@satdust/shared";
+import { MINT_USD, NETWORK } from "@satdust/shared";
+import { PROJECT_ADDRESS } from "@satdust/shared/project";
 import { splitMintPaymentSats } from "@/lib/mint-pricing";
 import { hydrateMintStore, persistMintRecord } from "@/lib/server/mint-persist";
 import { fetchBtcUsdMedian } from "@/lib/prices";

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { PROJECT_ADDRESS, UNIT_SATS } from "@satdust/shared";
+import { UNIT_SATS } from "@satdust/shared";
+import { PROJECT_ADDRESS } from "@satdust/shared/project";
 import { assertPreBroadcast, buildRevealPlan } from "./index";
 
 describe("reveal plan", () => {

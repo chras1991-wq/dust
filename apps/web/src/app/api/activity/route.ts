@@ -1,18 +1,28 @@
 import { listMints, getSupplySnapshot, getStore } from "@/lib/store";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
+import { getRealMintTotals, hydrateMintStore } from "@/lib/server/mint-persist";
 
 export const dynamic = "force-dynamic";
+
+const PUBLIC_MINT = new Set([
+  "COMMIT_BROADCAST",
+  "COMMIT_CONFIRMED",
+  "REVEAL_BROADCAST",
+  "REVEAL_MEMPOOL",
+  "REVEAL_CONFIRMED",
+  "INDEXER_PENDING",
+  "DUST_VALID",
+]);
 
 export async function GET(req: Request) {
   const limited = await rateLimit(req, "activity", 60, 60_000);
   if (limited) return limited;
 
+  await hydrateMintStore(true);
+  const totals = await getRealMintTotals();
+  const supply = getSupplySnapshot();
   const mints = listMints()
-    .filter((m) =>
-      ["DUST_VALID", "REVEAL_CONFIRMED", "INDEXER_PENDING", "REVEAL_MEMPOOL"].includes(
-        m.status
-      )
-    )
+    .filter((m) => PUBLIC_MINT.has(m.status))
     .slice(0, 100)
     .map((m, i, arr) => ({
       mintSequence: m.mintSequence ?? arr.length - i,
@@ -29,7 +39,11 @@ export async function GET(req: Request) {
     }));
 
   return noStoreJson({
-    supply: getSupplySnapshot(),
+    supply: {
+      ...supply,
+      minted: totals.minted,
+      pending: totals.pending,
+    },
     deployTxid: getStore().deployTxid,
     activity: mints,
   });

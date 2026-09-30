@@ -5,7 +5,8 @@
  * plus the project fee output.
  */
 import * as bitcoin from "bitcoinjs-lib";
-import { PROJECT_ADDRESS, UNIT_SATS } from "@satdust/shared";
+import { UNIT_SATS } from "@satdust/shared";
+import { PROJECT_ADDRESS } from "@satdust/shared/project";
 
 type EccLib = {
   signSchnorr: (hash: Uint8Array, priv: Uint8Array) => Uint8Array;

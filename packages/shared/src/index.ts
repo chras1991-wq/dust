@@ -13,10 +13,6 @@ export const TICK = "SATDUST" as const;
 export const PROJECT_NAME = "SATDUST" as const;
 export const SLOGAN = "Bitcoin Dust. Carried by Sats." as const;
 
-/** Production project fee address — must match frontend constant. */
-export const PROJECT_ADDRESS =
-  "bc1pvhl5eemwk4a9d8k225medwye8m4rzw0nhr3nsfw732xzr6zx8rmq5ckdk4" as const;
-
 export const SUPPLY = 54_600;
 export const UNIT_SATS = 546;
 export const MAX_SATS = SUPPLY * UNIT_SATS; // 29_811_600
@@ -48,10 +44,6 @@ export const MINT_PAYLOAD = {
 /** Case-fold ticker identity per DUST-20 (SATDUST / satdust / SatDust ≡ same). */
 export function normalizeTick(tick: string): string {
   return tick.trim().toUpperCase();
-}
-
-export function assertProjectAddress(address: string): boolean {
-  return address === PROJECT_ADDRESS;
 }
 
 export type Network = typeof NETWORK;
