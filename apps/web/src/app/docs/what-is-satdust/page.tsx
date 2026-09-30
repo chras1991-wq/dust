@@ -1,0 +1,26 @@
+import { DocBack, DocShell } from "@/components/DocShell";
+import { UNIT_SATS } from "@satdust/shared";
+import Link from "next/link";
+
+export default function WhatIsSatdust() {
+  return (
+    <DocShell title="What is SATDUST" section="Archive · 01">
+      <p>
+        <strong>SATDUST</strong> is the first fungible ticker under DUST-20. A mint gives you 1
+        SATDUST on a {UNIT_SATS}-sat UTXO on Bitcoin mainnet.
+      </p>
+      <p>Phase 1:</p>
+      <ul>
+        <li>Deploy the ticker</li>
+        <li>Mint with exact sats and offset 0</li>
+        <li>Verify against chain + indexer rules</li>
+      </ul>
+      <p>
+        Swap and desks (stake, agent, compute, auction) migrate when the first mint batch completes.
+        No bridges. Price only on <Link href="/mint">/mint</Link>. Mint sequence in the Index is
+        order, not a token id.
+      </p>
+      <DocBack />
+    </DocShell>
+  );
+}

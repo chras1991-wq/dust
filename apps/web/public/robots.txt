@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /api/*
+
+# Source maps and VCS must never be crawled or indexed
+Disallow: /*.map$
+Disallow: /.git
+Disallow: /.env
