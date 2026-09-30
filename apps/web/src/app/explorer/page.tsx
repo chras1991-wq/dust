@@ -1,36 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FeatureEntry } from "@/components/PrelaunchNotice";
 import { SwapDesk } from "@/components/SwapDesk";
 import { useSmoothMintProgress } from "@/hooks/useSmoothMintProgress";
 import { GENESIS_SUPPLY } from "@satdust/shared";
-
-type ActivityItem = {
-  mintSequence: number;
-  txid: string | null;
-  inscriptionId: string | null;
-  owner: string;
-  amount: number;
-  carrierSats: number;
-  block: number | null;
-  status: string;
-  createdAt?: number;
-};
-
-type Payload = {
-  supply: {
-    totalSupply: number;
-    minted: number;
-    remaining: number;
-    pending: number;
-  };
-  displayMinted?: number;
-  authorized?: number;
-  deployTxid: string | null;
-  activity: ActivityItem[];
-};
 
 const FEATURES = [
   {
@@ -60,21 +34,11 @@ const FEATURES = [
 ];
 
 export default function ExplorerPage() {
-  const [data, setData] = useState<Payload | null>(null);
   const { liveMinted, authorized, progressReady } = useSmoothMintProgress();
-  const minted =
-    progressReady && liveMinted != null
-      ? liveMinted
-      : typeof data?.displayMinted === "number"
-        ? data.displayMinted
-        : null;
-  const cap = authorized ?? data?.authorized ?? GENESIS_SUPPLY;
-
-  useEffect(() => {
-    void fetch("/api/activity")
-      .then((r) => r.json())
-      .then(setData);
-  }, []);
+  const minted = progressReady && liveMinted != null ? liveMinted : null;
+  const cap = authorized ?? GENESIS_SUPPLY;
+  const progressLabel =
+    minted != null ? `${minted.toLocaleString()} / ${cap.toLocaleString()}` : "…";
 
   return (
     <div className="page-shell max-w-5xl py-10 sm:py-14">
@@ -88,7 +52,7 @@ export default function ExplorerPage() {
       <div className="stat-strip mt-8 grid gap-3 sm:grid-cols-3">
         <Stat
           label="Minted"
-          value={minted != null ? `${minted.toLocaleString()} / ${cap.toLocaleString()}` : "…"}
+          value={progressLabel}
         />
         <Stat label="Pool" value="Migrating" />
         <Stat label="Modules" value="4 desks" />
@@ -116,86 +80,21 @@ export default function ExplorerPage() {
           <div>
             <p className="byline">Ledger</p>
             <h2 className="font-display mt-1 text-2xl sm:text-3xl">Mint activity</h2>
-            <p className="mt-1 font-sans text-sm text-[var(--ink-mute)]">
-              {minted != null
-                ? `${minted.toLocaleString()} / ${cap.toLocaleString()} · same count as the mint desk`
-                : "…"}
-            </p>
           </div>
           <Link href="/verify" className="font-condensed text-[0.75rem] uppercase tracking-[0.12em]">
             Prove a tx →
           </Link>
         </div>
-        <div className="scroll-x mt-5">
-          <table className="table-spec min-w-[720px]">
-            <thead>
-              <tr>
-                <th>When</th>
-                <th>TXID</th>
-                <th>Owner</th>
-                <th>Amount</th>
-                <th>UTXO sats</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!data ? (
-                <tr>
-                  <td colSpan={6} className="text-[var(--ink-mute)]">
-                    …
-                  </td>
-                </tr>
-              ) : data.activity.length ? (
-                data.activity.map((row) => (
-                  <tr key={`${row.mintSequence}-${row.txid}`}>
-                    <td>{row.createdAt ? formatWhen(row.createdAt) : "—"}</td>
-                    <td>
-                      {row.txid ? (
-                        <Link href={`/verify?txid=${row.txid}`}>{row.txid.slice(0, 8)}…</Link>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className="font-mono text-xs">{row.owner || "—"}</td>
-                    <td>{row.amount} SATDUST</td>
-                    <td>{row.carrierSats} sats</td>
-                    <td className={row.status.includes("VALID") ? "status-confirmed" : "status-pending"}>
-                      {activityStatus(row.status)}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="text-[var(--ink-mute)]">
-                    {minted != null
-                      ? `Mint progress is ${minted.toLocaleString()} / ${cap.toLocaleString()}. Paid transfers list here.`
-                      : "…"}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="panel-edit mt-5">
+          <p className="byline">Minted</p>
+          <p className="font-display mt-2 text-4xl sm:text-5xl">{progressLabel}</p>
+          <p className="mt-3 font-sans text-sm text-[var(--ink-mute)]">
+            Same mint progress as the mint desk.
+          </p>
         </div>
       </section>
     </div>
   );
-}
-
-function formatWhen(unixSeconds: number): string {
-  const d = new Date(unixSeconds * 1000);
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  const h = String(d.getHours()).padStart(2, "0");
-  const min = String(d.getMinutes()).padStart(2, "0");
-  return `${m}-${day} ${h}:${min}`;
-}
-
-function activityStatus(status: string): string {
-  if (status.includes("VALID") || status.includes("CONFIRMED")) return "Counted";
-  if (status.includes("BROADCAST") || status.includes("MEMPOOL") || status.includes("PENDING")) {
-    return "Paid";
-  }
-  return "Paid";
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
