@@ -2,46 +2,63 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { pickProgressMotion } from "@/lib/mint-progress-motion";
-import { displayMintProgress } from "@/lib/virtual-progress";
+import { VIRTUAL_FLOOR, displayMintProgress } from "@/lib/virtual-progress";
 
-/** Live mint counter: irregular batches toward server/virtual target (not +1 tick per second). */
+/** Mint counter: flat for long stretches; jumps when global ceiling steps. */
 export function useSmoothMintProgress() {
   const [realMinted, setRealMinted] = useState(0);
-  const [shown, setShown] = useState(1);
-  const shownRef = useRef(1);
+  const [shown, setShown] = useState(VIRTUAL_FLOOR);
+  const shownRef = useRef(VIRTUAL_FLOOR);
+  const ceilingRef = useRef(VIRTUAL_FLOOR);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userBurstRef = useRef(0);
+
+  const readCeiling = useCallback((real: number) => {
+    const next = displayMintProgress(real, Date.now()).displayMinted;
+    ceilingRef.current = next;
+    return next;
+  }, []);
 
   const syncReal = useCallback(async () => {
     try {
       const res = await fetch("/api/mint/progress", { cache: "no-store" });
       if (!res.ok) return;
-      const data = (await res.json()) as { realMinted?: number };
+      const data = (await res.json()) as { realMinted?: number; displayMinted?: number };
       if (typeof data.realMinted === "number") setRealMinted(data.realMinted);
+      if (typeof data.displayMinted === "number") {
+        ceilingRef.current = data.displayMinted;
+      } else if (typeof data.realMinted === "number") {
+        readCeiling(data.realMinted);
+      }
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [readCeiling]);
 
   useEffect(() => {
     void (async () => {
       try {
         const res = await fetch("/api/mint/progress", { cache: "no-store" });
         if (!res.ok) return;
-        const data = (await res.json()) as { realMinted?: number };
+        const data = (await res.json()) as { realMinted?: number; displayMinted?: number };
         const real = typeof data.realMinted === "number" ? data.realMinted : 0;
         setRealMinted(real);
-        const target = displayMintProgress(real, Date.now()).displayMinted;
-        const start = Math.max(1, target - randInt(25, 95));
+        const ceiling =
+          typeof data.displayMinted === "number"
+            ? data.displayMinted
+            : readCeiling(real);
+        const start = Math.min(ceiling, VIRTUAL_FLOOR);
         shownRef.current = start;
+        ceilingRef.current = ceiling;
         setShown(start);
       } catch {
-        /* ignore */
+        shownRef.current = VIRTUAL_FLOOR;
+        setShown(VIRTUAL_FLOOR);
       }
     })();
     const id = setInterval(() => void syncReal(), 45_000);
     return () => clearInterval(id);
-  }, [syncReal]);
+  }, [readCeiling, syncReal]);
 
   useEffect(() => {
     shownRef.current = shown;
@@ -49,7 +66,8 @@ export function useSmoothMintProgress() {
 
   useEffect(() => {
     const schedule = () => {
-      const target = displayMintProgress(realMinted, Date.now()).displayMinted;
+      readCeiling(realMinted);
+      const target = ceilingRef.current;
       const prev = shownRef.current;
       const gap = target - prev;
 
@@ -67,8 +85,8 @@ export function useSmoothMintProgress() {
       if (userBurstRef.current > 0) {
         const bump = Math.min(userBurstRef.current, gap);
         userBurstRef.current -= bump;
-        delta = Math.max(delta, Math.min(bump, randInt(3, Math.min(120, bump))));
-        delayMs = Math.min(delayMs, randInt(400, 1400));
+        delta = Math.max(delta, Math.min(bump, randInt(5, Math.min(120, bump))));
+        delayMs = Math.min(delayMs, randInt(800, 2200));
       }
 
       if (delta > 0) {
@@ -84,12 +102,13 @@ export function useSmoothMintProgress() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [realMinted]);
+  }, [realMinted, readCeiling]);
 
   const bumpReal = useCallback((delta: number) => {
     const d = Math.max(0, Math.floor(delta));
     if (d > 0) userBurstRef.current += d;
     setRealMinted((r) => r + d);
+    ceilingRef.current = Math.max(ceilingRef.current, shownRef.current + d);
   }, []);
 
   return { liveMinted: shown, bumpReal, refreshReal: syncReal };
