@@ -42,15 +42,15 @@ export default function CreatePage() {
       <p className="byline">Create · Launchpad</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Create</h1>
       <p className="deck mt-3 max-w-2xl text-[0.95rem] sm:mt-4 sm:text-[1.05rem]">
-        Deploy a custom DUST-20 ticker on Bitcoin mainnet using the same liquidity UTXO rules as
-        SATDUST — exact carrier sats, offset 0, case-folded identity.
+        Deploy your own DUST-20 ticker on mainnet — same rules as SATDUST: exact sats, offset 0,
+        case-insensitive ticker.
       </p>
 
       <div className="mt-4 panel-edit border-[var(--accent)]">
         <p className="kicker">Pre-launch</p>
         <p className="mt-2 text-sm text-[var(--ink-soft)]">
-          Broadcast is disabled until the launchpad opens. You can design the deploy payload and
-          validate invariants now.
+          Broadcast is off until the launchpad opens. You can draft the deploy JSON and check the
+          numbers now.
         </p>
       </div>
 
@@ -94,7 +94,7 @@ export default function CreatePage() {
                 onChange={(e) => setUnitSats(e.target.value.replace(/\D/g, ""))}
               />
               <span className="mt-1 block font-mono text-xs text-[var(--ink-mute)]">
-                Carrier sats per unit (≥ 546)
+                Sats per unit (≥ 546)
               </span>
             </label>
           </div>
@@ -143,11 +143,11 @@ export default function CreatePage() {
 
         <aside className="space-y-4">
           <div className="panel-edit">
-            <p className="kicker">Liquidity UTXO rules</p>
+            <p className="kicker">Mint rules</p>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-[var(--ink-soft)]">
-              <li>Each mint builds a carrier UTXO of exactly unit_sats.</li>
+              <li>Each mint builds a UTXO of exactly unit_sats.</li>
               <li>Inscription offset must be 0.</li>
-              <li>Transfer = spend the carrier — no transfer opcode.</li>
+              <li>Transfer = spend that UTXO — no transfer opcode.</li>
               <li>First valid deploy for a ticker wins.</li>
             </ul>
           </div>

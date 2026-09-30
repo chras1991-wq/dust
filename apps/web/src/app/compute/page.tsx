@@ -11,7 +11,7 @@ export default function ComputePage() {
     <ModuleShell
       code="Compute"
       title="Compute"
-      deck="Commit compute / hashrate credits against SATDUST collateral. Settlements settle to carrier-aware UTXOs after launch."
+      deck="Commit hashrate against SATDUST collateral. Settles to UTXOs after launch."
     >
       <div className="panel-edit space-y-4">
         <p className="kicker">Compute desk</p>

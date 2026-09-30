@@ -61,8 +61,8 @@ function VerifyForm() {
       <p className="byline">Laboratory · Proof</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Prove</h1>
       <p className="deck mt-4">
-        Paste a txid. We check carrier sats, offset, and DUST-20 mint shape. Chain + indexer still
-        have the final say.
+        Paste a txid. We check UTXO sats, offset, and DUST-20 mint shape. Chain + indexer still have
+        the final say.
       </p>
 
       <form onSubmit={onSubmit} className="panel-edit mt-8 space-y-4 sm:mt-10">
@@ -78,7 +78,7 @@ function VerifyForm() {
         </label>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="byline">Carrier sats</span>
+            <span className="byline">UTXO sats</span>
             <input className="input mt-2" value={carrier} onChange={(e) => setCarrier(e.target.value)} />
           </label>
           <label className="block">

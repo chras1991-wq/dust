@@ -5,10 +5,10 @@ export default function HowMintingWorks() {
   return (
     <article className="page-shell max-w-3xl py-10 sm:py-14">
       <p className="byline">Archive · 03</p>
-      <h1 className="masthead mt-2 text-4xl sm:text-5xl">Mint execution</h1>
+      <h1 className="masthead mt-2 text-4xl sm:text-5xl">How minting works</h1>
       <div className="mt-8 space-y-5 text-[var(--ink-soft)]">
         <p>
-          Commit/reveal inscription. The reveal must create a carrier whose value equals declared{" "}
+          Commit/reveal inscription. The reveal must create a UTXO whose value equals declared{" "}
           <code className="font-mono text-[var(--accent)]">sats</code>, with the inscription at
           offset <code className="font-mono text-[var(--accent)]">0</code>.
         </p>
@@ -20,10 +20,10 @@ export default function HowMintingWorks() {
   "sats": "${UNIT_SATS}"
 }`}</pre>
         <p>
-          Constraint:{" "}
+          Rule:{" "}
           <code className="font-mono text-sm text-[var(--accent)]">amt × unit_sats = sats</code>, and
-          carrier.value matches. Open mint capacity comes from Genesis or a passed milestone vote —
-          see <Link href="/mint#milestones">milestone issuance</Link>. Price:{" "}
+          the UTXO value matches. Mint slots come from Genesis or a passed milestone vote — see{" "}
+          <Link href="/mint#milestones">milestone mint</Link>. Price:{" "}
           <Link href="/mint">/mint</Link>.
         </p>
         <p>

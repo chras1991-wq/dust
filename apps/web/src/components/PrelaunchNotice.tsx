@@ -13,7 +13,7 @@ export function PrelaunchNotice({
       <h2 className="font-display mt-2 text-2xl sm:text-3xl">{feature} is not live yet</h2>
       <p className="mt-3 max-w-xl text-sm text-[var(--ink-soft)] sm:text-[0.95rem]">
         {detail ??
-          "SATDUST has not officially launched. This surface is ready for wiring once Genesis mint and indexer feeds are online."}
+          "Not live yet. This desk wires up after Genesis mint and indexer feeds are online."}
       </p>
       <div className="btn-row mt-6">
         <Link href="/mint" className="btn btn-solid">

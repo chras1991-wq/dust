@@ -7,7 +7,7 @@ export function MintMathPlate() {
       <div className="math-plate__inner">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <p className="font-condensed text-[0.72rem] uppercase tracking-[0.18em] text-[var(--accent-soft)]">
-            Fig. M · Issuance kernel
+            Fig. M · Mint math
           </p>
           <p className="font-condensed text-[0.68rem] uppercase tracking-[0.14em] text-[rgba(243,241,236,0.45)]">
             DUST-20 · L1
@@ -27,8 +27,8 @@ export function MintMathPlate() {
         </p>
 
         <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-[rgba(243,241,236,0.72)]">
-          Capacity opens only when milestone, quorum, and approval all fire. Genesis is the sole
-          unvoted window; the rest is earned.
+          New slots open only if the milestone is done and the vote passes. Genesis is the only
+          free window.
         </p>
 
         <div className="math-plate__rule" />
@@ -36,7 +36,7 @@ export function MintMathPlate() {
         <div className="grid gap-6 sm:grid-cols-[1.1fr_0.9fr] sm:items-end">
           <div>
             <p className="font-condensed text-[0.68rem] uppercase tracking-[0.16em] text-[var(--accent-soft)]">
-              Carrier invariant
+              UTXO rule
             </p>
             <p className="font-display mt-2 text-[clamp(1.25rem,4vw,1.85rem)] italic leading-snug text-[var(--paper)]">
               vout = {UNIT_SATS}
@@ -53,9 +53,9 @@ export function MintMathPlate() {
         </div>
 
         <pre className="math-plate__flow" aria-hidden>
-{`mint JSON ──► carrier UTXO ──► indexer 𝟙 ──► spendable unit
+{`mint JSON ──► ${UNIT_SATS}-sat UTXO ──► indexer 𝟙 ──► spendable unit
                  │
-                 └─ sats bound · liquidity rides the output`}
+                 └─ sats stay with the token`}
         </pre>
       </div>
     </section>

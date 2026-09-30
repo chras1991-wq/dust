@@ -1,9 +1,9 @@
 /**
- * SATDUST milestone issuance — supply is earned by progress, then approved by vote.
+ * SATDUST milestone mint — more supply only after progress + a holder vote.
  *
  * S_max = 10_000
  * S_0   = 2_000  (Genesis)
- * S_i   unlocked only when Milestone_i ∧ Quorum ∧ Approval
+ * S_i   opens only when Milestone_i ∧ Quorum ∧ Approval
  *
  * Mint_i = A_i × I(M_i) × I(Q_i ≥ Q_min) × I(V_i ≥ V_min)
  */
@@ -15,12 +15,11 @@ export const GENESIS_SUPPLY = 2_000;
 export const RESERVE_SUPPLY = SUPPLY_CAP - GENESIS_SUPPLY; // 8_000
 
 /**
- * Vote eligibility is by wallet SATDUST balance, not native BTC.
- * Threshold: SATDUST holdings valued at the live BTC rate ≥ this BTC-equivalent,
- * measured at the proposal snapshot. Power: 1 eligible wallet = 1 vote.
+ * Vote eligibility: wallet SATDUST valued ≥ this BTC amount at the live rate
+ * (proposal snapshot). Holding BTC alone does not qualify. 1 wallet = 1 vote.
  */
 export const VOTE_SATDUST_EQUIV_BTC = 0.005;
-/** @deprecated Use VOTE_SATDUST_EQUIV_BTC — was misread as native BTC balance. */
+/** @deprecated Use VOTE_SATDUST_EQUIV_BTC */
 export const VOTE_BTC_THRESHOLD = VOTE_SATDUST_EQUIV_BTC;
 
 export const VOTE_PERIOD_DAYS = 3;
@@ -54,7 +53,7 @@ export type MilestoneGoalDef = {
   kind: GoalKind;
   /** Target for ratio goals (current/target) or inverse (current ≤ target). */
   target?: number;
-  /** Human formula, e.g. H ≥ 50 */
+  /** Short check label, e.g. H ≥ 50 */
   formula: string;
   /** For any_of: option labels */
   options?: string[];
@@ -89,7 +88,7 @@ export const MILESTONES: MilestoneDef[] = [
     index: 0,
     code: "01",
     title: "Genesis",
-    blurb: "Initial open mint capacity at launch.",
+    blurb: "2,000 units open at launch. No vote.",
     amount: 2_000,
     supplyAfter: 2_000,
     isGenesis: true,
@@ -110,7 +109,7 @@ export const MILESTONES: MilestoneDef[] = [
     index: 1,
     code: "02",
     title: "Foundation",
-    blurb: "Project infrastructure is live and issuance rules are public.",
+    blurb: "Site, rules, and treasury are public.",
     amount: 250,
     supplyAfter: 2_250,
     isGenesis: false,
@@ -123,13 +122,13 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "site",
-        label: "Public page: supply, roadmap, treasury, mint history, governance",
+        label: "Public page: supply, roadmap, treasury, mint history, votes",
         kind: "boolean",
         formula: "Site = Live",
       },
       {
         id: "rules",
-        label: "Issuance rules published and fixed for all 7 milestones",
+        label: "Mint rules published for all 7 milestones",
         kind: "boolean",
         formula: "Rules = Public",
       },
@@ -148,8 +147,8 @@ export const MILESTONES: MilestoneDef[] = [
     id: "m2",
     index: 2,
     code: "03",
-    title: "First 50",
-    blurb: "A natural holder base forms — team wallets excluded.",
+    title: "50 holders",
+    blurb: "At least 50 holders outside the team.",
     amount: 400,
     supplyAfter: 2_650,
     isGenesis: false,
@@ -177,8 +176,8 @@ export const MILESTONES: MilestoneDef[] = [
     id: "m3",
     index: 3,
     code: "04",
-    title: "Stable Community",
-    blurb: "Growth, retention, and distribution — not just headcount.",
+    title: "Sticky base",
+    blurb: "People stay. Top wallets don’t own everything.",
     amount: 650,
     supplyAfter: 3_300,
     isGenesis: false,
@@ -199,7 +198,7 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "top10",
-        label: "Top 10 non-team concentration",
+        label: "Top 10 non-team share",
         kind: "inverse_ratio",
         target: 55,
         formula: "C_top10 ≤ 55%",
@@ -213,21 +212,21 @@ export const MILESTONES: MilestoneDef[] = [
     id: "m4",
     index: 4,
     code: "05",
-    title: "First Utility",
-    blurb: "A real SATDUST utility is live and used — not just a landing page.",
+    title: "First use",
+    blurb: "Something real to do with SATDUST — not just a homepage.",
     amount: 900,
     supplyAfter: 4_200,
     isGenesis: false,
     goals: [
       {
         id: "utility",
-        label: "SATDUST utility deployed and reachable",
+        label: "A SATDUST product is live and reachable",
         kind: "boolean",
-        formula: "Utility = Live",
+        formula: "Product = Live",
       },
       {
         id: "users",
-        label: "Unique wallets that used the utility",
+        label: "Wallets that used it",
         kind: "ratio",
         target: 30,
         formula: "U_unique ≥ 30",
@@ -248,8 +247,8 @@ export const MILESTONES: MilestoneDef[] = [
     id: "m5",
     index: 5,
     code: "06",
-    title: "Product Validation",
-    blurb: "People come back — usage on more than one day.",
+    title: "They come back",
+    blurb: "Same wallets use it on more than one day.",
     amount: 1_200,
     supplyAfter: 5_400,
     isGenesis: false,
@@ -284,15 +283,15 @@ export const MILESTONES: MilestoneDef[] = [
     id: "m6",
     index: 6,
     code: "07",
-    title: "External Validation",
-    blurb: "Outside proof — integrations, revenue, or community execution. Any 2 of 5.",
+    title: "Outside proof",
+    blurb: "Integrations, revenue, or community execution — any 2 of 5.",
     amount: 1_800,
     supplyAfter: 7_200,
     isGenesis: false,
     goals: [
       {
         id: "external",
-        label: "Pass any 2 external signals",
+        label: "Hit any 2 outside signals",
         kind: "any_of",
         need: 2,
         formula: "AnyTwo(A…E)",
@@ -300,8 +299,8 @@ export const MILESTONES: MilestoneDef[] = [
           "A · Holders ≥ 350",
           "B · Product users ≥ 150",
           "C · Independent SATDUST integration",
-          "D · Cumulative product revenue ≥ 0.1 BTC",
-          "E · Community-authored proposal executed",
+          "D · Product revenue ≥ 0.1 BTC",
+          "E · Community proposal executed",
         ],
       },
     ],
@@ -313,8 +312,8 @@ export const MILESTONES: MilestoneDef[] = [
     id: "m7",
     index: 7,
     code: "08",
-    title: "Maturity",
-    blurb: "Final release. Hard base metrics plus any 2 growth conditions.",
+    title: "Full supply",
+    blurb: "Last release. Hard numbers plus any 2 growth checks.",
     amount: 2_800,
     supplyAfter: 10_000,
     isGenesis: false,
@@ -342,7 +341,7 @@ export const MILESTONES: MilestoneDef[] = [
       },
       {
         id: "growth",
-        label: "Pass any 2 growth conditions",
+        label: "Hit any 2 growth checks",
         kind: "any_of",
         need: 2,
         formula: "AnyTwo(Growth)",

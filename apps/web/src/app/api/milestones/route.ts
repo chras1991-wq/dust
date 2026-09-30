@@ -17,16 +17,16 @@ export async function GET() {
     governance: {
       voteSatdustEquivBtc: VOTE_SATDUST_EQUIV_BTC,
       voteRule:
-        "Eligible if wallet SATDUST balance ≥ 0.005 BTC equivalent at live rate (snapshot). Not native BTC.",
+        "Vote if your SATDUST is worth ≥ 0.005 BTC at the live rate (snapshot). BTC alone does not qualify.",
       power: "1 eligible wallet = 1 vote",
       votePeriodDays: VOTE_PERIOD_DAYS,
       revoteCooldownDays: REVOTE_COOLDOWN_DAYS,
-      snapshot: "Balances read at proposal-creation block height",
+      snapshot: "Balances read at the proposal block height",
     },
     model: {
       genesis: GENESIS_SUPPLY,
       reserve: RESERVE_SUPPLY,
-      rule: "Milestone complete ≠ automatic issuance. Vote required.",
+      rule: "Milestone done ≠ automatic mint. Vote still required.",
     },
   });
 }

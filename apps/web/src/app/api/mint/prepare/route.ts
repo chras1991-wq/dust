@@ -45,7 +45,7 @@ export async function POST(req: Request) {
   const milestones = getMilestoneSnapshot();
   if (milestones.openCapacity <= 0) {
     return NextResponse.json(
-      { error: "No open mint capacity — await a passed milestone proposal" },
+      { error: "No open mint slots — wait for a passed milestone vote" },
       { status: 409 }
     );
   }
@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       "Construct commit inscription PSBT client-side or via indexer-backed builder",
       "Sign commit with wallet",
       "Broadcast commit",
-      "Build reveal with carrier=546 sats @ offset 0 and project fee output",
+      "Build reveal with UTXO=546 sats @ offset 0 and project fee output",
       "Sign and broadcast reveal",
     ],
   });

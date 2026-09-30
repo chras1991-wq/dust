@@ -11,7 +11,7 @@ export default function VerificationDoc() {
           <li>Mainnet tx exists and confirms</li>
           <li>Inscription is a DUST-20 mint for SATDUST</li>
           <li>Amount, unit sats, and declared sats line up</li>
-          <li>Carrier output holds exactly those sats</li>
+          <li>UTXO holds exactly those sats</li>
           <li>Inscription offset is 0</li>
           <li>Deploy exists; supply not exceeded</li>
           <li>Indexer accepts the mint</li>

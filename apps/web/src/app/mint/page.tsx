@@ -143,8 +143,8 @@ export default function MintPage() {
       <p className="byline">02 · Mint desk</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Mint</h1>
       <p className="deck mt-4 max-w-2xl">
-        1 SATDUST on a {UNIT_SATS}-sat carrier. Open capacity comes from Genesis or a passed
-        milestone vote — not from the calendar.
+        1 SATDUST, {UNIT_SATS} sats locked in the UTXO. Mint slots come from Genesis or a passed
+        vote — not a calendar.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.35fr_0.9fr] lg:gap-10">
@@ -157,7 +157,7 @@ export default function MintPage() {
             <div className="panel-edit">
               <p className="byline">SATDUST backing</p>
               <p className="font-display mt-2 text-2xl">{UNIT_SATS} sats</p>
-              <p className="mt-1 text-xs text-[var(--ink-mute)]">Single carrier UTXO · offset 0</p>
+              <p className="mt-1 text-xs text-[var(--ink-mute)]">One UTXO · offset 0</p>
             </div>
           </div>
 
@@ -231,8 +231,8 @@ export default function MintPage() {
 
           {openCapacity <= 0 && (
             <p className="mt-3 text-sm text-[var(--ink-mute)]">
-              Authorized capacity is full ({minted.toLocaleString()} / {authorized.toLocaleString()}
-              ). Next units require a passed milestone proposal.
+              This window is full ({minted.toLocaleString()} / {authorized.toLocaleString()}). Next
+              units need a passed milestone vote.
             </p>
           )}
 
@@ -249,15 +249,14 @@ export default function MintPage() {
         </div>
 
         <aside className="panel-edit h-fit">
-          <p className="kicker">Authorized window</p>
+          <p className="kicker">Open mint</p>
           <p className="font-display mt-2 text-4xl">
             {minted.toLocaleString()}
             <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
           </p>
           <p className="mt-2 text-sm text-[var(--ink-soft)]">
-            Genesis opens {GENESIS_SUPPLY.toLocaleString()}. Later tranches need milestones + votes,
-            with mint access prioritizing a whitelist of standout contributors. Hard cap{" "}
-            {SUPPLY.toLocaleString()}.
+            Genesis opens {GENESIS_SUPPLY.toLocaleString()}. Later batches need a milestone + vote;
+            contributors whitelist mints first. Cap {SUPPLY.toLocaleString()}.
           </p>
           <p className="mt-4 font-mono text-xs text-[var(--ink-mute)]">
             Open {openCapacity.toLocaleString()} · Pending {supply?.pending ?? 0}
@@ -269,7 +268,7 @@ export default function MintPage() {
               <Link href="/docs/what-is-satdust">What is SATDUST?</Link>
             </li>
             <li>
-              <Link href="/docs/tokenomics">Milestone issuance</Link>
+              <Link href="/docs/tokenomics">Milestone mint</Link>
             </li>
             <li>
               <Link href="/docs/how-minting-works">Mint execution</Link>
