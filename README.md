@@ -41,7 +41,7 @@ QUOTE_SECRET=...
 DEPLOY_TXID=
 DEPLOY_INSCRIPTION_ID=
 BTC_USD_FALLBACK=100000
-NEXT_PUBLIC_SITE_URL=https://your-deployment.vercel.app
+NEXT_PUBLIC_SITE_URL=https://dust20.com
 ```
 
 ## Deploy (Vercel)
