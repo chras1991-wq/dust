@@ -128,7 +128,8 @@ export const unisatAdapter: BitcoinWalletAdapter = {
     if (!window.unisat?.sendBitcoin) {
       throw new Error("UniSat sendBitcoin unavailable — update the extension");
     }
-    return window.unisat.sendBitcoin(toAddress, satoshis);
+    const sats = Math.floor(satoshis);
+    return window.unisat.sendBitcoin.call(window.unisat, toAddress, sats);
   },
   async pushTx(rawHex: string) {
     if (!window.unisat?.pushTx) throw new Error("UniSat pushTx unavailable");
@@ -174,9 +175,22 @@ export const okxAdapter: BitcoinWalletAdapter = {
     return window.okxwallet!.bitcoin!.signPsbt(psbt);
   },
   async sendBitcoin(toAddress: string, satoshis: number) {
-    const send = window.okxwallet?.bitcoin?.sendBitcoin;
-    if (!send) throw new Error("OKX sendBitcoin unavailable — update the wallet");
-    return send(toAddress, satoshis);
+    const btc = window.okxwallet?.bitcoin;
+    if (!btc) throw new Error("OKX Bitcoin wallet not available");
+    const sats = Math.floor(satoshis);
+    if (!Number.isFinite(sats) || sats <= 0) {
+      throw new Error("Invalid send amount");
+    }
+    if (typeof btc.sendBitcoin === "function") {
+      return btc.sendBitcoin.call(btc, toAddress, sats);
+    }
+    const legacy = btc as {
+      send?: (params: { to: string; value: string | number }) => Promise<string>;
+    };
+    if (typeof legacy.send === "function") {
+      return legacy.send.call(btc, { to: toAddress, value: sats });
+    }
+    throw new Error("OKX send unavailable — update OKX Wallet or use UniSat");
   },
 };
 

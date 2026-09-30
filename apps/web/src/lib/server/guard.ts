@@ -1,5 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
+import { redisRateLimit } from "@/lib/server/redis-rate";
 
 type Bucket = { count: number; resetAt: number };
 
@@ -13,12 +14,28 @@ function clientKey(req: Request, route: string): string {
 }
 
 /** Simple in-memory rate limit (per instance). Redundant with edge limits. */
-export function rateLimit(
+export async function rateLimit(
   req: Request,
   route: string,
   limit: number,
   windowMs: number
-): NextResponse | null {
+): Promise<NextResponse | null> {
+  const ip = clientKey(req, route).split(":").slice(1).join(":");
+  const kind = route.includes("mint") ? "mint" : "api";
+  const redis = await redisRateLimit(ip, kind);
+  if (!redis.ok) {
+    return NextResponse.json(
+      { error: "Too many requests — slow down" },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(redis.retryAfterSec),
+          "Cache-Control": "no-store",
+        },
+      }
+    );
+  }
+
   const key = clientKey(req, route);
   const now = Date.now();
   const bucket = buckets.get(key);

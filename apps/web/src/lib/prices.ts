@@ -82,10 +82,16 @@ export async function estimateMinerFeeSats(): Promise<number> {
       next: { revalidate: 30 },
     });
     if (!res.ok) throw new Error("fee estimate failed");
-    const data = (await res.json()) as { halfHourFee: number };
-    // Approximate commit+reveal vsize for inscription mint (~250 vB × rate)
-    return Math.round(250 * data.halfHourFee);
+    const data = (await res.json()) as {
+      halfHourFee: number;
+      economyFee?: number;
+      minimumFee?: number;
+    };
+    const rate =
+      data.minimumFee ?? data.economyFee ?? data.halfHourFee ?? 1;
+    // Reveal tx only (~165 vB) — funding output already carries carrier + project fee.
+    return Math.round(165 * rate) + 33;
   } catch {
-    return 2500;
+    return 450;
   }
 }

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { edgeRateLimit } from "@/lib/server/edge-rate";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
@@ -19,9 +20,14 @@ function applySecurity(res: NextResponse, pathname: string) {
     res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
     res.headers.set("Pragma", "no-cache");
   }
-  // Hide framework fingerprint on responses we control.
   res.headers.delete("x-powered-by");
   return res;
+}
+
+function clientIp(req: NextRequest): string {
+  const xf = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const real = req.headers.get("x-real-ip")?.trim();
+  return xf || real || "unknown";
 }
 
 function adminAuthorized(req: NextRequest): boolean {
@@ -36,7 +42,6 @@ function adminAuthorized(req: NextRequest): boolean {
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Block common scanner / source-map probes — never serve maps or VCS.
   if (
     pathname.endsWith(".map") ||
     pathname.includes("/.git") ||
@@ -46,19 +51,29 @@ export function middleware(req: NextRequest) {
     pathname.endsWith(".ts") ||
     pathname.endsWith(".tsx")
   ) {
-    return applySecurity(
-      new NextResponse(null, { status: 404 }),
-      pathname
-    );
+    return applySecurity(new NextResponse(null, { status: 404 }), pathname);
   }
 
-  // Admin is observational only and gated — no public back office.
-  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
-    if (!adminAuthorized(req)) {
+  if (pathname.startsWith("/api/")) {
+    const kind = pathname.includes("/mint") ? "mint" : "api";
+    const rl = edgeRateLimit(clientIp(req), kind);
+    if (!rl.ok) {
       return applySecurity(
-        new NextResponse(null, { status: 404 }),
+        NextResponse.json(
+          { error: "Too many requests" },
+          {
+            status: 429,
+            headers: { "Retry-After": String(rl.retryAfterSec) },
+          }
+        ),
         pathname
       );
+    }
+  }
+
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    if (!adminAuthorized(req)) {
+      return applySecurity(new NextResponse(null, { status: 404 }), pathname);
     }
   }
 
@@ -68,10 +83,6 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * All paths except Next static assets that must stay cacheable.
-     * _next/static & _next/image still get CSP from next.config headers.
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
   ],
 };

@@ -1,12 +1,12 @@
 import { isQuoteExpired, verifyQuoteSignature } from "@satdust/quote";
 import { PROJECT_ADDRESS, UNIT_SATS, NETWORK, MINT_USD } from "@satdust/shared";
-import { consumeQuoteUnits, getQuoteUnitsConsumed } from "@/lib/store";
+import { hydrateMintStore, persistMintRecord, tryConsumeQuoteUnits } from "@/lib/server/mint-persist";
 import { buildRevealPlan, assertPreBroadcast } from "@satdust/bitcoin";
 import { getQuoteSecret } from "@/lib/server/secrets";
 import { assertMintIntegrity } from "@/lib/server/integrity";
 import { noStoreJson, rateLimit, readJsonBody } from "@/lib/server/guard";
 import { publicErrorMessage } from "@/lib/server/safe-error";
-import { getQuote, getSupplySnapshot, upsertMint } from "@/lib/store";
+import { getQuote, getSupplySnapshot } from "@/lib/store";
 import { getMilestoneSnapshot } from "@/lib/milestone-store";
 import { estimateMinerFeeSats } from "@/lib/prices";
 
@@ -17,11 +17,12 @@ function isValidBech32(address: string): boolean {
 }
 
 export async function POST(req: Request) {
-  const limited = rateLimit(req, "mint-prepare", 20, 60_000);
+  const limited = await rateLimit(req, "mint-prepare", 20, 60_000);
   if (limited) return limited;
 
   try {
     assertMintIntegrity();
+    await hydrateMintStore();
 
     const parsed = await readJsonBody<{
       address?: string;
@@ -57,21 +58,20 @@ export async function POST(req: Request) {
       return noStoreJson({ error: "Wrong network" }, { status: 400 });
     }
     const amount = Math.floor(Number(parsed.body.amount ?? 1));
-    if (!Number.isFinite(amount) || amount < 1 || amount > 500) {
+    if (!Number.isFinite(amount) || amount < 1 || amount > 100_000) {
       return noStoreJson({ error: "Invalid mint amount" }, { status: 400 });
     }
     const quoteUnits = Math.round(Number(quote.usd) / MINT_USD);
     if (quoteUnits < 1) {
       return noStoreJson({ error: "ABORT: invalid quote units" }, { status: 400 });
     }
-    const consumed = getQuoteUnitsConsumed(quoteId);
-    if (consumed + amount > quoteUnits) {
+    const reserved = await tryConsumeQuoteUnits(quoteId, amount, quoteUnits);
+    if (!reserved) {
       return noStoreJson(
         { error: "Quote does not cover this mint batch — refresh price" },
         { status: 400 }
       );
     }
-    consumeQuoteUnits(quoteId, amount);
 
     const supply = getSupplySnapshot();
     const milestones = getMilestoneSnapshot();
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
     const mintId = `mint_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
     const now = Math.floor(Date.now() / 1000);
 
-    upsertMint({
+    await persistMintRecord({
       id: mintId,
       walletAddress: address,
       quoteId: quote.quoteId,
