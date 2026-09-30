@@ -110,26 +110,28 @@ export function SiteFooter() {
               <p className="font-sans text-sm text-[var(--ink-mute)]">
                 Revised 2026-09-01 · Mainnet · Experimental
               </p>
-              <a
-                href="https://x.com/sat_dust20"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Official X / Twitter — @sat_dust20"
-                title="@sat_dust20"
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--ink)] bg-white text-[var(--ink)] no-underline transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"
-              >
-                <TwitterIcon className="h-4 w-4" />
-              </a>
-              <a
-                href="https://discord.gg/g9b6sZ8eD"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Official Discord"
-                title="Discord"
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--ink)] bg-white text-[var(--ink)] no-underline transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"
-              >
-                <DiscordIcon className="h-5 w-5" />
-              </a>
+              <div className="flex shrink-0 items-center gap-3">
+                <a
+                  href="https://x.com/sat_dust20"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Official X / Twitter — @sat_dust20"
+                  title="@sat_dust20"
+                  className="inline-flex h-10 w-10 items-center justify-center border border-[var(--ink)] bg-white text-[var(--ink)] no-underline transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"
+                >
+                  <TwitterIcon className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://discord.gg/g9b6sZ8eD"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Official Discord"
+                  title="Discord"
+                  className="inline-flex h-10 w-10 items-center justify-center border border-[var(--ink)] bg-white text-[var(--ink)] no-underline transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"
+                >
+                  <DiscordIcon className="h-5 w-5" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
