@@ -4,19 +4,21 @@ const isProd = process.env.NODE_ENV === "production";
 
 /**
  * CSP: fonts are self-hosted via next/font — no Google Fonts CDN at runtime.
- * connect-src stays 'self' (price feeds are server-side only).
+ * connect-src allows mempool.space plus Privy and WalletConnect.
  * script-src keeps unsafe-inline for Next hydration; no unsafe-eval in prod.
  */
 const CSP = [
   "default-src 'self'",
   isProd
-    ? "script-src 'self' 'unsafe-inline'"
-    : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    ? "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
-  "img-src 'self' data: blob:",
-  // mempool.space: commit lookup + reveal broadcast from the browser
-  "connect-src 'self' https://mempool.space",
+  "img-src 'self' data: blob: https://auth.privy.io https://explorer-api.walletconnect.com https://registry.walletconnect.com",
+  // mempool.space: commit lookup + reveal broadcast. Privy + WalletConnect: wallet login.
+  "connect-src 'self' https://mempool.space https://auth.privy.io https://api.privy.io https://*.rpc.privy.systems https://explorer-api.walletconnect.com https://verify.walletconnect.com https://verify.walletconnect.org https://pulse.walletconnect.org https://api.web3modal.org wss://relay.walletconnect.com wss://relay.walletconnect.org wss://www.walletlink.org",
+  "frame-src https://auth.privy.io https://verify.walletconnect.com https://verify.walletconnect.org https://challenges.cloudflare.com",
+  "child-src https://auth.privy.io https://verify.walletconnect.com https://verify.walletconnect.org",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
@@ -81,7 +83,7 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-          // Allow wallet extension popups (UniSat / OKX / Xverse)
+          // Allow wallet and Privy auth popups
           { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
           { key: "Cross-Origin-Resource-Policy", value: "same-site" },
           {

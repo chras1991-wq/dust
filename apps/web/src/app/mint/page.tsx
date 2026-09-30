@@ -195,7 +195,7 @@ export default function MintPage() {
     setError(null);
     if (!account || !adapter) {
       walletOpenRef.current?.();
-      setError("Connect UniSat or OKX Wallet first, then mint.");
+      setError("Connect a Bitcoin wallet first, then mint.");
       return;
     }
     if (!quote || quoteExpired) {
@@ -342,7 +342,7 @@ export default function MintPage() {
             />
             {!account && (
               <p className="mt-2 text-sm text-[var(--ink-mute)]">
-                UniSat or OKX on Bitcoin mainnet. Payment is sent from your wallet — no address copy
+                Any Bitcoin wallet on mainnet. Payment is sent from your wallet — no address copy
                 on this page.
               </p>
             )}
