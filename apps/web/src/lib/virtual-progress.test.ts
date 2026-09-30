@@ -23,6 +23,22 @@ describe("virtualMintCountAt", () => {
     expect(t2 % 1).toBe(0);
   });
 
+  it("stays near the floor in the first minutes of the 18h window", () => {
+    const fiveMin = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 5 * 60_000);
+    const thirtyMin = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 30 * 60_000);
+    const twoHours = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 2 * 60 * 60_000);
+    expect(fiveMin).toBeLessThan(VIRTUAL_FLOOR + 80);
+    expect(thirtyMin).toBeLessThan(VIRTUAL_FLOOR + 250);
+    expect(twoHours).toBeGreaterThan(VIRTUAL_FLOOR);
+    expect(twoHours).toBeLessThan(VIRTUAL_FLOOR + 900);
+  });
+
+  it("is monotonic and identical for the same timestamp", () => {
+    const t = VIRTUAL_PROGRESS_START_MS + 3 * 60 * 60_000;
+    expect(virtualMintCountAt(t)).toBe(virtualMintCountAt(t));
+    expect(virtualMintCountAt(t + 60_000)).toBeGreaterThanOrEqual(virtualMintCountAt(t));
+  });
+
   it("caps at 4500 after 18h window", () => {
     const t = VIRTUAL_PROGRESS_START_MS + VIRTUAL_WINDOW_MS + 60_000;
     expect(virtualMintCountAt(t)).toBe(VIRTUAL_CAP);

@@ -28,33 +28,35 @@ function randInt(seed: number, min: number, max: number): number {
   return min + Math.floor(r * (max - min + 1));
 }
 
-const NICE_JUMP = [0, 5, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 75, 80, 100, 120, 150, 200, 250, 500];
-
-function pickNiceJump(seed: number, remaining: number): number {
-  const eligible = NICE_JUMP.filter((n) => n > 0 && n <= remaining);
-  if (eligible.length === 0) return remaining;
-  const idx = randInt(seed, 0, eligible.length - 1);
-  return eligible[idx]!;
+/** Ideal count on the 18h clock. Display never runs ahead of this. */
+function curveCount(elapsedMs: number): number {
+  const t = Math.min(1, Math.max(0, elapsedMs / VIRTUAL_WINDOW_MS));
+  const eased = 1 - (1 - t) ** 1.25;
+  return VIRTUAL_FLOOR + Math.round((VIRTUAL_CAP - VIRTUAL_FLOOR) * eased);
 }
 
 function eventWaitMs(eventIndex: number): number {
   const r = mulberry32(eventIndex + 11_003)();
-  if (r < 0.22) {
-    return randInt(eventIndex + 91, 90_000, 210_000);
-  }
-  return randInt(eventIndex + 77, 18_000, 75_000);
+  if (r < 0.3) return randInt(eventIndex + 91, 3 * 60_000, 8 * 60_000);
+  if (r < 0.62) return randInt(eventIndex + 44, 70_000, 180_000);
+  return randInt(eventIndex + 77, 40_000, 110_000);
 }
 
-function eventJump(eventIndex: number, current: number): number {
-  const remaining = VIRTUAL_CAP - current;
-  if (remaining <= 0) return 0;
+/** Release only a slice of the 18h budget — pauses, small bags, rare larger bags. */
+function eventJump(eventIndex: number, budget: number): number {
+  if (budget <= 0) return 0;
   const r = mulberry32(eventIndex + 88_001)();
-  if (r < 0.18) return 0;
-  if (r > 0.96) return pickNiceJump(eventIndex + 5, Math.min(remaining, 200));
-  return pickNiceJump(eventIndex + 13, remaining);
+  if (r < 0.24) return 0;
+  const cap = Math.min(budget, r > 0.93 ? 48 : r > 0.72 ? 22 : 12);
+  const nice = [1, 2, 3, 5, 8, 10, 12, 15, 20, 25, 30, 40].filter((n) => n <= cap);
+  if (nice.length === 0) return Math.min(budget, cap);
+  return nice[randInt(eventIndex + 3, 0, nice.length - 1)]!;
 }
 
-/** Step function of wall clock — flat between events, then jumps. */
+/**
+ * Global step counter. Same timestamp → same number on every device.
+ * Budget is the 18h curve, so a few minutes cannot reach the thousands.
+ */
 export function virtualMintCountAt(nowMs: number = Date.now()): number {
   if (nowMs < VIRTUAL_PROGRESS_START_MS) return VIRTUAL_FLOOR;
 
@@ -69,12 +71,13 @@ export function virtualMintCountAt(nowMs: number = Date.now()): number {
     const wait = eventWaitMs(event);
     if (t + wait > elapsed) break;
     t += wait;
-    count = Math.min(VIRTUAL_CAP, count + eventJump(event, count));
+    const budget = curveCount(t) - count;
+    count += eventJump(event, budget);
     event += 1;
-    if (event > 12_000) break;
+    if (event > 20_000) break;
   }
 
-  return count;
+  return Math.min(count, curveCount(elapsed), VIRTUAL_CAP);
 }
 
 function postCapDisplayBonus(nowMs: number): number {
