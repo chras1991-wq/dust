@@ -11,7 +11,6 @@ import {
 export const dynamic = "force-dynamic";
 
 const CREDITED = new Set([
-  "PSBT_CREATED",
   "COMMIT_SIGNED",
   "COMMIT_BROADCAST",
   "COMMIT_CONFIRMED",
