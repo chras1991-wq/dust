@@ -79,6 +79,14 @@ function TwitterIcon({ className }: { className?: string }) {
   );
 }
 
+function DiscordIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M19.27 5.33A17.4 17.4 0 0 0 15.09 4a.1.1 0 0 0-.07.04c-.18.33-.39.76-.53 1.09a16.1 16.1 0 0 0-4.98 0c-.14-.34-.35-.76-.54-1.09a.1.1 0 0 0-.07-.04 17.4 17.4 0 0 0-4.18 1.33.09.09 0 0 0-.04.03C2.2 9.05 1.5 12.58 1.82 16.06c0 .02.02.04.04.05a17.5 17.5 0 0 0 5.26 2.66.1.1 0 0 0 .11-.04c.4-.55.76-1.13 1.07-1.74a.1.1 0 0 0-.05-.14 11.5 11.5 0 0 1-1.64-.78.1.1 0 0 1-.01-.17c.11-.08.22-.17.32-.25a.1.1 0 0 1 .1-.01c3.44 1.57 7.17 1.57 10.55 0a.1.1 0 0 1 .11.01c.1.09.21.17.33.26a.1.1 0 0 1-.01.16 10.7 10.7 0 0 1-1.64.78.1.1 0 0 0-.05.14c.32.61.68 1.19 1.07 1.74a.1.1 0 0 0 .11.04 17.4 17.4 0 0 0 5.3-2.66.1.1 0 0 0 .04-.05c.38-3.96-.64-7.46-2.7-10.53a.08.08 0 0 0-.04-.03ZM8.52 13.91c-.83 0-1.51-.76-1.51-1.7s.67-1.7 1.51-1.7 1.53.77 1.51 1.7c0 .94-.67 1.7-1.51 1.7Zm6.96 0c-.83 0-1.51-.76-1.51-1.7s.67-1.7 1.51-1.7 1.53.77 1.51 1.7c0 .94-.68 1.7-1.51 1.7Z" />
+    </svg>
+  );
+}
+
 export function SiteFooter() {
   return (
     <footer className="layer mt-12 border-t-[1.5px] border-[var(--ink)] sm:mt-16">
@@ -98,7 +106,7 @@ export function SiteFooter() {
           <div className="md:text-right">
             <p className="byline">Spec</p>
             <p className="font-display mt-2 text-xl italic sm:text-2xl">DUST-20 v1.1.0</p>
-            <div className="mt-3 flex items-center gap-3 md:justify-end">
+            <div className="mt-3 flex flex-wrap items-center gap-3 md:justify-end">
               <p className="font-sans text-sm text-[var(--ink-mute)]">
                 Revised 2026-09-01 · Mainnet · Experimental
               </p>
@@ -111,6 +119,16 @@ export function SiteFooter() {
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--ink)] bg-white text-[var(--ink)] no-underline transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"
               >
                 <TwitterIcon className="h-4 w-4" />
+              </a>
+              <a
+                href="https://discord.gg/g9b6sZ8eD"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Official Discord"
+                title="Discord"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--ink)] bg-white text-[var(--ink)] no-underline transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"
+              >
+                <DiscordIcon className="h-5 w-5" />
               </a>
             </div>
           </div>
