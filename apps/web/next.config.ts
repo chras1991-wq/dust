@@ -15,7 +15,8 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
   "img-src 'self' data: blob:",
-  "connect-src 'self'",
+  // mempool.space: commit lookup + reveal broadcast from the browser
+  "connect-src 'self' https://mempool.space",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
@@ -42,7 +43,20 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["@satdust/shared"],
   },
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config, { dev, isServer, webpack }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...(config.resolve.fallback || {}),
+        buffer: require.resolve('buffer/'),
+        stream: false,
+        crypto: false,
+      };
+      config.plugins.push(
+        new webpack.ProvidePlugin({
+          Buffer: ['buffer', 'Buffer'],
+        })
+      );
+    }
     // Never emit browser source maps in production (anti-RE / no source leak).
     if (!dev) {
       config.devtool = false;
@@ -66,9 +80,10 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-          { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          // Allow wallet extension popups (UniSat / OKX / Xverse)
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+          { key: "Cross-Origin-Resource-Policy", value: "same-site" },
           {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",

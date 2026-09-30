@@ -12,7 +12,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@satdust/shared": "*"
+    "@bitcoinerlab/secp256k1": "^1.2.0",
+    "@satdust/shared": "*",
+    "bitcoinjs-lib": "^6.1.7",
+    "ecpair": "^2.1.0"
   },
   "devDependencies": {
     "typescript": "^5.8.2",

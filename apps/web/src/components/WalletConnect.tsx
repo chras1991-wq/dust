@@ -10,9 +10,11 @@ import {
 
 type Props = {
   onAccount?: (account: Account | null, adapter: BitcoinWalletAdapter | null) => void;
+  /** Lets parent CTAs open the wallet modal (e.g. Connect & Mint). */
+  registerOpen?: (open: () => void) => void;
 };
 
-export function WalletConnect({ onAccount }: Props) {
+export function WalletConnect({ onAccount, registerOpen }: Props) {
   const [open, setOpen] = useState(false);
   const [account, setAccount] = useState<Account | null>(null);
   const [adapterId, setAdapterId] = useState<WalletId | null>(null);
@@ -20,6 +22,9 @@ export function WalletConnect({ onAccount }: Props) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    registerOpen?.(() => setOpen(true));
+  }, [registerOpen]);
   const available = useMemo(() => ALL_ADAPTERS, []);
 
   async function connect(adapter: BitcoinWalletAdapter) {
@@ -82,7 +87,7 @@ export function WalletConnect({ onAccount }: Props) {
                 <p className="kicker">Wallet</p>
                 <h2 className="font-display mt-2 text-2xl sm:text-3xl">Select adapter</h2>
                 <p className="mt-2 text-sm text-[var(--ink-mute)]">
-                  Sign PSBT only. Never seed / private key / WIF.
+                  UniSat or OKX on Bitcoin mainnet. Never paste a seed / private key / WIF.
                 </p>
               </div>
               <button type="button" className="btn btn-ghost !w-auto shrink-0 px-3" onClick={() => setOpen(false)}>
@@ -92,22 +97,44 @@ export function WalletConnect({ onAccount }: Props) {
             <ul className="mt-6 space-y-2">
               {available.map((w) => {
                 const ready = mounted ? w.isAvailable() : false;
+                const canPay = w.id === "unisat" || w.id === "okx";
                 return (
                   <li key={w.id}>
                     <button
                       type="button"
-                      className="flex min-h-12 w-full items-center justify-between border border-[var(--ink)] px-4 py-3 text-left hover:bg-[var(--ink)] hover:text-[var(--paper)]"
-                      onClick={() => connect(w)}
+                      className="flex min-h-12 w-full items-center justify-between border border-[var(--ink)] px-4 py-3 text-left hover:bg-[var(--ink)] hover:text-[var(--paper)] disabled:opacity-40"
+                      disabled={!ready}
+                      onClick={() => void connect(w)}
                     >
-                      <span className="font-display text-lg">{w.name}</span>
+                      <span>
+                        <span className="font-display text-lg">{w.name}</span>
+                        {!canPay && (
+                          <span className="mt-0.5 block text-xs text-[var(--ink-mute)]">
+                            Connect only — mint pay needs UniSat/OKX
+                          </span>
+                        )}
+                      </span>
                       <span className="font-condensed text-[0.7rem] uppercase tracking-[0.12em]">
-                        {ready ? "Ready" : "Missing"}
+                        {ready ? (canPay ? "Ready" : "Limited") : "Install"}
                       </span>
                     </button>
                   </li>
                 );
               })}
             </ul>
+            {!available.some((w) => mounted && w.isAvailable()) && (
+              <p className="mt-4 text-sm text-[var(--invalid)]">
+                No Bitcoin wallet detected. Install{" "}
+                <a href="https://unisat.io" target="_blank" rel="noreferrer">
+                  UniSat
+                </a>{" "}
+                or{" "}
+                <a href="https://www.okx.com/web3" target="_blank" rel="noreferrer">
+                  OKX
+                </a>
+                , then refresh.
+              </p>
+            )}
           </div>
         </div>
       )}

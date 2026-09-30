@@ -27,6 +27,8 @@ export interface BitcoinWalletAdapter {
   getNetwork(): Promise<Network>;
   getUtxos(): Promise<Utxo[]>;
   signPsbt(psbt: string): Promise<string>;
+  /** Pay sats to an address; returns funding txid when the wallet broadcasts. */
+  sendBitcoin?(toAddress: string, satoshis: number): Promise<string>;
   pushTx?(rawHex: string): Promise<string>;
 }
 
@@ -44,6 +46,11 @@ declare global {
         Array<{ txid: string; vout: number; satoshis: number; scriptPk: string }>
       >;
       signPsbt: (psbtHex: string, options?: object) => Promise<string>;
+      sendBitcoin?: (
+        address: string,
+        amount: number,
+        options?: object
+      ) => Promise<string>;
       pushTx?: (rawHex: string) => Promise<string>;
       on?: (event: string, handler: (...args: unknown[]) => void) => void;
       removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
@@ -58,6 +65,7 @@ declare global {
           Array<{ txId: string; vout: number; satoshis: string; scriptPk?: string }>
         >;
         signPsbt: (psbtHex: string, options?: object) => Promise<string>;
+        sendBitcoin?: (address: string, amount: number) => Promise<string>;
         pushTx?: (rawHex: string) => Promise<string>;
       };
     };
@@ -116,6 +124,12 @@ export const unisatAdapter: BitcoinWalletAdapter = {
   async signPsbt(psbt: string) {
     return window.unisat!.signPsbt(psbt);
   },
+  async sendBitcoin(toAddress: string, satoshis: number) {
+    if (!window.unisat?.sendBitcoin) {
+      throw new Error("UniSat sendBitcoin unavailable — update the extension");
+    }
+    return window.unisat.sendBitcoin(toAddress, satoshis);
+  },
   async pushTx(rawHex: string) {
     if (!window.unisat?.pushTx) throw new Error("UniSat pushTx unavailable");
     return window.unisat.pushTx(rawHex);
@@ -158,6 +172,11 @@ export const okxAdapter: BitcoinWalletAdapter = {
   },
   async signPsbt(psbt: string) {
     return window.okxwallet!.bitcoin!.signPsbt(psbt);
+  },
+  async sendBitcoin(toAddress: string, satoshis: number) {
+    const send = window.okxwallet?.bitcoin?.sendBitcoin;
+    if (!send) throw new Error("OKX sendBitcoin unavailable — update the wallet");
+    return send(toAddress, satoshis);
   },
 };
 

@@ -9,11 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@bitcoinerlab/secp256k1": "^1.2.0",
     "@satdust/bitcoin": "*",
     "@satdust/dust20": "*",
     "@satdust/quote": "*",
     "@satdust/shared": "*",
     "@satdust/wallet": "*",
+    "bitcoinjs-lib": "^6.1.7",
+    "buffer": "^6.0.3",
+    "ecpair": "^2.1.0",
     "next": "15.5.26",
     "react": "19.1.0",
     "react-dom": "19.1.0",

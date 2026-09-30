@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ComponentProps } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import { WalletConnect } from "@/components/WalletConnect";
 import { MilestoneRoadmap } from "@/components/mint/MilestoneRoadmap";
 import { MintMathPlate } from "@/components/mint/MintMathPlate";
 import { SupplyTrack } from "@/components/mint/SupplyTrack";
+import { executeMintPayment, type MintPayProgress } from "@/lib/mint-pay";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 import {
   GENESIS_SUPPLY,
@@ -45,9 +46,18 @@ type MilestonePayload = {
   supplyTicks: ComponentProps<typeof SupplyTrack>["ticks"];
 };
 
+const PROGRESS_LABEL: Record<MintPayProgress, string> = {
+  preparing: "Preparing mint…",
+  awaiting_wallet: "Open your wallet and confirm payment…",
+  funding: "Funding received — building reveal…",
+  revealing: "Signing reveal inscription…",
+  broadcasting: "Broadcasting reveal…",
+  done: "Mint broadcast",
+};
+
 export default function MintPage() {
   const [account, setAccount] = useState<Account | null>(null);
-  const [, setAdapter] = useState<BitcoinWalletAdapter | null>(null);
+  const [adapter, setAdapter] = useState<BitcoinWalletAdapter | null>(null);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [supply, setSupply] = useState<SupplySnap | null>(null);
   const [milestones, setMilestones] = useState<MilestonePayload | null>(null);
@@ -55,8 +65,15 @@ export default function MintPage() {
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ mintId: string; notice: string } | null>(null);
+  const [progress, setProgress] = useState<MintPayProgress | null>(null);
+  const [result, setResult] = useState<{
+    mintId: string;
+    notice: string;
+    commitTxid?: string;
+    revealTxid?: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const walletOpenRef = useRef<(() => void) | null>(null);
 
   const refreshSupply = useCallback(async () => {
     const res = await fetch("/api/supply");
@@ -111,28 +128,48 @@ export default function MintPage() {
   const minted = supply?.minted ?? milestones?.minted ?? 0;
   const authorized = milestones?.authorized ?? GENESIS_SUPPLY;
 
-  async function prepareMint() {
-    if (!account || !quote) return;
+  function requestMint() {
+    setError(null);
+    if (!account || !adapter) {
+      walletOpenRef.current?.();
+      setError("Connect UniSat or OKX Wallet first, then mint.");
+      return;
+    }
+    if (!quote || quoteExpired) {
+      void refreshQuote();
+      setError("Price locked expired — refreshed. Tap Mint again.");
+      return;
+    }
+    setConfirmOpen(true);
+  }
+
+  async function confirmAndPay() {
+    if (!account || !adapter || !quote) return;
     setBusy(true);
     setError(null);
+    setProgress("preparing");
     try {
-      const res = await fetch("/api/mint/prepare", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          address: account.address,
-          publicKey: account.publicKey,
-          quoteId: quote.quoteId,
-        }),
+      const paid = await executeMintPayment({
+        account,
+        adapter,
+        quoteId: quote.quoteId,
+        projectFeeSats: Number(quote.feeSats),
+        revealMinerFeeSats: Math.max(minerFee, 400),
+        onProgress: setProgress,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Prepare failed");
-      setResult({ mintId: data.mintId, notice: data.notice });
+      setResult({
+        mintId: paid.mintId,
+        notice: paid.notice,
+        commitTxid: paid.commitTxid,
+        revealTxid: paid.revealTxid,
+      });
       setConfirmOpen(false);
       await refreshSupply();
       await refreshMilestones();
+      await refreshQuote();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Mint prepare failed");
+      setError(e instanceof Error ? e.message : "Mint payment failed");
+      setProgress(null);
     } finally {
       setBusy(false);
     }
@@ -192,7 +229,15 @@ export default function MintPage() {
                 setAccount(acc);
                 setAdapter(ad);
               }}
+              registerOpen={(open) => {
+                walletOpenRef.current = open;
+              }}
             />
+            {!account && (
+              <p className="mt-2 text-sm text-[var(--ink-mute)]">
+                Mint needs UniSat or OKX on Bitcoin mainnet. The wallet popup is the payment step.
+              </p>
+            )}
           </div>
 
           {/* Confirmed / authorized — directly above mint CTA */}
@@ -222,16 +267,21 @@ export default function MintPage() {
               <button
                 type="button"
                 className="btn btn-solid"
-                disabled={!account || busy}
-                onClick={() => setConfirmOpen(true)}
+                disabled={busy}
+                onClick={requestMint}
               >
-                Mint 1 SATDUST
+                {account ? "Mint 1 SATDUST" : "Connect & Mint"}
               </button>
             )}
             <Link href="#milestones" className="btn btn-ghost">
               Milestone roadmap
             </Link>
           </div>
+          {busy && progress && (
+            <p className="mt-3 font-sans text-sm text-[var(--accent)]">
+              {PROGRESS_LABEL[progress]}
+            </p>
+          )}
 
           {openCapacity <= 0 && (
             <p className="mt-3 text-sm text-[var(--ink-mute)]">
@@ -244,10 +294,34 @@ export default function MintPage() {
 
           {result && (
             <div className="panel-edit mt-8 border-[var(--valid)]">
-              <p className="kicker">Submitted</p>
-              <h2 className="font-display mt-2 text-2xl">Mint prepared</h2>
+              <p className="kicker">Broadcast</p>
+              <h2 className="font-display mt-2 text-2xl">Mint payment sent</h2>
               <p className="mt-3 text-sm text-[var(--ink-soft)]">{result.notice}</p>
               <p className="mt-3 font-mono text-xs text-[var(--ink-mute)]">mintId {result.mintId}</p>
+              {result.commitTxid && (
+                <p className="mt-2 break-all font-mono text-xs">
+                  Commit{" "}
+                  <a
+                    href={`https://mempool.space/tx/${result.commitTxid}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {result.commitTxid}
+                  </a>
+                </p>
+              )}
+              {result.revealTxid && (
+                <p className="mt-1 break-all font-mono text-xs">
+                  Reveal{" "}
+                  <a
+                    href={`https://mempool.space/tx/${result.revealTxid}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {result.revealTxid}
+                  </a>
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -323,11 +397,31 @@ export default function MintPage() {
             <p className="mt-4 break-all font-mono text-xs text-[var(--ink-mute)]">
               Fee → {PROJECT_ADDRESS}
             </p>
+            <p className="mt-4 text-sm text-[var(--ink-soft)]">
+              Next: your wallet asks you to pay the commit output. After that we broadcast the
+              reveal (546-sat carrier + project fee) automatically.
+            </p>
+            {busy && progress && (
+              <p className="mt-3 font-sans text-sm text-[var(--accent)]">
+                {PROGRESS_LABEL[progress]}
+              </p>
+            )}
+            {error && <p className="mt-3 font-sans text-sm text-[var(--invalid)]">{error}</p>}
             <div className="btn-row mt-6">
-              <button type="button" className="btn btn-solid" disabled={busy} onClick={() => void prepareMint()}>
-                Confirm &amp; Sign
+              <button
+                type="button"
+                className="btn btn-solid"
+                disabled={busy || !account || !adapter}
+                onClick={() => void confirmAndPay()}
+              >
+                {busy ? "Paying…" : "Confirm & Pay in Wallet"}
               </button>
-              <button type="button" className="btn btn-ghost" onClick={() => setConfirmOpen(false)}>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                disabled={busy}
+                onClick={() => setConfirmOpen(false)}
+              >
                 Cancel
               </button>
             </div>
