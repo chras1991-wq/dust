@@ -1,0 +1,20 @@
+{
+  "name": "satdust",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @satdust/web",
+    "build": "npm run build -w @satdust/web",
+    "start": "npm run start -w @satdust/web",
+    "lint": "npm run lint -w @satdust/web",
+    "test": "npm run test --workspaces --if-present",
+    "test:dust20": "npm run test -w @satdust/dust20"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
