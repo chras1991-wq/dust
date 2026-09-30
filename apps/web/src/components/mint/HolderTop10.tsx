@@ -13,9 +13,8 @@ type Props = {
 
 export function HolderTop10({ holders, loading }: Props) {
   return (
-    <section className="panel-edit mt-10">
-      <p className="byline">On-chain desk</p>
-      <h2 className="font-display mt-1 text-2xl tracking-tight">Holder Top 10</h2>
+    <section className="panel-edit mt-8">
+      <h2 className="font-display text-xl tracking-tight sm:text-2xl">Holder Top 10</h2>
       {loading ? (
         <p className="mt-4 text-sm text-[var(--ink-mute)]">Loading…</p>
       ) : holders.length === 0 ? (

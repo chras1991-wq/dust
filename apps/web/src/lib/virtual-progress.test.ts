@@ -14,11 +14,13 @@ describe("virtualMintCountAt", () => {
     expect(virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 30_000)).toBe(VIRTUAL_FLOOR);
   });
 
-  it("stays flat between discrete events then jumps", () => {
-    const a = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 60_000);
-    const b = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 90_000);
-    expect(a).toBe(VIRTUAL_FLOOR);
-    expect(b).toBeGreaterThanOrEqual(VIRTUAL_FLOOR);
+  it("only moves in steps (integer plateaus)", () => {
+    const t0 = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 5_000);
+    const t1 = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 12_000);
+    const t2 = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 45_000);
+    expect(t0).toBe(VIRTUAL_FLOOR);
+    expect(t2).toBeGreaterThanOrEqual(t1);
+    expect(t2 % 1).toBe(0);
   });
 
   it("caps at 4500 after 18h window", () => {

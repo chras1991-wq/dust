@@ -12,9 +12,11 @@ type Props = {
   onAccount?: (account: Account | null, adapter: BitcoinWalletAdapter | null) => void;
   /** Lets parent CTAs open the wallet modal (e.g. Connect & Mint). */
   registerOpen?: (open: () => void) => void;
+  /** Hide standalone Connect button — parent provides the only CTA. */
+  headlessUntilConnected?: boolean;
 };
 
-export function WalletConnect({ onAccount, registerOpen }: Props) {
+export function WalletConnect({ onAccount, registerOpen, headlessUntilConnected }: Props) {
   const [open, setOpen] = useState(false);
   const [account, setAccount] = useState<Account | null>(null);
   const [adapterId, setAdapterId] = useState<WalletId | null>(null);
@@ -71,7 +73,7 @@ export function WalletConnect({ onAccount, registerOpen }: Props) {
             Disconnect
           </button>
         </div>
-      ) : (
+      ) : headlessUntilConnected ? null : (
         <button type="button" className="btn btn-solid" onClick={() => setOpen(true)}>
           Connect Wallet
         </button>

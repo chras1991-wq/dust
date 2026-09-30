@@ -5,7 +5,6 @@ import Link from "next/link";
 import { WalletConnect } from "@/components/WalletConnect";
 import { HolderTop10 } from "@/components/mint/HolderTop10";
 import { MilestoneRoadmap } from "@/components/mint/MilestoneRoadmap";
-import { MintMathPlate } from "@/components/mint/MintMathPlate";
 import { SupplyTrack } from "@/components/mint/SupplyTrack";
 import { executeMintPayment, type MintPayProgress } from "@/lib/mint-pay";
 import { useSmoothMintProgress } from "@/hooks/useSmoothMintProgress";
@@ -230,6 +229,18 @@ export default function MintPage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.35fr_0.9fr] lg:gap-10">
         <div>
           <div className="panel-edit space-y-3">
+            <p className="font-sans text-xs text-[var(--ink-mute)] sm:text-sm">
+              Minted{" "}
+              <span className="font-display text-lg text-[var(--ink)] tabular-nums">
+                {displayMinted.toLocaleString()}
+              </span>
+              <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
+              <span className="hidden sm:inline">
+                {" "}
+                · slots {openCapacity.toLocaleString()}
+                {supply?.pending ? ` · pending ${supply.pending}` : ""}
+              </span>
+            </p>
             <label className="byline" htmlFor="mint-qty">Amount</label>
             <div className="flex flex-wrap items-end gap-3">
               <input
@@ -292,6 +303,7 @@ export default function MintPage() {
             </div>
 
             <WalletConnect
+              headlessUntilConnected
               onAccount={(acc, ad) => {
                 setAccount(acc);
                 setAdapter(ad);
@@ -320,20 +332,6 @@ export default function MintPage() {
             </div>
           </div>
 
-          <p className="mt-3 font-sans text-xs text-[var(--ink-mute)]">
-            Progress{" "}
-            <span className="font-display text-base text-[var(--ink)]">
-              {displayMinted.toLocaleString()}
-            </span>
-            <span className="text-[var(--ink-mute)]"> / {authorized.toLocaleString()}</span>
-            {" · "}
-            slots {openCapacity.toLocaleString()}
-            {supply?.pending ? ` · pending ${supply.pending}` : ""}
-            {" · "}
-            <Link href="#milestones" className="underline underline-offset-2">
-              roadmap
-            </Link>
-          </p>
           {busy && progress && (
             <p className="mt-3 font-sans text-sm text-[var(--accent)]">
               {PROGRESS_LABEL[progress]}
@@ -366,7 +364,7 @@ export default function MintPage() {
           <HolderTop10 holders={holders} />
         </div>
 
-        <aside className="panel-edit h-fit">
+        <aside className="panel-edit h-fit hidden lg:block">
           <p className="kicker">Live desk</p>
           <p className="font-display mt-2 text-4xl">
             {displayMinted.toLocaleString()}
@@ -397,8 +395,6 @@ export default function MintPage() {
           </ul>
         </aside>
       </div>
-
-      <MintMathPlate />
 
       <div id="milestones">
         {milestones && (

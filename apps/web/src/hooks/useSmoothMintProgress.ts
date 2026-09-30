@@ -1,17 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { pickProgressMotion } from "@/lib/mint-progress-motion";
+import {
+  nextRhythm,
+  pickProgressMotion,
+  type MotionRhythm,
+} from "@/lib/mint-progress-motion";
 import { VIRTUAL_FLOOR, displayMintProgress } from "@/lib/virtual-progress";
 
-/** Mint counter: flat for long stretches; jumps when global ceiling steps. */
+/** Mint counter: idle ↔ short active runs toward the global ceiling (变奏). */
 export function useSmoothMintProgress() {
   const [realMinted, setRealMinted] = useState(0);
   const [shown, setShown] = useState(VIRTUAL_FLOOR);
   const shownRef = useRef(VIRTUAL_FLOOR);
   const ceilingRef = useRef(VIRTUAL_FLOOR);
+  const rhythmRef = useRef<MotionRhythm>({ mode: "idle", activeTicksLeft: 0 });
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userBurstRef = useRef(0);
+  const tickSeedRef = useRef(0);
 
   const readCeiling = useCallback((real: number) => {
     const next = displayMintProgress(real, Date.now()).displayMinted;
@@ -56,7 +62,7 @@ export function useSmoothMintProgress() {
         setShown(VIRTUAL_FLOOR);
       }
     })();
-    const id = setInterval(() => void syncReal(), 45_000);
+    const id = setInterval(() => void syncReal(), 30_000);
     return () => clearInterval(id);
   }, [readCeiling, syncReal]);
 
@@ -71,20 +77,23 @@ export function useSmoothMintProgress() {
       const prev = shownRef.current;
       const gap = target - prev;
 
+      rhythmRef.current = nextRhythm(rhythmRef.current, gap);
+
       if (gap <= 0) {
         if (target < prev) {
           shownRef.current = target;
           setShown(target);
         }
-        timerRef.current = setTimeout(schedule, pickProgressMotion(0).delayMs);
+        timerRef.current = setTimeout(schedule, pickProgressMotion(0, rhythmRef.current).delayMs);
         return;
       }
 
-      let { delta, delayMs } = pickProgressMotion(gap);
+      let { delta, delayMs } = pickProgressMotion(gap, rhythmRef.current);
 
       if (userBurstRef.current > 0) {
         const bump = Math.min(userBurstRef.current, gap);
         userBurstRef.current -= bump;
+        rhythmRef.current = { mode: "active", activeTicksLeft: 3 };
         delta = Math.max(delta, Math.min(bump, randInt(5, Math.min(120, bump))));
         delayMs = Math.min(delayMs, randInt(800, 2200));
       }
@@ -95,6 +104,7 @@ export function useSmoothMintProgress() {
         setShown(next);
       }
 
+      tickSeedRef.current += 1;
       timerRef.current = setTimeout(schedule, delayMs);
     };
 

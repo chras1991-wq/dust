@@ -28,22 +28,30 @@ function randInt(seed: number, min: number, max: number): number {
   return min + Math.floor(r * (max - min + 1));
 }
 
+const NICE_JUMP = [0, 5, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 75, 80, 100, 120, 150, 200, 250, 500];
+
+function pickNiceJump(seed: number, remaining: number): number {
+  const eligible = NICE_JUMP.filter((n) => n > 0 && n <= remaining);
+  if (eligible.length === 0) return remaining;
+  const idx = randInt(seed, 0, eligible.length - 1);
+  return eligible[idx]!;
+}
+
 function eventWaitMs(eventIndex: number): number {
   const r = mulberry32(eventIndex + 11_003)();
-  if (r < 0.38) {
-    return randInt(eventIndex + 91, 180_000, 480_000);
+  if (r < 0.22) {
+    return randInt(eventIndex + 91, 90_000, 210_000);
   }
-  return randInt(eventIndex + 77, 50_000, 200_000);
+  return randInt(eventIndex + 77, 18_000, 75_000);
 }
 
 function eventJump(eventIndex: number, current: number): number {
   const remaining = VIRTUAL_CAP - current;
   if (remaining <= 0) return 0;
   const r = mulberry32(eventIndex + 88_001)();
-  if (r < 0.32) return 0;
-  if (r > 0.965) return Math.min(remaining, randInt(eventIndex + 5, 72, 160));
-  if (r < 0.62) return Math.min(remaining, randInt(eventIndex + 9, 4, 22));
-  return Math.min(remaining, randInt(eventIndex + 13, 18, 58));
+  if (r < 0.18) return 0;
+  if (r > 0.96) return pickNiceJump(eventIndex + 5, Math.min(remaining, 200));
+  return pickNiceJump(eventIndex + 13, remaining);
 }
 
 /** Step function of wall clock — flat between events, then jumps. */

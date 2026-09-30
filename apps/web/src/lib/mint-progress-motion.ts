@@ -1,8 +1,13 @@
-/** Irregular mint counter steps — mostly idle; occasional batch jumps. */
+/** Irregular mint counter — idle stretches + short active runs (变奏). */
 
 export type ProgressMotionPick = {
   delta: number;
   delayMs: number;
+};
+
+export type MotionRhythm = {
+  mode: "idle" | "active";
+  activeTicksLeft: number;
 };
 
 function randInt(min: number, max: number): number {
@@ -16,43 +21,57 @@ function clampChunk(gap: number, min: number, max: number): number {
   return randInt(lo, hi);
 }
 
-/**
- * UI should sit still most of the time; when the server ceiling moves, jump in batches.
- */
-export function pickProgressMotion(gap: number): ProgressMotionPick {
+/** Human-ish mint batch sizes (people mint round numbers). */
+export function humanMintChunk(gap: number, seed: number): number {
+  const nice = [1, 2, 3, 5, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 75, 80, 100, 120, 150, 200, 250, 500];
+  const r = (seed * 1103515245 + 12345) >>> 0;
+  const pick = nice[r % nice.length]!;
+  if (pick <= gap) return pick;
+  for (let i = nice.length - 1; i >= 0; i--) {
+    if (nice[i]! <= gap) return nice[i]!;
+  }
+  return gap;
+}
+
+export function nextRhythm(prev: MotionRhythm, gap: number): MotionRhythm {
   if (gap <= 0) {
-    return { delta: 0, delayMs: randInt(12_000, 28_000) };
+    return { mode: "idle", activeTicksLeft: 0 };
+  }
+  if (prev.mode === "active" && prev.activeTicksLeft > 0) {
+    return { mode: "active", activeTicksLeft: prev.activeTicksLeft - 1 };
+  }
+  if (prev.mode === "idle" && Math.random() < 0.38) {
+    return { mode: "active", activeTicksLeft: randInt(2, 5) };
+  }
+  return { mode: "idle", activeTicksLeft: 0 };
+}
+
+export function pickProgressMotion(gap: number, rhythm: MotionRhythm): ProgressMotionPick {
+  if (gap <= 0) {
+    return { delta: 0, delayMs: randInt(5000, 14_000) };
+  }
+
+  if (rhythm.mode === "idle") {
+    if (Math.random() < 0.55) {
+      return { delta: 0, delayMs: randInt(6000, 18_000) };
+    }
+    const chunk = humanMintChunk(gap, Date.now() % 9973);
+    return { delta: Math.min(gap, chunk), delayMs: randInt(3500, 10_000) };
   }
 
   const r = Math.random();
-
-  if (r < 0.42) {
-    return { delta: 0, delayMs: randInt(10_000, 35_000) };
+  if (r < 0.2) {
+    return { delta: 0, delayMs: randInt(2500, 6000) };
   }
-
-  if (gap >= 40 && r > 0.94) {
+  if (r > 0.9 && gap >= 30) {
     return {
-      delta: clampChunk(gap, 55, 140),
-      delayMs: randInt(2500, 6000),
+      delta: clampChunk(gap, 40, 120),
+      delayMs: randInt(1800, 4500),
     };
   }
-
-  if (r < 0.7) {
-    return {
-      delta: clampChunk(gap, 6, gap > 80 ? 38 : 24),
-      delayMs: randInt(1800, 5500),
-    };
-  }
-
-  if (r < 0.88) {
-    return {
-      delta: clampChunk(gap, 1, 4),
-      delayMs: randInt(4000, 11_000),
-    };
-  }
-
+  const chunk = humanMintChunk(gap, Date.now() + rhythm.activeTicksLeft * 17);
   return {
-    delta: clampChunk(gap, 22, Math.min(75, gap)),
-    delayMs: randInt(2200, 7000),
+    delta: Math.min(gap, chunk),
+    delayMs: randInt(1200, 3800),
   };
 }
