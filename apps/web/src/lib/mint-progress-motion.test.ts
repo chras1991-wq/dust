@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { humanMintChunk, nextRhythm, pickProgressMotion } from "./mint-progress-motion";
+import { humanMintChunk, nextRhythm, pickProgressMotion, type MotionRhythm } from "./mint-progress-motion";
 
 describe("pickProgressMotion", () => {
   it("never exceeds remaining gap", () => {
@@ -34,7 +34,7 @@ describe("humanMintChunk", () => {
 
 describe("nextRhythm", () => {
   it("enters active runs when behind", () => {
-    let r = { mode: "idle" as const, activeTicksLeft: 0 };
+    let r: MotionRhythm = { mode: "idle", activeTicksLeft: 0 };
     let sawActive = false;
     for (let i = 0; i < 50; i++) {
       r = nextRhythm(r, 40);

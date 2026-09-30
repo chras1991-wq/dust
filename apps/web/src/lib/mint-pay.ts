@@ -26,7 +26,7 @@ export async function executeMintPayment(args: {
 
   if (!adapter.sendBitcoin) {
     throw new Error(
-      `${adapter.name} cannot send Bitcoin from this page. Use UniSat or OKX Wallet.`
+      `${adapter.name} cannot send Bitcoin from this page. Use UniSat, OKX, Xverse, Leather, Phantom, or Bitget.`
     );
   }
 

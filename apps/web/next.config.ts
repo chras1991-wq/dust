@@ -10,13 +10,14 @@ const isProd = process.env.NODE_ENV === "production";
 const CSP = [
   "default-src 'self'",
   isProd
-    ? "script-src 'self' 'unsafe-inline'"
-    : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    ? "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://auth.privy.io"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://auth.privy.io",
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
   "img-src 'self' data: blob:",
   // mempool.space: commit lookup + reveal broadcast from the browser
-  "connect-src 'self' https://mempool.space",
+  "connect-src 'self' https://mempool.space https://auth.privy.io https://*.privy.io wss://relay.walletconnect.com wss://relay.walletconnect.org https://explorer-api.walletconnect.com https://*.rpc.privy.systems",
+  "frame-src https://auth.privy.io https://verify.walletconnect.com https://verify.walletconnect.org",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",

@@ -32,7 +32,7 @@ export interface BitcoinWalletAdapter {
   pushTx?(rawHex: string): Promise<string>;
 }
 
-export type WalletId = "unisat" | "okx" | "xverse" | "leather";
+export type WalletId = "unisat" | "okx" | "xverse" | "leather" | "phantom" | "bitget";
 
 declare global {
   interface Window {
@@ -75,6 +75,17 @@ declare global {
     LeatherProvider?: {
       request: (method: string, params?: object) => Promise<unknown>;
     };
+    phantom?: {
+      bitcoin?: {
+        requestAccounts: () => Promise<Array<{ address: string; publicKey?: string }>>;
+        getAccounts?: () => Promise<Array<{ address: string; publicKey?: string }>>;
+        signPSBT?: (psbt: string) => Promise<string>;
+        sendBitcoin?: (address: string, amount: number) => Promise<string>;
+      };
+    };
+    bitkeep?: {
+      unisat?: Window["unisat"];
+    };
   }
 }
 
@@ -90,7 +101,10 @@ export const unisatAdapter: BitcoinWalletAdapter = {
   id: "unisat",
   name: "UniSat",
   isAvailable() {
-    return typeof window !== "undefined" && Boolean(window.unisat);
+    if (typeof window === "undefined" || !window.unisat) return false;
+    // Bitget injects the same object on window.unisat. Show it once, as Bitget.
+    if (window.bitkeep?.unisat && window.unisat === window.bitkeep.unisat) return false;
+    return true;
   },
   async connect() {
     if (!window.unisat) throw new Error("UniSat not installed");
@@ -194,15 +208,24 @@ export const okxAdapter: BitcoinWalletAdapter = {
   },
 };
 
+function xverseProvider(): NonNullable<Window["btc"]> | undefined {
+  if (typeof window === "undefined") return undefined;
+  const extra = window as Window & {
+    XverseProviders?: { BitcoinProvider?: NonNullable<Window["btc"]> };
+  };
+  return extra.XverseProviders?.BitcoinProvider ?? window.btc;
+}
+
 export const xverseAdapter: BitcoinWalletAdapter = {
   id: "xverse",
   name: "Xverse",
   isAvailable() {
-    return typeof window !== "undefined" && Boolean(window.btc);
+    return Boolean(xverseProvider());
   },
   async connect() {
-    if (!window.btc) throw new Error("Xverse not installed");
-    const res = (await window.btc.request("getAccounts", {
+    const provider = xverseProvider();
+    if (!provider) throw new Error("Xverse not installed");
+    const res = (await provider.request("getAccounts", {
       purposes: ["ordinals", "payment"],
       message: "Connect to SATDUST",
     })) as { result?: Array<{ address: string; publicKey: string; purpose: string }> };
@@ -226,12 +249,24 @@ export const xverseAdapter: BitcoinWalletAdapter = {
     return [];
   },
   async signPsbt(psbt: string) {
-    const res = (await window.btc!.request("signPsbt", {
+    const provider = xverseProvider();
+    if (!provider) throw new Error("Xverse not installed");
+    const res = (await provider.request("signPsbt", {
       psbt,
       broadcast: false,
     })) as { result?: { psbt: string } };
     if (!res.result?.psbt) throw new Error("Xverse signPsbt failed");
     return res.result.psbt;
+  },
+  async sendBitcoin(toAddress: string, satoshis: number) {
+    const provider = xverseProvider();
+    if (!provider) throw new Error("Xverse not installed");
+    const res = (await provider.request("sendTransfer", {
+      recipients: [{ address: toAddress, amount: Math.floor(satoshis) }],
+    })) as { result?: { txid?: string } };
+    const txid = res.result?.txid;
+    if (!txid) throw new Error("Xverse send failed");
+    return txid;
   },
 };
 
@@ -275,13 +310,113 @@ export const leatherAdapter: BitcoinWalletAdapter = {
     if (!res.result?.hex) throw new Error("Leather signPsbt failed");
     return res.result.hex;
   },
+  async sendBitcoin(toAddress: string, satoshis: number) {
+    const res = (await window.LeatherProvider!.request("sendTransfer", {
+      recipients: [{ address: toAddress, amount: Math.floor(satoshis) }],
+      network: "mainnet",
+    })) as { result?: { txid?: string } };
+    const txid = res.result?.txid;
+    if (!txid) throw new Error("Leather send failed");
+    return txid;
+  },
 };
+
+function injectedUnisatLike(
+  id: WalletId,
+  name: string,
+  getApi: () => Window["unisat"] | undefined
+): BitcoinWalletAdapter {
+  return {
+    id,
+    name,
+    isAvailable() {
+      return typeof window !== "undefined" && Boolean(getApi());
+    },
+    async connect() {
+      const api = getApi();
+      if (!api) throw new Error(`${name} not installed`);
+      const accounts = await api.requestAccounts();
+      const address = accounts[0];
+      if (!address) throw new Error(`No ${name} account`);
+      const publicKey = await api.getPublicKey();
+      const network = mapNetwork(await api.getNetwork());
+      return { address, publicKey, network };
+    },
+    async getAddress() {
+      const accounts = await getApi()!.getAccounts();
+      return accounts[0]!;
+    },
+    async getPublicKey() {
+      return getApi()!.getPublicKey();
+    },
+    async getNetwork() {
+      return mapNetwork(await getApi()!.getNetwork());
+    },
+    async getUtxos() {
+      return [];
+    },
+    async signPsbt(psbt: string) {
+      return getApi()!.signPsbt(psbt);
+    },
+    async sendBitcoin(toAddress: string, satoshis: number) {
+      const api = getApi();
+      if (!api?.sendBitcoin) throw new Error(`${name} sendBitcoin unavailable`);
+      return api.sendBitcoin.call(api, toAddress, Math.floor(satoshis));
+    },
+  };
+}
+
+export const phantomAdapter: BitcoinWalletAdapter = {
+  id: "phantom",
+  name: "Phantom",
+  isAvailable() {
+    return typeof window !== "undefined" && Boolean(window.phantom?.bitcoin);
+  },
+  async connect() {
+    const api = window.phantom?.bitcoin;
+    if (!api) throw new Error("Phantom Bitcoin wallet not installed");
+    const accounts = await api.requestAccounts();
+    const first = accounts[0];
+    if (!first?.address) throw new Error("No Phantom Bitcoin account");
+    return { address: first.address, publicKey: first.publicKey, network: "mainnet" };
+  },
+  async getAddress() {
+    return (await this.connect()).address;
+  },
+  async getPublicKey() {
+    return (await this.connect()).publicKey ?? "";
+  },
+  async getNetwork() {
+    return "mainnet";
+  },
+  async getUtxos() {
+    return [];
+  },
+  async signPsbt(psbt: string) {
+    const api = window.phantom?.bitcoin;
+    if (!api?.signPSBT) throw new Error("Phantom signPSBT unavailable");
+    return api.signPSBT(psbt);
+  },
+  async sendBitcoin(toAddress: string, satoshis: number) {
+    const api = window.phantom?.bitcoin;
+    if (!api?.sendBitcoin) throw new Error("Phantom Bitcoin send unavailable — update Phantom");
+    return api.sendBitcoin(toAddress, Math.floor(satoshis));
+  },
+};
+
+export const bitgetAdapter = injectedUnisatLike("bitget", "Bitget Wallet", () => {
+  if (typeof window === "undefined") return undefined;
+  const extra = window as Window & { bitget?: { unisat?: Window["unisat"] } };
+  return window.bitkeep?.unisat ?? extra.bitget?.unisat;
+});
 
 export const ALL_ADAPTERS: BitcoinWalletAdapter[] = [
   unisatAdapter,
   okxAdapter,
   xverseAdapter,
   leatherAdapter,
+  phantomAdapter,
+  bitgetAdapter,
 ];
 
 export function listAvailableWallets(): BitcoinWalletAdapter[] {

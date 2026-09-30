@@ -163,7 +163,6 @@ export default function MintPage() {
     setError(null);
     if (!account || !adapter) {
       walletOpenRef.current?.();
-      setError("Connect UniSat or OKX Wallet first, then mint.");
       return;
     }
     if (!quote) void refreshQuote();

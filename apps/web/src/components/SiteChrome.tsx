@@ -14,7 +14,7 @@ const LINKS = [
 
 export function MarqueeBar() {
   const text =
-    "DUST-20  ·  Sats locked in the UTXO  ·  Bitcoin Mainnet  ·  SATDUST  ·  Offset-0  ·  Experimental  ·  ";
+    "DUST-20  ·  First liquidity UTXO protocol  ·  Bitcoin Mainnet  ·  SATDUST  ·  Offset-0  ·  Experimental  ·  ";
   return (
     <div className="issue-bar layer" aria-hidden>
       <div className="issue-track">
@@ -83,20 +83,10 @@ export function SiteFooter() {
   return (
     <footer className="layer mt-12 border-t-[1.5px] border-[var(--ink)] sm:mt-16">
       <div className="bg-[var(--ink)]">
-        <div className="page-shell flex items-center justify-between gap-4 py-3">
-          <p className="min-w-0 font-condensed text-[0.65rem] uppercase leading-relaxed tracking-[0.12em] text-[var(--paper)] sm:text-[0.72rem] sm:tracking-[0.16em]">
+        <div className="page-shell py-3">
+          <p className="font-condensed text-[0.65rem] uppercase leading-relaxed tracking-[0.12em] text-[var(--paper)] sm:text-[0.72rem] sm:tracking-[0.16em]">
             Colophon · Not Bitcoin consensus · Indexer-dependent state
           </p>
-          <a
-            href="https://x.com/sat_dust20"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Official Twitter / X — @sat_dust20"
-            title="@sat_dust20"
-            className="social-x inline-flex shrink-0 items-center justify-center text-[var(--paper)] no-underline opacity-75 transition-opacity hover:text-[var(--paper)] hover:opacity-100"
-          >
-            <TwitterIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-          </a>
         </div>
       </div>
       <div className="page-shell py-8 sm:py-10">
