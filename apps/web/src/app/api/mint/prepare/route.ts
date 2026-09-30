@@ -114,14 +114,14 @@ export async function POST(req: Request) {
     return noStoreJson({
       mintId,
       status: "PSBT_CREATED",
-      projectAddress: PROJECT_ADDRESS,
       quote: {
         quoteId: quote.quoteId,
         feeSats: quote.feeSats,
         usd: quote.usd,
         expiresAt: quote.expiresAt,
       },
-      revealPlan: plan,
+      carrierSats: plan.outputs[0]?.value ?? UNIT_SATS,
+      feeSats,
       notice:
         "Mint availability is not guaranteed until your transaction is confirmed and accepted by the DUST-20 indexer.",
       next: [

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PROJECT_ADDRESS } from "@satdust/shared";
 
 type Supply = {
   minted: number;
@@ -34,7 +33,6 @@ export default function AdminPage() {
         <Tile label="Confirmed mint" value={String(supply?.minted ?? "—")} />
         <Tile label="Pending mint" value={String(supply?.pending ?? "—")} />
         <Tile label="Remaining" value={String(supply?.remaining ?? "—")} />
-        <Tile label="Project address" value={`${PROJECT_ADDRESS.slice(0, 12)}…`} />
         <Tile
           label="Deploy tx"
           value={

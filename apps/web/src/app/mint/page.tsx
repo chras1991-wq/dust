@@ -5,12 +5,12 @@ import Link from "next/link";
 import { WalletConnect } from "@/components/WalletConnect";
 import { MilestoneRoadmap } from "@/components/mint/MilestoneRoadmap";
 import { MintMathPlate } from "@/components/mint/MintMathPlate";
+import { HolderTop10 } from "@/components/mint/HolderTop10";
 import { SupplyTrack } from "@/components/mint/SupplyTrack";
 import { executeMintPayment, type MintPayProgress } from "@/lib/mint-pay";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 import {
   GENESIS_SUPPLY,
-  PROJECT_ADDRESS,
   SUPPLY,
   UNIT_SATS,
 } from "@satdust/shared";
@@ -22,7 +22,6 @@ type Quote = {
   feeSats: string;
   expiresAt: number;
   signature: string;
-  projectAddress: string;
 };
 
 type SupplySnap = {
@@ -93,9 +92,8 @@ export default function MintPage() {
       return;
     }
     const q = (await res.json()) as Quote;
-    if (q.projectAddress !== PROJECT_ADDRESS) {
-      setError("ABORT: backend returned unexpected project address");
-      setQuote(null);
+    if (!q.quoteId || !q.feeSats) {
+      setError("Failed to fetch signed quote");
       return;
     }
     setQuote(q);
@@ -380,6 +378,8 @@ export default function MintPage() {
         />
       )}
 
+      <HolderTop10 />
+
       {confirmOpen && quote && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
           <div className="panel-edit modal-sheet mb-[env(safe-area-inset-bottom)] w-full sm:mb-0">
@@ -388,18 +388,15 @@ export default function MintPage() {
             <ul className="mt-5 space-y-2 font-sans text-sm text-[var(--ink-soft)]">
               <li className="text-[var(--ink)]">1 SATDUST</li>
               <li>{UNIT_SATS} sats backing</li>
-              <li>Project fee {feeSats.toLocaleString()} sats</li>
+              <li>Mint fee {feeSats.toLocaleString()} sats</li>
               <li>Network ≈ {minerFee.toLocaleString()} sats</li>
               <li className="font-display text-lg text-[var(--accent)]">
                 Total ≈ {total.toLocaleString()} sats
               </li>
             </ul>
-            <p className="mt-4 break-all font-mono text-xs text-[var(--ink-mute)]">
-              Fee → {PROJECT_ADDRESS}
-            </p>
             <p className="mt-4 text-sm text-[var(--ink-soft)]">
-              Next: your wallet asks you to pay the commit output. After that we broadcast the
-              reveal (546-sat carrier + project fee) automatically.
+              Next: confirm in your wallet. We then broadcast the reveal (546-sat carrier + mint
+              fee) automatically.
             </p>
             {busy && progress && (
               <p className="mt-3 font-sans text-sm text-[var(--accent)]">
