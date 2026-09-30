@@ -62,10 +62,13 @@ describe("virtualMintCountAt", () => {
 });
 
 describe("displayMintProgress", () => {
-  it("uses real count when higher than virtual before cap", () => {
+  it("adds real mints on top of the virtual clock before cap", () => {
     const now = VIRTUAL_PROGRESS_START_MS + 60_000;
-    const d = displayMintProgress(9000, now);
-    expect(d.displayMinted).toBe(9000);
+    const virtual = virtualMintCountAt(now);
+    const d = displayMintProgress(25, now);
+    expect(d.virtualMinted).toBe(virtual);
+    expect(d.displayMinted).toBe(virtual + 25);
+    expect(displayMintProgress(25, now).displayMinted).toBe(d.displayMinted);
   });
 
   it("ignores real mint after virtual cap and adds post-cap bonus", () => {

@@ -19,12 +19,12 @@ export function syncBackend(): SyncBackend {
 }
 
 /** Pull global counters + recent mint index into the in-process cache (short TTL). */
-export async function hydrateMintStore(): Promise<void> {
+export async function hydrateMintStore(force = false): Promise<void> {
   const kv = getKv();
   if (!kv) return;
 
   const now = Date.now();
-  if (now - lastHydrateMs < HYDRATE_TTL_MS) return;
+  if (!force && now - lastHydrateMs < HYDRATE_TTL_MS) return;
   lastHydrateMs = now;
 
   const counters = await kv.hgetall<Record<string, string>>(COUNTER_KEY);

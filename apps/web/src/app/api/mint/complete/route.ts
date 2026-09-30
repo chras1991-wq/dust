@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   if (limited) return limited;
 
   try {
-    await hydrateMintStore();
+    await hydrateMintStore(true);
     const parsed = await readJsonBody<{
       mintId?: string;
       commitTxid?: string;

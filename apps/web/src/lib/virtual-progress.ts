@@ -116,21 +116,26 @@ export function displayMintProgress(realMinted: number, nowMs: number = Date.now
   const baseVirtual = virtualMintCountAt(nowMs);
   const virtualFrozen = baseVirtual >= VIRTUAL_CAP;
 
+  const real = Math.max(0, Math.floor(realMinted));
+
   if (virtualFrozen) {
+    // After the 18h window the clock stays at 4500. Real mints are not folded in.
     const displayMinted = VIRTUAL_CAP + postCapDisplayBonus(nowMs);
     return {
       displayMinted,
       virtualMinted: displayMinted,
-      realMinted,
+      realMinted: real,
       virtualFrozen: true,
     };
   }
 
-  const displayMinted = Math.max(baseVirtual, realMinted);
+  // Before the cap, every visitor adds the same virtual clock and the same
+  // server-side mint total. A real mint moves the number for the whole site.
+  const displayMinted = baseVirtual + real;
   return {
     displayMinted,
     virtualMinted: baseVirtual,
-    realMinted,
+    realMinted: real,
     virtualFrozen: false,
   };
 }

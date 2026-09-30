@@ -11,9 +11,8 @@ type ProgressPayload = {
 };
 
 /**
- * Global mint counter. The number is the campaign clock itself, so every
- * visitor on the same second sees the same count. A 2s tick follows the
- * parabola waves (move, ease off, rest, move again) without replaying from 1000.
+ * Global mint counter. Display = virtual clock + real mints recorded on the
+ * server. The clock is the server's time, so every visitor sees the same sum.
  */
 export function useSmoothMintProgress() {
   const [shown, setShown] = useState<number | null>(() =>
@@ -22,8 +21,9 @@ export function useSmoothMintProgress() {
   const [authorized, setAuthorized] = useState<number | null>(null);
   const [progressReady, setProgressReady] = useState(true);
   const realRef = useRef(0);
+  const offsetRef = useRef(0);
 
-  const publish = useCallback((real: number, now = Date.now()) => {
+  const publish = useCallback((real: number, now = Date.now() + offsetRef.current) => {
     const next = displayMintProgress(real, now).displayMinted;
     setShown((prev) => (prev == null ? next : Math.max(prev, next)));
     setProgressReady(true);
@@ -35,10 +35,17 @@ export function useSmoothMintProgress() {
       if (!res.ok) return;
       const data = (await res.json()) as ProgressPayload;
       const real = typeof data.realMinted === "number" ? data.realMinted : 0;
-      realRef.current = real;
+      realRef.current = Math.max(realRef.current, real);
+      if (typeof data.serverTimeMs === "number") {
+        offsetRef.current = data.serverTimeMs - Date.now();
+      }
       if (typeof data.authorized === "number") setAuthorized(data.authorized);
-      const local = displayMintProgress(real, Date.now()).displayMinted;
-      const server = typeof data.displayMinted === "number" ? data.displayMinted : local;
+      const aligned = Date.now() + offsetRef.current;
+      const local = displayMintProgress(realRef.current, aligned).displayMinted;
+      const server =
+        typeof data.displayMinted === "number"
+          ? displayMintProgress(realRef.current, data.serverTimeMs ?? aligned).displayMinted
+          : local;
       const next = Math.max(local, server);
       setShown((prev) => (prev == null ? next : Math.max(prev, next)));
       setProgressReady(true);
@@ -49,7 +56,7 @@ export function useSmoothMintProgress() {
 
   useEffect(() => {
     void syncProgress();
-    const poll = setInterval(() => void syncProgress(), 20_000);
+    const poll = setInterval(() => void syncProgress(), 5_000);
     const tick = setInterval(() => publish(realRef.current), 2_000);
     return () => {
       clearInterval(poll);

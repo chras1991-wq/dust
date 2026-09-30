@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
   try {
     assertMintIntegrity();
-    await hydrateMintStore();
+    await hydrateMintStore(true);
 
     const parsed = await readJsonBody<{
       address?: string;
