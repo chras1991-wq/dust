@@ -10,7 +10,7 @@ import { saveQuote } from "@/lib/store";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const limited = rateLimit(req, "quote", 30, 60_000);
+  const limited = await rateLimit(req, "quote", 30, 60_000);
   if (limited) return limited;
 
   try {

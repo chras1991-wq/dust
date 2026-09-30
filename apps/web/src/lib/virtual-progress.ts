@@ -1,13 +1,12 @@
 /**
- * Deterministic virtual mint progress for FOMO display.
+ * Deterministic virtual mint progress — single global clock (all users see the same number).
  * Start: 2026-09-30 15:10 Beijing (UTC 07:10).
- * Caps at 4500; real mint count can push display higher afterward.
  */
 
 export const VIRTUAL_PROGRESS_START_MS = Date.parse("2026-09-30T07:10:00.000Z");
 export const VIRTUAL_CAP = 4500;
-/** Onboarding window — ~70% of virtual growth lands in the tail. */
-export const VIRTUAL_WINDOW_MS = 8 * 60 * 60 * 1000;
+/** 18h onboarding window; ~70% of growth in the long tail. */
+export const VIRTUAL_WINDOW_MS = 18 * 60 * 60 * 1000;
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -25,7 +24,7 @@ function randInt(seed: number, min: number, max: number): number {
   return min + Math.floor(r * (max - min + 1));
 }
 
-/** Pure virtual count from the campaign clock (no real mints). */
+/** Pure virtual count from campaign clock (identical on every server). */
 export function virtualMintCountAt(nowMs: number = Date.now()): number {
   if (nowMs < VIRTUAL_PROGRESS_START_MS) return 1;
 
@@ -49,12 +48,12 @@ export function virtualMintCountAt(nowMs: number = Date.now()): number {
 
   const burstEnd = Math.min(elapsed, VIRTUAL_WINDOW_MS * 0.32);
   let minute = 0;
-  while (count < 2600 && cursor + 60_000 <= burstEnd) {
-    const volatile = minute % 4 !== 1;
-    const inc = volatile
-      ? randInt(20_000 + minute, 18, 95)
-      : randInt(30_000 + minute, 8, 22);
-    count = Math.min(2600, count + inc);
+  while (count < 3000 && cursor + 60_000 <= burstEnd) {
+    const fastMinute = minute % 3 !== 2;
+    const inc = fastMinute
+      ? randInt(20_000 + minute, 10, 100)
+      : randInt(30_000 + minute, 10, 35);
+    count = Math.min(3000, count + inc);
     cursor += 60_000;
     minute += 1;
   }
@@ -68,8 +67,8 @@ export function virtualMintCountAt(nowMs: number = Date.now()): number {
   const tailElapsed = Math.min(elapsed - tailCursor, VIRTUAL_WINDOW_MS - tailCursor);
   const tailDuration = VIRTUAL_WINDOW_MS - tailCursor;
   const t = tailDuration > 0 ? tailElapsed / tailDuration : 1;
-  const eased = 1 - (1 - t) ** 2.4;
-  const from = Math.max(count, 2600);
+  const eased = 1 - (1 - t) ** 3.1;
+  const from = Math.max(count, 3000);
   const target = from + (VIRTUAL_CAP - from) * eased;
   return Math.min(VIRTUAL_CAP, Math.round(target));
 }

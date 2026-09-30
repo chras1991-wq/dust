@@ -1,14 +1,15 @@
-import { getSupplySnapshot } from "@/lib/store";
 import { buildHolderTop10 } from "@/lib/holder-leaderboard";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
+import { getRealMintTotals } from "@/lib/server/mint-persist";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const limited = rateLimit(req, "holders-top", 60, 60_000);
+  const limited = await rateLimit(req, "holders-top", 60, 60_000);
   if (limited) return limited;
 
-  const realMinted = getSupplySnapshot().minted + getSupplySnapshot().pending;
+  const totals = await getRealMintTotals();
+  const realMinted = totals.minted + totals.pending;
   const holders = buildHolderTop10(realMinted).map(({ rank, address, amount }) => ({
     rank,
     address,

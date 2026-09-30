@@ -4,7 +4,7 @@ import { noStoreJson, rateLimit } from "@/lib/server/guard";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const limited = rateLimit(req, "activity", 60, 60_000);
+  const limited = await rateLimit(req, "activity", 60, 60_000);
   if (limited) return limited;
 
   const mints = listMints()

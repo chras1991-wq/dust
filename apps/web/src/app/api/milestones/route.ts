@@ -13,7 +13,7 @@ import { publicErrorMessage } from "@/lib/server/safe-error";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const limited = rateLimit(req, "milestones", 60, 60_000);
+  const limited = await rateLimit(req, "milestones", 60, 60_000);
   if (limited) return limited;
 
   try {

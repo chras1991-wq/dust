@@ -7,7 +7,7 @@ import { assertMintIntegrity } from "@/lib/server/integrity";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const limited = rateLimit(req, "verify", 40, 60_000);
+  const limited = await rateLimit(req, "verify", 40, 60_000);
   if (limited) return limited;
 
   try {

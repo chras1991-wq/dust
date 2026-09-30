@@ -1,14 +1,20 @@
 import { noStoreJson, rateLimit, readJsonBody } from "@/lib/server/guard";
 import { publicErrorMessage } from "@/lib/server/safe-error";
-import { getStore, listMints, upsertMint } from "@/lib/store";
+import { listMints } from "@/lib/store";
+import {
+  hydrateMintStore,
+  persistMintRecord,
+  recordMintBroadcast,
+} from "@/lib/server/mint-persist";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const limited = rateLimit(req, "mint-complete", 30, 60_000);
+  const limited = await rateLimit(req, "mint-complete", 30, 60_000);
   if (limited) return limited;
 
   try {
+    await hydrateMintStore();
     const parsed = await readJsonBody<{
       mintId?: string;
       commitTxid?: string;
@@ -32,18 +38,19 @@ export async function POST(req: Request) {
     const wasPending =
       mint.status === "PSBT_CREATED" || mint.status === "QUOTE_CREATED";
 
-    upsertMint({
+    const updated = {
       ...mint,
       amount,
-      status: "REVEAL_BROADCAST",
+      status: "REVEAL_BROADCAST" as const,
       commitTxid: parsed.body.commitTxid ?? mint.commitTxid,
       revealTxid: parsed.body.revealTxid ?? mint.revealTxid,
       updatedAt: now,
-    });
+    };
 
     if (wasPending) {
-      const store = getStore();
-      store.pendingMinted += amount;
+      await recordMintBroadcast(updated, amount);
+    } else {
+      await persistMintRecord(updated);
     }
 
     return noStoreJson({ ok: true, mintId, status: "REVEAL_BROADCAST" });

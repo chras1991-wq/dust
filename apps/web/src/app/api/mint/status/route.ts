@@ -21,7 +21,7 @@ function publicMintView(mint: ReturnType<typeof listMints>[number]) {
 }
 
 export async function GET(req: Request) {
-  const limited = rateLimit(req, "mint-status", 60, 60_000);
+  const limited = await rateLimit(req, "mint-status", 60, 60_000);
   if (limited) return limited;
 
   const { searchParams } = new URL(req.url);

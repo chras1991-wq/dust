@@ -18,8 +18,8 @@ describe("virtualMintCountAt", () => {
     expect(n).toBeLessThanOrEqual(580);
   });
 
-  it("caps at 4500 after window", () => {
-    const t = VIRTUAL_PROGRESS_START_MS + 9 * 60 * 60 * 1000;
+  it("caps at 4500 after 18h window", () => {
+    const t = VIRTUAL_PROGRESS_START_MS + 19 * 60 * 60 * 1000;
     expect(virtualMintCountAt(t)).toBe(VIRTUAL_CAP);
   });
 });

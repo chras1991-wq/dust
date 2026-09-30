@@ -1,5 +1,6 @@
 import { listMints } from "@/lib/store";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
+import { getWalletBalancePersisted, hydrateMintStore } from "@/lib/server/mint-persist";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ function isValidBech32(address: string): boolean {
 }
 
 export async function GET(req: Request) {
-  const limited = rateLimit(req, "wallet-balance", 60, 60_000);
+  const limited = await rateLimit(req, "wallet-balance", 60, 60_000);
   if (limited) return limited;
 
   const { searchParams } = new URL(req.url);
@@ -31,8 +32,11 @@ export async function GET(req: Request) {
     return noStoreJson({ error: "Invalid address" }, { status: 400 });
   }
 
+  await hydrateMintStore();
   const mints = listMints().filter((m) => m.walletAddress === address && CREDITED.has(m.status));
-  const balance = mints.reduce((s, m) => s + m.amount, 0);
+  const localBalance = mints.reduce((s, m) => s + m.amount, 0);
+  const persisted = await getWalletBalancePersisted(address);
+  const balance = persisted != null ? Math.max(localBalance, persisted) : localBalance;
   const records = mints.map((m) => ({
     mintId: m.id,
     amount: m.amount,
