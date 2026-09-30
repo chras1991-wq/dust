@@ -4,7 +4,8 @@ import {
   usdToFeeSats,
   verifyQuoteSignature,
 } from "@satdust/quote";
-import { MINT_USD, NETWORK, PROJECT_ADDRESS, UNIT_SATS } from "@satdust/shared";
+import { MINT_USD, NETWORK, PROJECT_ADDRESS } from "@satdust/shared";
+import { splitMintPaymentSats } from "@/lib/mint-pricing";
 import { hydrateMintStore, persistMintRecord } from "@/lib/server/mint-persist";
 import { fetchBtcUsdMedian } from "@/lib/prices";
 import { getQuoteSecret } from "@/lib/server/secrets";
@@ -43,7 +44,7 @@ export async function POST(req: Request) {
       return noStoreJson({ error: "Quantity must be at least 1" }, { status: 400 });
     }
 
-    let unitFeeSats: number;
+    let quoteFeeSatsTotal: number;
     let quoteId = parsed.body.quoteId?.trim() ?? "";
 
     const quote = quoteId ? getQuote(quoteId) : undefined;
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
       !isQuoteExpired(quote) &&
       quoteUnits === qty
     ) {
-      unitFeeSats = Math.round(Number(quote.feeSats) / qty);
+      quoteFeeSatsTotal = Math.round(Number(quote.feeSats));
     } else {
       const { btcUsd, providerPrices } = await fetchBtcUsdMedian();
       const fresh = createSignedQuote({
@@ -67,14 +68,17 @@ export async function POST(req: Request) {
       });
       saveQuote(fresh);
       quoteId = fresh.quoteId;
-      unitFeeSats = Math.round(usdToFeeSats(MINT_USD, Number(fresh.btcUsd)));
+      quoteFeeSatsTotal = Math.round(usdToFeeSats(MINT_USD * qty, Number(fresh.btcUsd)));
     }
 
-    if (!Number.isFinite(unitFeeSats) || unitFeeSats <= 0) {
+    if (!Number.isFinite(quoteFeeSatsTotal) || quoteFeeSatsTotal <= 0) {
       return noStoreJson({ error: "Price unavailable" }, { status: 503 });
     }
 
-    const paySats = qty * (UNIT_SATS + unitFeeSats);
+    const { paySats, carrierSats, projectFeeSats, unitProjectFeeSats } = splitMintPaymentSats(
+      qty,
+      quoteFeeSatsTotal
+    );
     const mintId = `mint_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
     const now = Math.floor(Date.now() / 1000);
 
@@ -83,8 +87,8 @@ export async function POST(req: Request) {
       walletAddress: address,
       quoteId,
       amount: qty,
-      carrierSats: UNIT_SATS * qty,
-      projectFeeSats: unitFeeSats * qty,
+      carrierSats,
+      projectFeeSats,
       status: "PSBT_CREATED",
       createdAt: now,
       updatedAt: now,
@@ -93,9 +97,9 @@ export async function POST(req: Request) {
     return noStoreJson({
       mintId,
       paySats,
-      unitFeeSats,
+      unitFeeSats: unitProjectFeeSats,
       quantity: qty,
-      carrierSats: UNIT_SATS * qty,
+      carrierSats,
       /** Wallet-only destination — never render in UI */
       payTo: PROJECT_ADDRESS,
       notice:

@@ -1,5 +1,5 @@
 import { createSignedQuote } from "@satdust/quote";
-import { MINT_USD, QUOTE_TTL_SECONDS } from "@satdust/shared";
+import { MINT_USD, QUOTE_TTL_SECONDS, UNIT_SATS } from "@satdust/shared";
 import { fetchBtcUsdMedian } from "@/lib/prices";
 import { getQuoteSecret } from "@/lib/server/secrets";
 import { assertMintIntegrity } from "@/lib/server/integrity";
@@ -49,7 +49,13 @@ export async function POST(req: Request) {
       signature: quote.signature,
       mintUsd: MINT_USD,
       quantity,
-      unitFeeSats: String(Math.round(Number(quote.feeSats) / quantity)),
+      unitPaySats: String(Math.round(Number(quote.feeSats) / quantity)),
+      unitFeeSats: String(
+        Math.max(
+          0,
+          Math.round(Number(quote.feeSats) / quantity) - UNIT_SATS
+        )
+      ),
       providerCount: providerPrices.length,
     });
   } catch (e) {

@@ -155,14 +155,17 @@ export default function MintPage() {
   }, [quote]);
 
   const qty = parseMintQuantity(quantityInput);
-  const unitFeeSats = quote?.unitFeeSats
-    ? Number(quote.unitFeeSats)
-    : quote
-      ? Math.round(Number(quote.feeSats) / qty)
-      : 0;
+  const paySatsTotal = quote ? Math.round(Number(quote.feeSats)) : 0;
   const carrierSats = UNIT_SATS * qty;
-  const totalFeeSats = unitFeeSats * qty;
-  const totalSats = carrierSats + totalFeeSats;
+  const unitPaySats = qty > 0 && paySatsTotal > 0 ? Math.round(paySatsTotal / qty) : 0;
+  const projectFeeSats = Math.max(0, paySatsTotal - carrierSats);
+  const unitProjectFeeSats =
+    quote?.unitFeeSats && Number(quote.unitFeeSats) < unitPaySats
+      ? Number(quote.unitFeeSats)
+      : qty > 0
+        ? Math.round(projectFeeSats / qty)
+        : 0;
+  const totalSats = paySatsTotal;
   const btcPrice = quote ? Number(quote.btcUsd) : 0;
   const totalBtc = btcPrice > 0 ? totalSats / 100_000_000 : 0;
   const quoteExpired = secondsLeft <= 0;
@@ -263,28 +266,31 @@ export default function MintPage() {
               <p className="font-display mt-2 text-2xl">{carrierSats.toLocaleString()} sats</p>
             </div>
             <div className="panel-edit">
-              <p className="byline">Mint fee</p>
+              <p className="byline">Mint price (all-in)</p>
               <p className="font-display mt-2 text-2xl">
-                {quote ? `$${(qty * 1).toFixed(2)}` : "…"}
+                {quote ? `$${Number(quote.usd).toFixed(2)}` : "…"}
               </p>
               <p className="mt-1 text-xs text-[var(--ink-mute)]">
-                {unitFeeSats.toLocaleString()} sats / token
+                {unitPaySats > 0
+                  ? `${unitPaySats.toLocaleString()} sats / token total (${UNIT_SATS} carrier + ${unitProjectFeeSats.toLocaleString()} project)`
+                  : "—"}
               </p>
             </div>
           </div>
 
           <div className="panel-edit mt-4 space-y-3 font-sans text-sm">
             <Row
-              label="Mint fee (total)"
+              label="Wallet transfer (mint)"
               value={
                 quote
-                  ? `${totalFeeSats.toLocaleString()} sats · $${Number(quote.usd).toFixed(2)}`
+                  ? `${totalSats.toLocaleString()} sats · $${Number(quote.usd).toFixed(2)}`
                   : "loading…"
               }
             />
             <p className="text-xs text-[var(--ink-mute)]">
-              One BTC transfer for all {qty} tokens ({qty}×{UNIT_SATS} carrier + {qty}× mint fee).
-              Miner fee is separate in your wallet — not in this sats total.
+              One BTC payment for {qty} tokens — price includes {UNIT_SATS} sats carrier per token
+              (locked in your UTXO, not miner gas). OKX/UniSat network fee is usually ~$0.3–$1 and
+              is charged separately by the wallet.
             </p>
             <div className="border-t border-[var(--ink)] pt-3 mt-3">
               <Row
@@ -456,8 +462,8 @@ export default function MintPage() {
                 Carrier {UNIT_SATS.toLocaleString()} × {qty} = {carrierSats.toLocaleString()} sats
               </li>
               <li>
-                Mint fee ${(qty * 1).toFixed(2)} ≈ {totalFeeSats.toLocaleString()} sats (
-                {unitFeeSats.toLocaleString()}/ea)
+                Mint ${quote ? Number(quote.usd).toFixed(2) : "…"} ≈ {totalSats.toLocaleString()}{" "}
+                sats ({unitPaySats.toLocaleString()}/token all-in)
               </li>
               <li className="font-display text-lg text-[var(--accent)]">
                 Pay {totalBtc.toFixed(8)} BTC ({totalSats.toLocaleString()} sats)
