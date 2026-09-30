@@ -35,27 +35,9 @@ function curveCount(elapsedMs: number): number {
   return VIRTUAL_FLOOR + Math.round((VIRTUAL_CAP - VIRTUAL_FLOOR) * eased);
 }
 
-function eventWaitMs(eventIndex: number): number {
-  const r = mulberry32(eventIndex + 11_003)();
-  if (r < 0.3) return randInt(eventIndex + 91, 3 * 60_000, 8 * 60_000);
-  if (r < 0.62) return randInt(eventIndex + 44, 70_000, 180_000);
-  return randInt(eventIndex + 77, 40_000, 110_000);
-}
-
-/** Release only a slice of the 18h budget — pauses, small bags, rare larger bags. */
-function eventJump(eventIndex: number, budget: number): number {
-  if (budget <= 0) return 0;
-  const r = mulberry32(eventIndex + 88_001)();
-  if (r < 0.24) return 0;
-  const cap = Math.min(budget, r > 0.93 ? 48 : r > 0.72 ? 22 : 12);
-  const nice = [1, 2, 3, 5, 8, 10, 12, 15, 20, 25, 30, 40].filter((n) => n <= cap);
-  if (nice.length === 0) return Math.min(budget, cap);
-  return nice[randInt(eventIndex + 3, 0, nice.length - 1)]!;
-}
-
 /**
- * Global step counter. Same timestamp → same number on every device.
- * Budget is the 18h curve, so a few minutes cannot reach the thousands.
+ * Each wave: quiet → faster → quiet (parabola), then a short rest.
+ * Same timestamp → same count. Spends only the 18h budget.
  */
 export function virtualMintCountAt(nowMs: number = Date.now()): number {
   if (nowMs < VIRTUAL_PROGRESS_START_MS) return VIRTUAL_FLOOR;
@@ -65,16 +47,44 @@ export function virtualMintCountAt(nowMs: number = Date.now()): number {
 
   let t = 0;
   let count = VIRTUAL_FLOOR;
-  let event = 0;
+  let wave = 0;
 
-  while (t < elapsed && count < VIRTUAL_CAP) {
-    const wait = eventWaitMs(event);
-    if (t + wait > elapsed) break;
-    t += wait;
-    const budget = curveCount(t) - count;
-    count += eventJump(event, budget);
-    event += 1;
-    if (event > 20_000) break;
+  while (t < elapsed && count < VIRTUAL_CAP && wave < 4_000) {
+    const cycle = randInt(wave + 400, 70_000, 130_000);
+    const restHead = Math.round(cycle * (0.14 + mulberry32(wave + 7)() * 0.08));
+    const restTail = Math.round(cycle * (0.16 + mulberry32(wave + 9)() * 0.1));
+    const active = Math.max(24_000, cycle - restHead - restTail);
+    const intensity = 0.65 + mulberry32(wave + 13)() * 0.7;
+
+    if (t + restHead > elapsed) break;
+    t += restHead;
+
+    let activeCursor = 0;
+    let tick = 0;
+    while (activeCursor < active && t < elapsed && count < VIRTUAL_CAP && tick < 24) {
+      const step = randInt(wave * 80 + tick + 11, 6_000, 13_000);
+      const stepIn = Math.min(step, active - activeCursor, elapsed - t);
+      if (stepIn <= 0) break;
+      activeCursor += stepIn;
+      t += stepIn;
+
+      const p = activeCursor / active;
+      const parabola = 4 * p * (1 - p);
+      const edgeSkip = parabola < 0.22 && mulberry32(wave * 17 + tick + 21)() < 0.55;
+      if (!edgeSkip) {
+        const budget = curveCount(t) - count;
+        if (budget > 0) {
+          const want = Math.max(1, Math.round(parabola * (2 + intensity * 5)));
+          const cap = parabola > 0.72 ? 8 : 4;
+          count += Math.min(budget, want, cap);
+        }
+      }
+      tick += 1;
+    }
+
+    if (t >= elapsed) break;
+    t += Math.min(restTail, elapsed - t);
+    wave += 1;
   }
 
   return Math.min(count, curveCount(elapsed), VIRTUAL_CAP);

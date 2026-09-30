@@ -11,24 +11,21 @@ type ProgressPayload = {
 };
 
 /**
- * One global mint counter. The page shows the server clock value immediately.
- * Refresh does not replay from 1000.
+ * Global mint counter. The number is the campaign clock itself, so every
+ * visitor on the same second sees the same count. A 2s tick follows the
+ * parabola waves (move, ease off, rest, move again) without replaying from 1000.
  */
 export function useSmoothMintProgress() {
-  const [shown, setShown] = useState<number | null>(null);
+  const [shown, setShown] = useState<number | null>(() =>
+    displayMintProgress(0, Date.now()).displayMinted
+  );
   const [authorized, setAuthorized] = useState<number | null>(null);
-  const [progressReady, setProgressReady] = useState(false);
+  const [progressReady, setProgressReady] = useState(true);
   const realRef = useRef(0);
 
-  const applyServerProgress = useCallback((data: ProgressPayload) => {
-    const real = typeof data.realMinted === "number" ? data.realMinted : 0;
-    const display =
-      typeof data.displayMinted === "number"
-        ? data.displayMinted
-        : displayMintProgress(real, data.serverTimeMs ?? Date.now()).displayMinted;
-    realRef.current = real;
-    setShown(display);
-    if (typeof data.authorized === "number") setAuthorized(data.authorized);
+  const publish = useCallback((real: number, now = Date.now()) => {
+    const next = displayMintProgress(real, now).displayMinted;
+    setShown((prev) => (prev == null ? next : Math.max(prev, next)));
     setProgressReady(true);
   }, []);
 
@@ -36,25 +33,39 @@ export function useSmoothMintProgress() {
     try {
       const res = await fetch("/api/mint/progress", { cache: "no-store" });
       if (!res.ok) return;
-      applyServerProgress((await res.json()) as ProgressPayload);
+      const data = (await res.json()) as ProgressPayload;
+      const real = typeof data.realMinted === "number" ? data.realMinted : 0;
+      realRef.current = real;
+      if (typeof data.authorized === "number") setAuthorized(data.authorized);
+      const local = displayMintProgress(real, Date.now()).displayMinted;
+      const server = typeof data.displayMinted === "number" ? data.displayMinted : local;
+      const next = Math.max(local, server);
+      setShown((prev) => (prev == null ? next : Math.max(prev, next)));
+      setProgressReady(true);
     } catch {
       /* ignore */
     }
-  }, [applyServerProgress]);
+  }, []);
 
   useEffect(() => {
     void syncProgress();
-    const id = setInterval(() => void syncProgress(), 20_000);
-    return () => clearInterval(id);
-  }, [syncProgress]);
+    const poll = setInterval(() => void syncProgress(), 20_000);
+    const tick = setInterval(() => publish(realRef.current), 2_000);
+    return () => {
+      clearInterval(poll);
+      clearInterval(tick);
+    };
+  }, [publish, syncProgress]);
 
-  const bumpReal = useCallback((delta: number) => {
-    const d = Math.max(0, Math.floor(delta));
-    if (d <= 0) return;
-    realRef.current += d;
-    const display = displayMintProgress(realRef.current, Date.now()).displayMinted;
-    setShown((prev) => (prev == null ? display : Math.max(prev, display)));
-  }, []);
+  const bumpReal = useCallback(
+    (delta: number) => {
+      const d = Math.max(0, Math.floor(delta));
+      if (d <= 0) return;
+      realRef.current += d;
+      publish(realRef.current);
+    },
+    [publish]
+  );
 
   return {
     liveMinted: shown,

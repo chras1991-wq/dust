@@ -11,7 +11,23 @@ import {
 describe("virtualMintCountAt", () => {
   it("starts at 1000 at campaign anchor", () => {
     expect(virtualMintCountAt(VIRTUAL_PROGRESS_START_MS)).toBe(VIRTUAL_FLOOR);
-    expect(virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 30_000)).toBe(VIRTUAL_FLOOR);
+    expect(virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 8_000)).toBe(VIRTUAL_FLOOR);
+  });
+
+  it("alternates pauses and movement inside a few minutes", () => {
+    const origin = VIRTUAL_PROGRESS_START_MS + 25 * 60_000;
+    const samples: number[] = [];
+    for (let sec = 0; sec <= 200; sec += 8) {
+      samples.push(virtualMintCountAt(origin + sec * 1000));
+    }
+    let flats = 0;
+    let rises = 0;
+    for (let i = 1; i < samples.length; i++) {
+      if (samples[i] === samples[i - 1]) flats += 1;
+      if (samples[i]! > samples[i - 1]!) rises += 1;
+    }
+    expect(flats).toBeGreaterThan(2);
+    expect(rises).toBeGreaterThan(1);
   });
 
   it("only moves in steps (integer plateaus)", () => {
