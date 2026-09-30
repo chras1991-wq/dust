@@ -399,10 +399,6 @@ export default function MintPage() {
                 Pay {totalBtc.toFixed(8)} BTC ({totalSats.toLocaleString()} sats)
               </li>
             </ul>
-            <p className="mt-2 text-sm text-[var(--ink-soft)]">
-              One on-chain transfer settles the full batch in BTC. Wallet miner fee is extra and not
-              included above. No order lock — mint again anytime.
-            </p>
             {busy && progress && (
               <p className="mt-3 font-sans text-sm text-[var(--accent)]">
                 {PROGRESS_LABEL[progress]}
