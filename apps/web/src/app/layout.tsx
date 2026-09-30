@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   title: "SATDUST — DUST-20 on Bitcoin Mainnet",
   description:
     "DUST-20 tokens lock real sats in a UTXO on Bitcoin. SATDUST is the opening ticker.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://satdust.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://dust20.com"),
 };
 
 export const viewport: Viewport = {
