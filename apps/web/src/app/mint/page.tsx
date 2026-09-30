@@ -5,6 +5,7 @@ import Link from "next/link";
 import { WalletConnect } from "@/components/WalletConnect";
 import { MilestoneRoadmap } from "@/components/mint/MilestoneRoadmap";
 import { MintMathPlate } from "@/components/mint/MintMathPlate";
+import { HolderTop10 } from "@/components/mint/HolderTop10";
 import { SupplyTrack } from "@/components/mint/SupplyTrack";
 import { executeMintPayment, type MintPayProgress } from "@/lib/mint-pay";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
@@ -376,6 +377,8 @@ export default function MintPage() {
           ticks={milestones.supplyTicks}
         />
       )}
+
+      <HolderTop10 />
 
       {confirmOpen && quote && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
