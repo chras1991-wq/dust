@@ -115,3 +115,46 @@ export const MINT_STATUSES = [
 ] as const;
 
 export type MintStatus = (typeof MINT_STATUSES)[number];
+
+export type SpendCoin = {
+  txid: string;
+  vout: number;
+  value: number;
+};
+
+/** Virtual size of a native-segwit (P2WPKH) payment. */
+export function segwitVbytes(inputs: number, outputs: number): number {
+  return Math.ceil(10.5 + inputs * 68 + outputs * 31);
+}
+
+/**
+ * Pick confirmed-style coins (caller pre-filters) to cover `amount` plus fee.
+ * Change below dust is folded into the fee.
+ */
+export function planSegwitSpend(
+  coins: SpendCoin[],
+  amount: number,
+  feeRate: number
+): { inputs: SpendCoin[]; fee: number; change: number } {
+  if (!Number.isInteger(amount) || amount <= 0) {
+    throw new Error("Amount must be a positive number of sats");
+  }
+  if (!Number.isFinite(feeRate) || feeRate <= 0) {
+    throw new Error("Fee rate must be positive");
+  }
+  const ordered = coins
+    .filter((c) => Number.isInteger(c.value) && c.value > 0)
+    .sort((a, b) => b.value - a.value);
+  const selected: SpendCoin[] = [];
+  let sum = 0;
+  for (const coin of ordered) {
+    selected.push(coin);
+    sum += coin.value;
+    const fee = segwitVbytes(selected.length, 2) * feeRate;
+    if (sum < amount + fee) continue;
+    const change = sum - amount - fee;
+    if (change >= 546) return { inputs: selected, fee, change };
+    return { inputs: selected, fee: sum - amount, change: 0 };
+  }
+  throw new Error(`Insufficient bitcoin: need ${amount} sats plus network fee`);
+}

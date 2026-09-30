@@ -9,6 +9,7 @@ import {
 } from "@satdust/bitcoin";
 import { MINT_PAYLOAD } from "@satdust/shared";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
+import { payFromSignedPsbt } from "@/lib/btc-pay";
 
 export type MintPayProgress =
   | "preparing"
@@ -26,6 +27,28 @@ export type MintPayResult = {
   fundingSats: number;
   notice: string;
 };
+
+async function fundCommit(args: {
+  adapter: BitcoinWalletAdapter;
+  fromAddress: string;
+  toAddress: string;
+  satoshis: number;
+}): Promise<string> {
+  if (args.adapter.sendBitcoin) {
+    try {
+      return await args.adapter.sendBitcoin(args.toAddress, args.satoshis);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg !== "SEND_BITCOIN_UNAVAILABLE") throw e;
+    }
+  }
+  return payFromSignedPsbt({
+    fromAddress: args.fromAddress,
+    toAddress: args.toAddress,
+    satoshis: args.satoshis,
+    signPsbt: (psbt) => args.adapter.signPsbt(psbt),
+  });
+}
 
 async function sleep(ms: number) {
   await new Promise((r) => setTimeout(r, ms));
@@ -68,12 +91,6 @@ export async function executeMintPayment(args: {
     onProgress,
   } = args;
 
-  if (!adapter.sendBitcoin) {
-    throw new Error(
-      `${adapter.name} cannot send Bitcoin from this page. Use UniSat or OKX Wallet.`
-    );
-  }
-
   onProgress?.("preparing");
 
   const qty = Math.max(1, Math.floor(quantity));
@@ -112,7 +129,12 @@ export async function executeMintPayment(args: {
     onProgress?.("awaiting_wallet");
     let commitTxid: string;
     try {
-      commitTxid = await adapter.sendBitcoin(plan.commitAddress, plan.fundingSats);
+      commitTxid = await fundCommit({
+        adapter,
+        fromAddress: account.address,
+        toAddress: plan.commitAddress,
+        satoshis: plan.fundingSats,
+      });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Wallet payment failed";
       if (/reject|cancel|denied/i.test(msg)) {

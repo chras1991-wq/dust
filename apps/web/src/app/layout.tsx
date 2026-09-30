@@ -6,6 +6,7 @@ import {
   Archivo_Narrow,
   IBM_Plex_Mono,
 } from "next/font/google";
+import { PrivyRoot } from "@/components/PrivyRoot";
 import { SiteFooter, SiteHeader, MarqueeBar } from "@/components/SiteChrome";
 import "./globals.css";
 
@@ -76,10 +77,12 @@ export default function RootLayout({
           } as React.CSSProperties
         }
       >
-        <MarqueeBar />
-        <SiteHeader />
-        <main className="layer min-h-[70vh]">{children}</main>
-        <SiteFooter />
+        <PrivyRoot>
+          <MarqueeBar />
+          <SiteHeader />
+          <main className="layer min-h-[70vh]">{children}</main>
+          <SiteFooter />
+        </PrivyRoot>
       </body>
     </html>
   );

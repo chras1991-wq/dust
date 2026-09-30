@@ -22,7 +22,7 @@ apps/web          Next.js site + API
 packages/dust20   Deploy/mint validators
 packages/quote    Signed BTC/USD quotes
 packages/bitcoin  Reveal plan + status machine
-packages/wallet   UniSat / OKX / Xverse / Leather adapters
+packages/wallet   Bitcoin wallet adapters (browser wallets + Privy)
 packages/shared   Constants
 ```
 
@@ -42,6 +42,7 @@ DEPLOY_TXID=
 DEPLOY_INSCRIPTION_ID=
 BTC_USD_FALLBACK=100000
 NEXT_PUBLIC_SITE_URL=https://dust20.com
+NEXT_PUBLIC_PRIVY_APP_ID=cmt9hky9c01is0cjoiw60nprw
 ```
 
 ## Deploy (Vercel)

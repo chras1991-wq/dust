@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PROJECT_ADDRESS, UNIT_SATS } from "@satdust/shared";
-import { assertPreBroadcast, buildRevealPlan } from "./index";
+import { assertPreBroadcast, buildRevealPlan, planSegwitSpend, segwitVbytes } from "./index";
 
 describe("reveal plan", () => {
   it("places carrier at 546 and project fee next", () => {
@@ -50,5 +50,29 @@ describe("reveal plan", () => {
         projectOutputAddress: PROJECT_ADDRESS,
       })
     ).toThrow(/offset/);
+  });
+});
+
+describe("segwit spend plan", () => {
+  const coin = { txid: "aa", vout: 0, value: 100_000 };
+
+  it("keeps change when it clears dust", () => {
+    const fee = segwitVbytes(1, 2) * 2;
+    const plan = planSegwitSpend([coin], 10_000, 2);
+    expect(fee).toBe(282);
+    expect(plan.inputs).toEqual([coin]);
+    expect(plan.fee).toBe(282);
+    expect(plan.change).toBe(100_000 - 10_000 - 282);
+  });
+
+  it("folds dust change into the fee", () => {
+    const plan = planSegwitSpend([coin], 99_500, 2);
+    expect(plan.change).toBe(0);
+    expect(plan.fee).toBe(500);
+    expect(plan.inputs).toHaveLength(1);
+  });
+
+  it("rejects a short balance", () => {
+    expect(() => planSegwitSpend([coin], 200_000, 2)).toThrow(/Insufficient bitcoin/);
   });
 });
