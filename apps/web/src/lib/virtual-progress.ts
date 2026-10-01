@@ -60,6 +60,10 @@ export const MARK_WINDOW_MS = 18 * 60 * 1000;
 /** Genesis desk total. The slow irregular climb fills this in 5 hours. */
 export const FILL_DISPLAY = 5460;
 export const FILL_WINDOW_MS = 5 * 60 * 60 * 1000;
+/** Fast uneven climb to 5,175. Ten minutes from this wall time. */
+export const FAST_AT_MS = 1_790_821_599_918;
+export const FAST_TARGET = 5175;
+export const FAST_WINDOW_MS = 10 * 60 * 1000;
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -340,12 +344,8 @@ export function irregularMintCount(
   return Math.min(count, to);
 }
 
-/**
- * Public desk number after the direct jump.
- * 4,317 for 5 minutes, irregular steps to 4,618, then 5 hours of uneven
- * steps that fill 5,460. Real mints do not move this number.
- */
-export function jumpedMintDisplay(nowMs: number): number {
+/** Desk number before the ten-minute climb to 5,175. */
+function displayBeforeFastClimb(nowMs: number): number {
   const elapsed = nowMs - JUMP_AT_MS;
   if (elapsed < JUMP_PAUSE_MS) return JUMP_DISPLAY;
   const afterPause = elapsed - JUMP_PAUSE_MS;
@@ -354,6 +354,24 @@ export function jumpedMintDisplay(nowMs: number): number {
   }
   const afterMark = afterPause - MARK_WINDOW_MS;
   return irregularMintCount(afterMark, FILL_WINDOW_MS, MARK_DISPLAY, FILL_DISPLAY, 2_441);
+}
+
+/**
+ * Public desk number after the direct jump.
+ * Holds 4,317, then climbs. From FAST_AT_MS the desk reaches 5,175 in ten
+ * minutes and keeps filling 5,460. Real mints do not move this number.
+ */
+export function jumpedMintDisplay(nowMs: number): number {
+  if (nowMs < FAST_AT_MS) return displayBeforeFastClimb(nowMs);
+  const from = Math.min(FAST_TARGET, displayBeforeFastClimb(FAST_AT_MS));
+  const elapsed = nowMs - FAST_AT_MS;
+  if (elapsed <= FAST_WINDOW_MS) {
+    return irregularMintCount(elapsed, FAST_WINDOW_MS, from, FAST_TARGET, 5_175);
+  }
+  const fillEnd = JUMP_AT_MS + JUMP_PAUSE_MS + MARK_WINDOW_MS + FILL_WINDOW_MS;
+  const slowStart = FAST_AT_MS + FAST_WINDOW_MS;
+  const slowMs = Math.max(60_000, fillEnd - slowStart);
+  return irregularMintCount(elapsed - FAST_WINDOW_MS, slowMs, FAST_TARGET, FILL_DISPLAY, 51_751);
 }
 
 /** Public number from the 20-minute rush onward. Real mints are not added. */

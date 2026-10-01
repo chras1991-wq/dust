@@ -7,12 +7,13 @@ import {
   movingMintProgress,
   MINT_CLOCK_OFFSET_MS,
   MINT_PROGRESS_PAUSE,
+  FAST_AT_MS,
+  FAST_TARGET,
+  FAST_WINDOW_MS,
   FILL_DISPLAY,
-  FILL_WINDOW_MS,
   JUMP_AT_MS,
   JUMP_DISPLAY,
   JUMP_PAUSE_MS,
-  MARK_DISPLAY,
   MARK_WINDOW_MS,
   SPRINT_DISPLAY_TARGET,
   SPRINT_REAL_SNAPSHOT,
@@ -149,43 +150,30 @@ describe("displayMintProgress", () => {
     expect(held.realMinted).toBe(9_999);
     expect(displayMintProgress(1, JUMP_AT_MS + JUMP_PAUSE_MS - 1).displayMinted).toBe(JUMP_DISPLAY);
 
-    const markStart = JUMP_AT_MS + JUMP_PAUSE_MS;
+    const start = displayMintProgress(9_999, FAST_AT_MS);
+    expect(start.displayMinted).toBeGreaterThan(JUMP_DISPLAY);
+    expect(start.displayMinted).toBeLessThan(FAST_TARGET);
+    expect(start.paused).toBe(false);
+
     const deltas: number[] = [];
-    const gaps: number[] = [];
-    let prev = JUMP_DISPLAY;
-    let lastMove = 0;
-    for (let sec = 0; sec <= MARK_WINDOW_MS / 1000; sec += 2) {
-      const n = displayMintProgress(1, markStart + sec * 1000).displayMinted;
+    let prev = start.displayMinted;
+    for (let sec = 0; sec <= FAST_WINDOW_MS / 1000; sec += 5) {
+      const n = displayMintProgress(1, FAST_AT_MS + sec * 1000).displayMinted;
       expect(n).toBeGreaterThanOrEqual(prev);
-      if (n > prev) {
-        deltas.push(n - prev);
-        if (lastMove > 0) gaps.push(sec - lastMove);
-        lastMove = sec;
-      }
+      if (n > prev) deltas.push(n - prev);
       prev = n;
     }
-    expect(displayMintProgress(80_000, markStart + MARK_WINDOW_MS).displayMinted).toBe(MARK_DISPLAY);
     expect(deltas.some((d) => d >= 2 && d <= 9)).toBe(true);
-    expect(deltas.some((d) => d >= 10 && d <= 19)).toBe(true);
     expect(deltas.some((d) => d >= 20)).toBe(true);
-    expect(Math.max(...gaps) - Math.min(...gaps)).toBeGreaterThan(30);
+    const mid = displayMintProgress(1, FAST_AT_MS + 5 * 60_000).displayMinted;
+    expect(mid).toBeGreaterThan(start.displayMinted + 150);
+    expect(mid).toBeLessThan(FAST_TARGET);
+    const landed = displayMintProgress(80_000, FAST_AT_MS + FAST_WINDOW_MS);
+    expect(landed.displayMinted).toBe(FAST_TARGET);
+    expect(landed.realMinted).toBe(80_000);
 
-    const fillStart = markStart + MARK_WINDOW_MS;
-    const fillDeltas: number[] = [];
-    let fillPrev = MARK_DISPLAY;
-    for (let sec = 0; sec <= FILL_WINDOW_MS / 1000; sec += 30) {
-      const n = displayMintProgress(0, fillStart + sec * 1000).displayMinted;
-      expect(n).toBeGreaterThanOrEqual(fillPrev);
-      if (n > fillPrev) fillDeltas.push(n - fillPrev);
-      fillPrev = n;
-    }
-    expect(fillDeltas.some((d) => d >= 2 && d <= 9)).toBe(true);
-    expect(fillDeltas.some((d) => d >= 10 && d <= 19)).toBe(true);
-    expect(fillDeltas.some((d) => d >= 20)).toBe(true);
-    const halfway = displayMintProgress(0, fillStart + FILL_WINDOW_MS / 2).displayMinted;
-    expect(halfway).toBeGreaterThan(MARK_DISPLAY + 200);
-    expect(halfway).toBeLessThan(FILL_DISPLAY - 200);
-    const done = displayMintProgress(50_000, fillStart + FILL_WINDOW_MS);
+    const fillEnd = JUMP_AT_MS + JUMP_PAUSE_MS + MARK_WINDOW_MS + 5 * 60 * 60 * 1000;
+    const done = displayMintProgress(50_000, fillEnd);
     expect(done.displayMinted).toBe(FILL_DISPLAY);
     expect(done.displayMinted).not.toBe(50_000);
   });
