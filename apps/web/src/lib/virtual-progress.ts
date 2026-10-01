@@ -72,6 +72,10 @@ export const DRIFT_WINDOW_MS = 20 * 60 * 1000;
 export const LIFT_AT_MS = 1_790_826_600_000;
 export const LIFT_TARGET = 5396;
 export const LIFT_WINDOW_MS = 60 * 1000;
+/** Uneven climb to 5,437. One minute from this wall time. */
+export const PULL_AT_MS = 1_790_830_860_000;
+export const PULL_TARGET = 5437;
+export const PULL_WINDOW_MS = 60 * 1000;
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -411,7 +415,7 @@ function displayBeforeDrift(nowMs: number): number {
 
 /**
  * Public desk number. From DRIFT_AT_MS it reaches 5,317 in twenty minutes,
- * then climbs to 5,396, then keeps filling 5,460. Real mints do not move it.
+ * then climbs to 5,396, then 5,437, then keeps filling 5,460. Real mints do not move it.
  */
 export function jumpedMintDisplay(nowMs: number): number {
   if (nowMs < DRIFT_AT_MS) return displayBeforeDrift(nowMs);
@@ -436,10 +440,25 @@ export function jumpedMintDisplay(nowMs: number): number {
     );
   }
 
+  if (nowMs < PULL_AT_MS) return LIFT_TARGET;
+
+  const pullElapsed = nowMs - PULL_AT_MS;
+  if (pullElapsed <= PULL_WINDOW_MS) {
+    return irregularMintCount(
+      pullElapsed,
+      PULL_WINDOW_MS,
+      LIFT_TARGET,
+      PULL_TARGET,
+      5_437,
+      16,
+      true
+    );
+  }
+
   const fillEnd = JUMP_AT_MS + JUMP_PAUSE_MS + MARK_WINDOW_MS + FILL_WINDOW_MS;
-  const slowStart = LIFT_AT_MS + LIFT_WINDOW_MS;
+  const slowStart = PULL_AT_MS + PULL_WINDOW_MS;
   const slowMs = Math.max(60_000, fillEnd - slowStart);
-  return irregularMintCount(liftElapsed - LIFT_WINDOW_MS, slowMs, LIFT_TARGET, FILL_DISPLAY, 53_961);
+  return irregularMintCount(pullElapsed - PULL_WINDOW_MS, slowMs, PULL_TARGET, FILL_DISPLAY, 54_371);
 }
 
 /** Public number from the 20-minute rush onward. Real mints are not added. */
