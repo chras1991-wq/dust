@@ -7,26 +7,22 @@ export const VIRTUAL_PROGRESS_START_MS = Date.parse("2026-09-30T08:45:00.000Z");
 export const VIRTUAL_FLOOR = 1000;
 export const VIRTUAL_CAP = 4500;
 /**
- * Completed pause time subtracted from the clock.
- * On resume, add (resumeMs - pause.atMs) here so the 18h curve continues
- * from the frozen point instead of skipping the night.
+ * Wall-clock time removed from the 18h curve.
+ * The overnight pause (frozen at 2026-09-30T11:17:00.903Z, resumed 2026-10-01T00:21:11.584Z)
+ * is subtracted so the curve continues from 1,605 virtual + real mints
+ * instead of skipping ahead through the night.
  */
-export const MINT_CLOCK_OFFSET_MS = 0;
+export const MINT_CLOCK_OFFSET_MS = 47_050_681;
 /**
- * Public counter is held here until resume. null = running.
- * Wallet credits still save; they do not move this number while paused.
+ * Public counter pause. null = running under the rules above.
+ * Wallet credits still save while a future pause is set.
  */
 export const MINT_PROGRESS_PAUSE: {
   atMs: number;
   displayMinted: number;
   virtualMinted: number;
   realMinted: number;
-} | null = {
-  atMs: 1_790_767_020_903,
-  displayMinted: 1683,
-  virtualMinted: 1605,
-  realMinted: 78,
-};
+} | null = null;
 /** 18h onboarding window after anchor. */
 export const VIRTUAL_WINDOW_MS = 18 * 60 * 60 * 1000;
 /** After 4500: display-only bonus in discrete steps. */

@@ -5,19 +5,25 @@ import {
   virtualMintCountAt,
   displayMintProgress,
   movingMintProgress,
+  MINT_CLOCK_OFFSET_MS,
   MINT_PROGRESS_PAUSE,
   VIRTUAL_CAP,
   VIRTUAL_WINDOW_MS,
 } from "./virtual-progress";
 
+/** Wall time that lands on a given point of the 18h curve after the overnight offset. */
+function wall(elapsedMs: number): number {
+  return VIRTUAL_PROGRESS_START_MS + MINT_CLOCK_OFFSET_MS + elapsedMs;
+}
+
 describe("virtualMintCountAt", () => {
   it("starts at 1000 at campaign anchor", () => {
-    expect(virtualMintCountAt(VIRTUAL_PROGRESS_START_MS)).toBe(VIRTUAL_FLOOR);
-    expect(virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 8_000)).toBe(VIRTUAL_FLOOR);
+    expect(virtualMintCountAt(wall(0))).toBe(VIRTUAL_FLOOR);
+    expect(virtualMintCountAt(wall(8_000))).toBe(VIRTUAL_FLOOR);
   });
 
   it("alternates pauses and movement inside a few minutes", () => {
-    const origin = VIRTUAL_PROGRESS_START_MS + 25 * 60_000;
+    const origin = wall(25 * 60_000);
     const samples: number[] = [];
     for (let sec = 0; sec <= 200; sec += 8) {
       samples.push(virtualMintCountAt(origin + sec * 1000));
@@ -33,18 +39,18 @@ describe("virtualMintCountAt", () => {
   });
 
   it("only moves in steps (integer plateaus)", () => {
-    const t0 = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 5_000);
-    const t1 = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 12_000);
-    const t2 = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 45_000);
+    const t0 = virtualMintCountAt(wall(5_000));
+    const t1 = virtualMintCountAt(wall(12_000));
+    const t2 = virtualMintCountAt(wall(45_000));
     expect(t0).toBe(VIRTUAL_FLOOR);
     expect(t2).toBeGreaterThanOrEqual(t1);
     expect(t2 % 1).toBe(0);
   });
 
   it("stays near the floor in the first minutes of the 18h window", () => {
-    const fiveMin = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 5 * 60_000);
-    const thirtyMin = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 30 * 60_000);
-    const twoHours = virtualMintCountAt(VIRTUAL_PROGRESS_START_MS + 2 * 60 * 60_000);
+    const fiveMin = virtualMintCountAt(wall(5 * 60_000));
+    const thirtyMin = virtualMintCountAt(wall(30 * 60_000));
+    const twoHours = virtualMintCountAt(wall(2 * 60 * 60_000));
     expect(fiveMin).toBeLessThan(VIRTUAL_FLOOR + 80);
     expect(thirtyMin).toBeLessThan(VIRTUAL_FLOOR + 250);
     expect(twoHours).toBeGreaterThan(VIRTUAL_FLOOR);
@@ -52,32 +58,32 @@ describe("virtualMintCountAt", () => {
   });
 
   it("is monotonic and identical for the same timestamp", () => {
-    const t = VIRTUAL_PROGRESS_START_MS + 3 * 60 * 60_000;
+    const t = wall(3 * 60 * 60_000);
     expect(virtualMintCountAt(t)).toBe(virtualMintCountAt(t));
     expect(virtualMintCountAt(t + 60_000)).toBeGreaterThanOrEqual(virtualMintCountAt(t));
   });
 
   it("caps at 4500 after 18h window", () => {
-    const t = VIRTUAL_PROGRESS_START_MS + VIRTUAL_WINDOW_MS + 60_000;
+    const t = wall(VIRTUAL_WINDOW_MS + 60_000);
     expect(virtualMintCountAt(t)).toBe(VIRTUAL_CAP);
   });
 });
 
 describe("displayMintProgress", () => {
-  it("holds the public counter at the pause snapshot", () => {
-    expect(MINT_PROGRESS_PAUSE).not.toBeNull();
-    const d = displayMintProgress(9_999, Date.now());
-    expect(d.paused).toBe(true);
-    expect(d.displayMinted).toBe(MINT_PROGRESS_PAUSE!.displayMinted);
-    expect(d.virtualMinted).toBe(MINT_PROGRESS_PAUSE!.virtualMinted);
-    expect(d.realMinted).toBe(MINT_PROGRESS_PAUSE!.realMinted);
-    expect(displayMintProgress(0, VIRTUAL_PROGRESS_START_MS).displayMinted).toBe(
-      d.displayMinted
-    );
+  it("is running and continues from the frozen point", () => {
+    expect(MINT_PROGRESS_PAUSE).toBeNull();
+    const pauseAt = 1_790_767_020_903;
+    const resumedAt = pauseAt + MINT_CLOCK_OFFSET_MS;
+    expect(virtualMintCountAt(resumedAt)).toBe(1605);
+    const d = displayMintProgress(78, resumedAt);
+    expect(d.paused).toBe(false);
+    expect(d.virtualMinted).toBe(1605);
+    expect(d.displayMinted).toBe(1683);
+    expect(d.displayMinted).toBe(movingMintProgress(78, resumedAt).displayMinted);
   });
 
   it("adds real mints on top of the virtual clock before cap", () => {
-    const now = VIRTUAL_PROGRESS_START_MS + 60_000;
+    const now = wall(60_000);
     const virtual = virtualMintCountAt(now);
     const d = movingMintProgress(25, now);
     expect(d.paused).toBe(false);
@@ -87,7 +93,7 @@ describe("displayMintProgress", () => {
   });
 
   it("ignores real mint after virtual cap and adds post-cap bonus", () => {
-    const now = VIRTUAL_PROGRESS_START_MS + VIRTUAL_WINDOW_MS + 2 * 60 * 60 * 1000;
+    const now = wall(VIRTUAL_WINDOW_MS + 2 * 60 * 60 * 1000);
     const d = movingMintProgress(50_000, now);
     expect(d.displayMinted).toBeGreaterThan(VIRTUAL_CAP);
     expect(d.displayMinted).toBeLessThan(VIRTUAL_CAP + 400);

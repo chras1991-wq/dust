@@ -39,12 +39,13 @@ export function useSmoothMintProgress() {
 
   useEffect(() => {
     void syncProgress();
-    const poll = setInterval(() => void syncProgress(), 5_000);
+    const poll = setInterval(() => void syncProgress(), 2_000);
     return () => clearInterval(poll);
   }, [syncProgress]);
 
   const bumpReal = useCallback(
-    (_delta: number) => {
+    (delta: number) => {
+      if (!Number.isFinite(delta)) return;
       void syncProgress();
     },
     [syncProgress]
