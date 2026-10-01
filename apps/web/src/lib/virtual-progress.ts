@@ -23,7 +23,17 @@ export const MINT_PROGRESS_PAUSE: {
   virtualMinted: number;
   realMinted: number;
 } | null = null;
-/** 18h onboarding window after anchor. */
+/**
+ * Wall-clock start of the 10-minute climb. Before this, the resumed 18h curve
+ * still runs. Public display target at the end of the climb is 3,000 when
+ * real mints are still the snapshot below; later real mints add on top.
+ */
+export const SPRINT_START_MS = 1_790_817_723_811;
+export const SPRINT_WINDOW_MS = 10 * 60 * 1000;
+export const SPRINT_DISPLAY_TARGET = 3000;
+export const SPRINT_REAL_SNAPSHOT = 432;
+export const SPRINT_VIRTUAL_TARGET = SPRINT_DISPLAY_TARGET - SPRINT_REAL_SNAPSHOT;
+/** 18h onboarding window after anchor. The slow parabola finishes here at 4,500. */
 export const VIRTUAL_WINDOW_MS = 18 * 60 * 60 * 1000;
 /** After 4500: display-only bonus in discrete steps. */
 export const POST_CAP_WINDOW_MS = 5 * 60 * 60 * 1000;
@@ -60,7 +70,12 @@ function clockMs(nowMs: number): number {
   return nowMs - MINT_CLOCK_OFFSET_MS;
 }
 
-export function virtualMintCountAt(nowMs: number = Date.now()): number {
+function campaignWindowEndMs(): number {
+  return VIRTUAL_PROGRESS_START_MS + MINT_CLOCK_OFFSET_MS + VIRTUAL_WINDOW_MS;
+}
+
+/** Curve that was running before the 10-minute climb. */
+function legacyVirtualMintCount(nowMs: number): number {
   nowMs = clockMs(nowMs);
   if (nowMs < VIRTUAL_PROGRESS_START_MS) return VIRTUAL_FLOOR;
 
@@ -110,6 +125,82 @@ export function virtualMintCountAt(nowMs: number = Date.now()): number {
   }
 
   return Math.min(count, curveCount(elapsed), VIRTUAL_CAP);
+}
+
+/**
+ * 10 minutes of uneven bursts that land on the virtual target.
+ * The public number is this plus real mints, so the snapshot real total
+ * makes the desk read 3,000 at the end of the window.
+ */
+function sprintVirtual(elapsedMs: number, from: number, to: number): number {
+  if (elapsedMs <= 0 || to <= from) return from;
+  if (elapsedMs >= SPRINT_WINDOW_MS) return to;
+  const delta = to - from;
+  let t = 0;
+  let count = from;
+  let i = 0;
+  while (t < elapsedMs && count < to && i < 500) {
+    const gap = randInt(i + 2_400, 2_800, 5_400);
+    if (t + gap > elapsedMs) break;
+    t += gap;
+    const p = t / SPRINT_WINDOW_MS;
+    const eased = p ** 0.82;
+    const ideal = from + Math.round(delta * eased);
+    const room = ideal - count;
+    if (room <= 0) {
+      i += 1;
+      continue;
+    }
+    const parabola = 4 * p * (1 - p);
+    const edge = parabola < 0.2 && mulberry32(i + 77)() < 0.45;
+    const want = edge
+      ? randInt(i + 90, 2, 6)
+      : Math.max(6, Math.round(8 + parabola * 18));
+    count += p > 0.92 ? room : Math.min(room, want);
+    i += 1;
+  }
+  return Math.min(count, to);
+}
+
+/** After 3,000: ease-out parabola, fastest just after the sprint, then gentler into 4,500. */
+function slowIdeal(elapsedMs: number, durationMs: number): number {
+  const p = Math.min(1, Math.max(0, elapsedMs / durationMs));
+  const eased = 1 - (1 - p) ** 2;
+  return SPRINT_VIRTUAL_TARGET + Math.round((VIRTUAL_CAP - SPRINT_VIRTUAL_TARGET) * eased);
+}
+
+function slowVirtual(nowMs: number): number {
+  const slowStart = SPRINT_START_MS + SPRINT_WINDOW_MS;
+  const windowEnd = campaignWindowEndMs();
+  if (nowMs >= windowEnd) return VIRTUAL_CAP;
+  const duration = Math.max(1, windowEnd - slowStart);
+  const elapsed = nowMs - slowStart;
+  if (elapsed <= 0) return SPRINT_VIRTUAL_TARGET;
+
+  let t = 0;
+  let count = SPRINT_VIRTUAL_TARGET;
+  let wave = 0;
+  while (t < elapsed && count < VIRTUAL_CAP && wave < 2_000) {
+    const rest = randInt(wave + 640, 70_000, 160_000);
+    if (t + rest > elapsed) break;
+    t += rest;
+    const ideal = slowIdeal(t, duration);
+    const room = ideal - count;
+    if (room > 0) {
+      const take = Math.max(2, Math.round(room * (0.7 + mulberry32(wave + 19)() * 0.3)));
+      count += Math.min(room, take, 22);
+    }
+    wave += 1;
+  }
+  return Math.min(count, slowIdeal(elapsed, duration), VIRTUAL_CAP);
+}
+
+export function virtualMintCountAt(nowMs: number = Date.now()): number {
+  if (nowMs < SPRINT_START_MS) return legacyVirtualMintCount(nowMs);
+  const from = legacyVirtualMintCount(SPRINT_START_MS);
+  const sprintElapsed = nowMs - SPRINT_START_MS;
+  if (sprintElapsed <= SPRINT_WINDOW_MS) return sprintVirtual(sprintElapsed, from, SPRINT_VIRTUAL_TARGET);
+  return slowVirtual(nowMs);
 }
 
 function postCapDisplayBonus(nowMs: number): number {
