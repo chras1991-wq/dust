@@ -64,15 +64,24 @@ export function SwapDesk() {
 
   useEffect(() => {
     const load = () =>
-      void fetch("/api/market/index")
-        .then((r) => r.json())
+      void fetch("/api/market/index", { cache: "no-store" })
+        .then((r) => {
+          if (!r.ok) throw new Error("market");
+          return r.json();
+        })
         .then((d: { btcUsd?: number; satsPerUnit?: number }) => {
           if (Number.isFinite(d.btcUsd) && d.btcUsd! > 0) setBtcUsd(d.btcUsd!);
           if (Number.isFinite(d.satsPerUnit) && d.satsPerUnit! > 0) setSatsPerUnit(d.satsPerUnit!);
         })
-        .catch(() => undefined);
+        .catch(() => {
+          void fetch("/api/spot/btc-usd", { cache: "no-store" })
+            .then((r) => r.json())
+            .then((d: { btcUsd?: number }) => {
+              if (Number.isFinite(d.btcUsd) && d.btcUsd! > 0) setBtcUsd(d.btcUsd!);
+            });
+        });
     load();
-    const id = setInterval(load, 60_000);
+    const id = setInterval(load, 30_000);
     return () => clearInterval(id);
   }, []);
 
@@ -350,9 +359,11 @@ function SwapLeg({
         disabled={!editable}
         onChange={(e) => onAmount(e.target.value.replace(/[^0-9.]/g, ""))}
       />
-      {side === "BTC" && usdApprox != null && Number.isFinite(usdApprox) && usdApprox > 0 && (
+      {side === "BTC" && amount && Number(amount) > 0 && (
         <p className="mt-1 font-sans text-sm text-[var(--ink-mute)]">
-          ≈ ${usdApprox.toFixed(2)} U
+          {usdApprox != null && Number.isFinite(usdApprox) && usdApprox > 0
+            ? `≈ $${usdApprox.toFixed(2)} U`
+            : "…"}
         </p>
       )}
     </div>
