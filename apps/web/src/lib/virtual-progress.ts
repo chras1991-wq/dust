@@ -50,6 +50,16 @@ export const VIRTUAL_WINDOW_MS = 18 * 60 * 60 * 1000;
 export const POST_CAP_WINDOW_MS = 5 * 60 * 60 * 1000;
 export const POST_CAP_BONUS_MAX = 360;
 export const RUSH_SLOW_CEILING = VIRTUAL_CAP + POST_CAP_BONUS_MAX;
+/** Instant public jump, then a 5-minute hold. */
+export const JUMP_AT_MS = 1_790_820_250_020;
+export const JUMP_DISPLAY = 4317;
+export const JUMP_PAUSE_MS = 5 * 60 * 1000;
+/** Irregular bursts from the hold up to this mark. */
+export const MARK_DISPLAY = 4618;
+export const MARK_WINDOW_MS = 18 * 60 * 1000;
+/** Genesis desk total. The slow irregular climb fills this in 5 hours. */
+export const FILL_DISPLAY = 5460;
+export const FILL_WINDOW_MS = 5 * 60 * 60 * 1000;
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -247,6 +257,105 @@ function rushSlow(elapsedMs: number): number {
   return Math.min(count, ideal, RUSH_SLOW_CEILING);
 }
 
+function chunkAdds(need: number, count: number, seed: number, cap: number): number[] {
+  const weights: number[] = [];
+  for (let i = 0; i < count; i++) {
+    const roll = mulberry32(seed + i * 17 + 3);
+    const band = roll();
+    const size = roll();
+    if (band < 0.4) weights.push(3 + size * 4);
+    else if (band < 0.72) weights.push(10 + size * 8);
+    else weights.push(22 + size * 28);
+  }
+  const sumW = weights.reduce((total, w) => total + w, 0);
+  const raw = weights.map((w) => (w / sumW) * need);
+  const adds = raw.map((value) => Math.min(cap, Math.max(1, Math.floor(value))));
+  let left = need - adds.reduce((total, n) => total + n, 0);
+  const rank = raw
+    .map((value, index) => ({
+      index,
+      key: value - Math.floor(value) + mulberry32(seed + index * 91)() * 0.02,
+    }))
+    .sort((a, b) => b.key - a.key);
+  let guard = 0;
+  while (left > 0 && guard < need * 4) {
+    const slot = rank[guard % rank.length]!.index;
+    if (adds[slot]! < cap) {
+      adds[slot] = adds[slot]! + 1;
+      left -= 1;
+    }
+    guard += 1;
+  }
+  while (left < 0) {
+    let donor = 0;
+    for (let i = 1; i < adds.length; i++) if (adds[i]! > adds[donor]!) donor = i;
+    if (adds[donor]! <= 1) break;
+    adds[donor] = adds[donor]! - 1;
+    left += 1;
+  }
+  return adds;
+}
+
+function chunkTimes(durationMs: number, count: number, seed: number): number[] {
+  const gaps: number[] = [];
+  for (let i = 0; i < count; i++) {
+    const roll = mulberry32(seed + i * 53 + 11);
+    const band = roll();
+    const size = roll();
+    if (band < 0.16) gaps.push(4 + size * 10);
+    else if (band < 0.46) gaps.push(16 + size * 45);
+    else if (band < 0.78) gaps.push(55 + size * 110);
+    else gaps.push(140 + size * 220);
+  }
+  const sum = gaps.reduce((total, gap) => total + gap, 0);
+  let cursor = 0;
+  const times: number[] = [];
+  for (let i = 0; i < count; i++) {
+    cursor += (gaps[i]! / sum) * durationMs;
+    times.push(Math.min(durationMs, Math.round(cursor)));
+  }
+  times[times.length - 1] = durationMs;
+  return times;
+}
+
+/** Uneven jumps. Same timestamp always yields the same total. */
+export function irregularMintCount(
+  elapsedMs: number,
+  durationMs: number,
+  from: number,
+  to: number,
+  seed: number
+): number {
+  if (elapsedMs <= 0 || to <= from) return from;
+  if (elapsedMs >= durationMs) return to;
+  const need = to - from;
+  const steps = Math.max(12, Math.min(80, Math.round(need / 14)));
+  const adds = chunkAdds(need, steps, seed, 52);
+  const times = chunkTimes(durationMs, steps, seed + 404);
+  let count = from;
+  for (let i = 0; i < steps; i++) {
+    if (times[i]! > elapsedMs) break;
+    count += adds[i]!;
+  }
+  return Math.min(count, to);
+}
+
+/**
+ * Public desk number after the direct jump.
+ * 4,317 for 5 minutes, irregular steps to 4,618, then 5 hours of uneven
+ * steps that fill 5,460. Real mints do not move this number.
+ */
+export function jumpedMintDisplay(nowMs: number): number {
+  const elapsed = nowMs - JUMP_AT_MS;
+  if (elapsed < JUMP_PAUSE_MS) return JUMP_DISPLAY;
+  const afterPause = elapsed - JUMP_PAUSE_MS;
+  if (afterPause <= MARK_WINDOW_MS) {
+    return irregularMintCount(afterPause, MARK_WINDOW_MS, JUMP_DISPLAY, MARK_DISPLAY, 861);
+  }
+  const afterMark = afterPause - MARK_WINDOW_MS;
+  return irregularMintCount(afterMark, FILL_WINDOW_MS, MARK_DISPLAY, FILL_DISPLAY, 2_441);
+}
+
 /** Public number from the 20-minute rush onward. Real mints are not added. */
 export function rushDisplay(nowMs: number): number {
   const from = rushAnchor();
@@ -283,6 +392,17 @@ export function movingMintProgress(realMinted: number, nowMs: number = Date.now(
   paused: boolean;
 } {
   const real = Math.max(0, Math.floor(realMinted));
+
+  if (nowMs >= JUMP_AT_MS) {
+    const displayMinted = jumpedMintDisplay(nowMs);
+    return {
+      displayMinted,
+      virtualMinted: displayMinted,
+      realMinted: real,
+      virtualFrozen: displayMinted >= VIRTUAL_CAP,
+      paused: nowMs < JUMP_AT_MS + JUMP_PAUSE_MS,
+    };
+  }
 
   if (nowMs >= RUSH_START_MS) {
     const displayMinted = rushDisplay(nowMs);

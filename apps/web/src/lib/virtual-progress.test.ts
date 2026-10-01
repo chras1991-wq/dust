@@ -7,12 +7,13 @@ import {
   movingMintProgress,
   MINT_CLOCK_OFFSET_MS,
   MINT_PROGRESS_PAUSE,
-  RUSH_REAL_SNAPSHOT,
-  RUSH_SLOW_CEILING,
-  RUSH_SLOW_WINDOW_MS,
-  RUSH_START_MS,
-  RUSH_TARGET,
-  RUSH_WINDOW_MS,
+  FILL_DISPLAY,
+  FILL_WINDOW_MS,
+  JUMP_AT_MS,
+  JUMP_DISPLAY,
+  JUMP_PAUSE_MS,
+  MARK_DISPLAY,
+  MARK_WINDOW_MS,
   SPRINT_DISPLAY_TARGET,
   SPRINT_REAL_SNAPSHOT,
   SPRINT_START_MS,
@@ -141,54 +142,58 @@ describe("displayMintProgress", () => {
     expect(biggest).toBeGreaterThan(5);
   });
 
-  it("climbs to 4538 in 20 minutes, then creeps through a four-hour window", () => {
-    const start = displayMintProgress(RUSH_REAL_SNAPSHOT, RUSH_START_MS);
-    expect(start.displayMinted).toBeGreaterThan(2_500);
-    expect(start.displayMinted).toBeLessThan(RUSH_TARGET);
-    expect(start.paused).toBe(false);
+  it("jumps to 4317, pauses, then fills with uneven steps", () => {
+    const held = displayMintProgress(9_999, JUMP_AT_MS + 30_000);
+    expect(held.displayMinted).toBe(JUMP_DISPLAY);
+    expect(held.paused).toBe(true);
+    expect(held.realMinted).toBe(9_999);
+    expect(displayMintProgress(1, JUMP_AT_MS + JUMP_PAUSE_MS - 1).displayMinted).toBe(JUMP_DISPLAY);
 
-    const samples: number[] = [];
-    for (let sec = 0; sec <= 20 * 60; sec += 15) {
-      samples.push(displayMintProgress(99_999, RUSH_START_MS + sec * 1000).displayMinted);
+    const markStart = JUMP_AT_MS + JUMP_PAUSE_MS;
+    const deltas: number[] = [];
+    const gaps: number[] = [];
+    let prev = JUMP_DISPLAY;
+    let lastMove = 0;
+    for (let sec = 0; sec <= MARK_WINDOW_MS / 1000; sec += 2) {
+      const n = displayMintProgress(1, markStart + sec * 1000).displayMinted;
+      expect(n).toBeGreaterThanOrEqual(prev);
+      if (n > prev) {
+        deltas.push(n - prev);
+        if (lastMove > 0) gaps.push(sec - lastMove);
+        lastMove = sec;
+      }
+      prev = n;
     }
-    for (let i = 1; i < samples.length; i++) {
-      expect(samples[i]).toBeGreaterThanOrEqual(samples[i - 1]!);
+    expect(displayMintProgress(80_000, markStart + MARK_WINDOW_MS).displayMinted).toBe(MARK_DISPLAY);
+    expect(deltas.some((d) => d >= 2 && d <= 9)).toBe(true);
+    expect(deltas.some((d) => d >= 10 && d <= 19)).toBe(true);
+    expect(deltas.some((d) => d >= 20)).toBe(true);
+    expect(Math.max(...gaps) - Math.min(...gaps)).toBeGreaterThan(30);
+
+    const fillStart = markStart + MARK_WINDOW_MS;
+    const fillDeltas: number[] = [];
+    let fillPrev = MARK_DISPLAY;
+    for (let sec = 0; sec <= FILL_WINDOW_MS / 1000; sec += 30) {
+      const n = displayMintProgress(0, fillStart + sec * 1000).displayMinted;
+      expect(n).toBeGreaterThanOrEqual(fillPrev);
+      if (n > fillPrev) fillDeltas.push(n - fillPrev);
+      fillPrev = n;
     }
-    const mid = samples[10 * 4]!;
-    expect(mid).toBeGreaterThan(start.displayMinted + 500);
-    expect(mid).toBeLessThan(RUSH_TARGET - 80);
-
-    const almost = displayMintProgress(1, RUSH_START_MS + RUSH_WINDOW_MS - 20_000);
-    expect(RUSH_TARGET - almost.displayMinted).toBeLessThan(120);
-    const landed = displayMintProgress(99_999, RUSH_START_MS + RUSH_WINDOW_MS);
-    expect(landed.displayMinted).toBe(RUSH_TARGET);
-    expect(landed.virtualFrozen).toBe(true);
-    expect(landed.realMinted).toBe(99_999);
-
-    const later = displayMintProgress(0, RUSH_START_MS + RUSH_WINDOW_MS + 30 * 60_000);
-    expect(later.displayMinted).toBeGreaterThan(RUSH_TARGET);
-    expect(later.displayMinted).toBeLessThan(RUSH_TARGET + 140);
-    const twoHours = displayMintProgress(0, RUSH_START_MS + RUSH_WINDOW_MS + 2 * 60 * 60_000);
-    expect(twoHours.displayMinted).toBeGreaterThan(later.displayMinted);
-    expect(twoHours.displayMinted).toBeLessThan(RUSH_SLOW_CEILING);
-
-    const done = displayMintProgress(50_000, RUSH_START_MS + RUSH_WINDOW_MS + RUSH_SLOW_WINDOW_MS);
-    expect(done.displayMinted).toBe(RUSH_SLOW_CEILING);
+    expect(fillDeltas.some((d) => d >= 2 && d <= 9)).toBe(true);
+    expect(fillDeltas.some((d) => d >= 10 && d <= 19)).toBe(true);
+    expect(fillDeltas.some((d) => d >= 20)).toBe(true);
+    const halfway = displayMintProgress(0, fillStart + FILL_WINDOW_MS / 2).displayMinted;
+    expect(halfway).toBeGreaterThan(MARK_DISPLAY + 200);
+    expect(halfway).toBeLessThan(FILL_DISPLAY - 200);
+    const done = displayMintProgress(50_000, fillStart + FILL_WINDOW_MS);
+    expect(done.displayMinted).toBe(FILL_DISPLAY);
     expect(done.displayMinted).not.toBe(50_000);
-
-    let biggest = 0;
-    for (let i = 1; i < samples.length; i++) {
-      biggest = Math.max(biggest, samples[i]! - samples[i - 1]!);
-    }
-    expect(biggest).toBeGreaterThan(8);
-    expect(biggest).toBeLessThan(160);
   });
 
-  it("ignores real mint after virtual cap and adds post-cap bonus", () => {
+  it("ignores real mints once the desk is on the jumped schedule", () => {
     const now = wall(VIRTUAL_WINDOW_MS + 2 * 60 * 60 * 1000);
     const d = movingMintProgress(50_000, now);
-    expect(d.displayMinted).toBeGreaterThan(VIRTUAL_CAP);
-    expect(d.displayMinted).toBeLessThan(VIRTUAL_CAP + 400);
+    expect(d.displayMinted).toBe(FILL_DISPLAY);
     expect(d.displayMinted).not.toBe(50_000);
   });
 });
