@@ -3,6 +3,18 @@ import type { QuoteRecord } from "@satdust/quote";
 import type { MintStatus } from "@satdust/bitcoin";
 import { SUPPLY } from "@satdust/shared";
 
+export type SwapRecord = {
+  id: string;
+  walletAddress: string;
+  direction: "SATDUST_TO_BTC" | "BTC_TO_SATDUST";
+  satdustAmount: number;
+  estimatedBtcSats: number;
+  fundingTxid: string;
+  fundingSats: number;
+  poolAddress: string;
+  createdAt: number;
+};
+
 export type MintRecord = {
   id: string;
   walletAddress: string;
@@ -27,6 +39,7 @@ type Store = {
   /** Units already reserved from a signed quote (1 SATDUST = 1 unit). */
   quoteUnitsConsumed: Map<string, number>;
   mints: MintRecord[];
+  swaps: SwapRecord[];
   /** Confirmed DUST-valid mint count. Chain/indexer is source of truth; this is cache. */
   confirmedMinted: number;
   pendingMinted: number;
@@ -43,6 +56,7 @@ function createStore(): Store {
     quotes: new Map(),
     quoteUnitsConsumed: new Map(),
     mints: [],
+    swaps: [],
     // Real confirmed count only — default 0 until indexer/mints update it.
     confirmedMinted: Number(process.env.MOCK_MINTED ?? 0),
     pendingMinted: Number(process.env.MOCK_PENDING ?? 0),
@@ -98,4 +112,12 @@ export function upsertMint(mint: MintRecord) {
   const idx = store.mints.findIndex((m) => m.id === mint.id);
   if (idx >= 0) store.mints[idx] = mint;
   else store.mints.push(mint);
+}
+
+export function recordSwap(swap: SwapRecord) {
+  getStore().swaps.push(swap);
+}
+
+export function listSwaps(): SwapRecord[] {
+  return [...getStore().swaps].sort((a, b) => b.createdAt - a.createdAt);
 }
