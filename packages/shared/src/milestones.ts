@@ -19,7 +19,7 @@ export const GENESIS_SUPPLY = 5_460;
 export const RESERVE_SUPPLY = SUPPLY_CAP - GENESIS_SUPPLY; // 49_140
 
 /** After this wall time the Genesis desk closes and the public counter holds at GENESIS_SUPPLY. */
-export const GENESIS_MINT_END_AT_MS = Date.parse("2026-10-01T06:00:00.000Z");
+export const GENESIS_MINT_END_AT_MS = Date.parse("2026-10-01T05:50:00.000Z");
 
 export function isGenesisMintClosed(nowMs: number = Date.now()): boolean {
   return nowMs >= GENESIS_MINT_END_AT_MS;
