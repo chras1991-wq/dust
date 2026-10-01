@@ -19,5 +19,7 @@ export async function GET(req: Request) {
     btcUsd,
     bars: snap.bars,
     minute: snap.minute,
+    targetUsd: snap.targetUsd,
+    targetAtMs: snap.targetAtMs,
   });
 }

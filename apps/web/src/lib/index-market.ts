@@ -1,10 +1,9 @@
 import { MINT_USD } from "@satdust/shared";
 
-/** USD per 1 unit at t=0 (mint × 1.38). */
+/** USD per 1 SATDUST at session open (mint × 1.38). */
 export const OPEN_USD = MINT_USD * 1.38;
-/** USD per 1 unit after ramp (mint × 3). */
-export const PLATEAU_USD = MINT_USD * 3;
-export const RAMP_MINUTES = 30;
+/** USD per 1 SATDUST at ramp deadline (mint × 14.7). */
+export const TARGET_USD = MINT_USD * 14.7;
 
 export type MinuteBar = {
   t: number;
@@ -18,7 +17,15 @@ function anchorMs(nowMs: number): number {
   const raw = process.env.INDEX_MARKET_ANCHOR_MS?.trim();
   const parsed = raw ? Number(raw) : NaN;
   if (Number.isFinite(parsed) && parsed > 0) return parsed;
-  return nowMs - 20 * 60_000;
+  return Date.parse("2026-10-01T07:00:00.000Z");
+}
+
+/** Beijing 2026-10-01 19:00 → UTC 11:00. Override with INDEX_MARKET_TARGET_MS. */
+function targetDeadlineMs(): number {
+  const raw = process.env.INDEX_MARKET_TARGET_MS?.trim();
+  const parsed = raw ? Number(raw) : NaN;
+  if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  return Date.parse("2026-10-01T11:00:00.000Z");
 }
 
 function mulberry32(seed: number): () => number {
@@ -37,13 +44,17 @@ function smoothstep(x: number): number {
   return t * t * (3 - 2 * t);
 }
 
-function fairUsdAtMinute(minuteIndex: number): number {
-  if (minuteIndex <= 0) return OPEN_USD;
-  if (minuteIndex <= RAMP_MINUTES) {
-    const p = minuteIndex / RAMP_MINUTES;
-    return OPEN_USD + (PLATEAU_USD - OPEN_USD) * smoothstep(p);
-  }
-  return PLATEAU_USD;
+function fairUsdAt(anchor: number, minuteIndex: number): number {
+  const tMs = anchor + minuteIndex * 60_000;
+  const deadline = targetDeadlineMs();
+  if (tMs >= deadline) return TARGET_USD;
+  const span = Math.max(60_000, deadline - anchor);
+  const p = (tMs - anchor) / span;
+  return OPEN_USD + (TARGET_USD - OPEN_USD) * smoothstep(p);
+}
+
+function isPreDeadline(anchor: number, minuteIndex: number): boolean {
+  return anchor + minuteIndex * 60_000 < targetDeadlineMs();
 }
 
 type StreakState = { dir: 1 | -1; left: number };
@@ -80,15 +91,15 @@ function rollStreak(
   state.left = pickStreakLength(rnd);
 }
 
-function priceBounds(minuteIndex: number): { floor: number; cap: number } {
-  if (minuteIndex <= RAMP_MINUTES) {
-    const p = minuteIndex / RAMP_MINUTES;
+function priceBounds(anchor: number, minuteIndex: number, fair: number): { floor: number; cap: number } {
+  const pre = isPreDeadline(anchor, minuteIndex);
+  if (pre) {
     return {
-      floor: OPEN_USD * (0.965 + p * 0.02),
-      cap: OPEN_USD + (PLATEAU_USD - OPEN_USD) * (0.55 + p * 0.55) + 0.08,
+      floor: Math.max(OPEN_USD * 0.96, fair * 0.9),
+      cap: Math.min(TARGET_USD * 1.02, fair * 1.07 + 0.2),
     };
   }
-  return { floor: PLATEAU_USD * 0.74, cap: PLATEAU_USD * 1.13 };
+  return { floor: TARGET_USD * 0.86, cap: TARGET_USD * 1.09 };
 }
 
 function generateBars(anchor: number, throughMinute: number): MinuteBar[] {
@@ -101,20 +112,23 @@ function generateBars(anchor: number, throughMinute: number): MinuteBar[] {
 
   for (let m = 0; m <= throughMinute; m++) {
     const rnd = mulberry32(anchor + m * 31_337);
-    const fair = fairUsdAtMinute(m);
+    const fair = fairUsdAt(anchor, m);
     const recentHigh = Math.max(...recentCloses.slice(-10));
+    const ramp = isPreDeadline(anchor, m);
 
     if (state.left <= 0) rollStreak(state, rnd, prevClose, fair, recentHigh);
     state.left -= 1;
 
-    const ramp = m <= RAMP_MINUTES;
-    const vol = (ramp ? 0.028 : 0.02) + rnd() * (ramp ? 0.045 : 0.032);
-    const pull = (fair - prevClose) * (ramp ? 0.055 : 0.075);
+    const vol =
+      (ramp ? 0.032 : 0.022) +
+      rnd() * (ramp ? 0.055 : 0.035) +
+      (fair / TARGET_USD) * 0.015;
+    const pull = (fair - prevClose) * (ramp ? 0.06 : 0.08);
     const leg = state.dir * vol * (0.75 + rnd() * 0.95);
-    const shock = (rnd() - 0.5) * 0.04;
+    const shock = (rnd() - 0.5) * (0.035 + (fair / TARGET_USD) * 0.02);
     let close = prevClose + pull + leg + shock;
 
-    const { floor, cap } = priceBounds(m);
+    const { floor, cap } = priceBounds(anchor, m, fair);
     close = Math.max(floor, Math.min(cap, close));
 
     const open =
@@ -131,8 +145,8 @@ function generateBars(anchor: number, throughMinute: number): MinuteBar[] {
     bars.push({
       t: anchor + m * 60_000,
       o: roundUsd(open),
-      h: roundUsd(Math.min(cap + 0.05, bodyHigh + wickUp)),
-      l: roundUsd(Math.max(floor - 0.03, bodyLow - wickDown)),
+      h: roundUsd(Math.min(cap + 0.08, bodyHigh + wickUp)),
+      l: roundUsd(Math.max(floor - 0.05, bodyLow - wickDown)),
       c: roundUsd(close),
     });
 
@@ -152,6 +166,8 @@ export function marketSnapshot(nowMs: number = Date.now(), historyMinutes = 90):
   minute: number;
   usdPerUnit: number;
   bars: MinuteBar[];
+  targetUsd: number;
+  targetAtMs: number;
 } {
   const anchor = anchorMs(nowMs);
   const elapsed = Math.max(0, nowMs - anchor);
@@ -160,5 +176,11 @@ export function marketSnapshot(nowMs: number = Date.now(), historyMinutes = 90):
   const usdPerUnit = all.length ? all[all.length - 1].c : OPEN_USD;
   const start = Math.max(0, all.length - historyMinutes);
   const bars = all.slice(start);
-  return { minute, usdPerUnit, bars };
+  return {
+    minute,
+    usdPerUnit,
+    bars,
+    targetUsd: TARGET_USD,
+    targetAtMs: targetDeadlineMs(),
+  };
 }
