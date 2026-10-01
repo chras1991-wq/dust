@@ -10,13 +10,13 @@ const FEATURES = [
     href: "/stake",
     code: "01 · Stake",
     title: "Stake",
-    blurb: "Lock SATDUST for weight and rewards. Migrates with first mint.",
+    blurb: "Lock SATDUST. A longer lock counts more weight.",
   },
   {
     href: "/agent",
     code: "02 · Agent",
     title: "Agent",
-    blurb: "Agents that watch or act on your SATDUST UTXOs. Migrates with first mint.",
+    blurb: "Deploy a watcher. Keys stay in the wallet.",
   },
   {
     href: "/compute",
