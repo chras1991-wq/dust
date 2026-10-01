@@ -65,7 +65,7 @@ export const FAST_AT_MS = 1_790_821_599_918;
 export const FAST_TARGET = 5175;
 export const FAST_WINDOW_MS = 10 * 60 * 1000;
 /** Slow uneven climb to 5,317. Twenty minutes from this wall time. */
-export const DRIFT_AT_MS = 1_790_823_159_054;
+export const DRIFT_AT_MS = 1_790_823_618_982;
 export const DRIFT_TARGET = 5317;
 export const DRIFT_WINDOW_MS = 20 * 60 * 1000;
 
@@ -304,25 +304,54 @@ function chunkAdds(need: number, count: number, seed: number, cap: number): numb
   return adds;
 }
 
-function chunkTimes(durationMs: number, count: number, seed: number): number[] {
+function chunkTimes(durationMs: number, count: number, seed: number, lead = false): number[] {
   const gaps: number[] = [];
   for (let i = 0; i < count; i++) {
     const roll = mulberry32(seed + i * 53 + 11);
     const band = roll();
     const size = roll();
-    if (band < 0.16) gaps.push(4 + size * 10);
+    if (lead) {
+      if (band < 0.34) gaps.push(12 + size * 20);
+      else if (band < 0.7) gaps.push(28 + size * 35);
+      else gaps.push(50 + size * 40);
+    } else if (band < 0.16) gaps.push(4 + size * 10);
     else if (band < 0.46) gaps.push(16 + size * 45);
     else if (band < 0.78) gaps.push(55 + size * 110);
     else gaps.push(140 + size * 220);
   }
-  const sum = gaps.reduce((total, gap) => total + gap, 0);
-  let cursor = 0;
-  const times: number[] = [];
-  for (let i = 0; i < count; i++) {
-    cursor += (gaps[i]! / sum) * durationMs;
+  const head = lead ? 12_000 + Math.round(mulberry32(seed + 7)() * 18_000) : 0;
+  const body = gaps.slice(lead ? 1 : 0);
+  const bodySum = body.reduce((total, gap) => total + gap, 0) || 1;
+  const bodyDuration = Math.max(1_000, durationMs - head);
+  let cursor = head;
+  const times: number[] = lead ? [head] : [];
+  for (let i = 0; i < body.length; i++) {
+    cursor += (body[i]! / bodySum) * bodyDuration;
     times.push(Math.min(durationMs, Math.round(cursor)));
   }
   times[times.length - 1] = durationMs;
+  if (lead) {
+    const maxGap = 150_000;
+    for (let pass = 0; pass < 8; pass++) {
+      let prev = 0;
+      let worst = -1;
+      let worstGap = 0;
+      for (let i = 0; i < times.length - 1; i++) {
+        const gap = times[i]! - prev;
+        if (gap > worstGap) {
+          worstGap = gap;
+          worst = i;
+        }
+        prev = times[i]!;
+      }
+      if (worst < 0 || worstGap <= maxGap) break;
+      times[worst] = (worst === 0 ? 0 : times[worst - 1]!) + maxGap;
+    }
+    for (let i = 1; i < times.length; i++) {
+      if (times[i]! <= times[i - 1]!) times[i] = times[i - 1]! + 8_000;
+    }
+    times[times.length - 1] = durationMs;
+  }
   return times;
 }
 
@@ -333,14 +362,15 @@ export function irregularMintCount(
   from: number,
   to: number,
   seed: number,
-  cap = 52
+  cap = 52,
+  lead = false
 ): number {
   if (elapsedMs <= 0 || to <= from) return from;
   if (elapsedMs >= durationMs) return to;
   const need = to - from;
   const steps = Math.max(12, Math.min(80, Math.round(need / 14)));
   const adds = chunkAdds(need, steps, seed, cap);
-  const times = chunkTimes(durationMs, steps, seed + 404);
+  const times = chunkTimes(durationMs, steps, seed + 404, lead);
   let count = from;
   for (let i = 0; i < steps; i++) {
     if (times[i]! > elapsedMs) break;
@@ -384,7 +414,7 @@ export function jumpedMintDisplay(nowMs: number): number {
   const from = Math.min(DRIFT_TARGET, displayBeforeDrift(DRIFT_AT_MS));
   const elapsed = nowMs - DRIFT_AT_MS;
   if (elapsed <= DRIFT_WINDOW_MS) {
-    return irregularMintCount(elapsed, DRIFT_WINDOW_MS, from, DRIFT_TARGET, 5_317, 16);
+    return irregularMintCount(elapsed, DRIFT_WINDOW_MS, from, DRIFT_TARGET, 5_317, 16, true);
   }
   const fillEnd = JUMP_AT_MS + JUMP_PAUSE_MS + MARK_WINDOW_MS + FILL_WINDOW_MS;
   const slowStart = DRIFT_AT_MS + DRIFT_WINDOW_MS;

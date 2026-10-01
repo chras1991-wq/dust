@@ -188,6 +188,7 @@ describe("displayMintProgress", () => {
     }
     expect(driftDeltas.some((d) => d >= 2 && d <= 9)).toBe(true);
     expect(driftDeltas.every((d) => d <= 16)).toBe(true);
+    expect(displayMintProgress(1, DRIFT_AT_MS + 40_000).displayMinted).toBeGreaterThan(driftStart);
     const driftMid = displayMintProgress(1, DRIFT_AT_MS + 10 * 60_000).displayMinted;
     expect(driftMid).toBeGreaterThan(driftStart);
     expect(driftMid).toBeLessThan(DRIFT_TARGET);
