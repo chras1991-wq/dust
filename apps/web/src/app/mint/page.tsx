@@ -12,6 +12,7 @@ import {
   GENESIS_SUPPLY,
   SUPPLY,
   UNIT_SATS,
+  isGenesisMintClosed,
 } from "@satdust/shared";
 
 type Quote = {
@@ -48,7 +49,14 @@ export default function MintPage() {
   const [adapter, setAdapter] = useState<BitcoinWalletAdapter | null>(null);
   const [quantityInput, setQuantityInput] = useState("1");
   const [quote, setQuote] = useState<Quote | null>(null);
-  const { liveMinted, authorized: progressAuthorized, progressReady, bumpReal, refreshReal } = useSmoothMintProgress();
+  const {
+    liveMinted,
+    authorized: progressAuthorized,
+    genesisClosed: genesisClosedRemote,
+    progressReady,
+    bumpReal,
+    refreshReal,
+  } = useSmoothMintProgress();
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [btcSats, setBtcSats] = useState<number | null>(null);
   const [mintRecords, setMintRecords] = useState<MintRecordView[]>([]);
@@ -161,6 +169,8 @@ export default function MintPage() {
   const authorized = progressAuthorized ?? milestones?.authorized ?? GENESIS_SUPPLY;
   const displayMinted = progressReady && liveMinted != null ? liveMinted : null;
   const openSlots = displayMinted != null ? Math.max(0, authorized - displayMinted) : null;
+  const genesisClosed =
+    genesisClosedRemote || isGenesisMintClosed() || (milestones?.openCapacity ?? 1) <= 0;
 
   function requestMint() {
     setError(null);
@@ -250,80 +260,99 @@ export default function MintPage() {
                 · slots {openSlots != null ? openSlots.toLocaleString() : "…"}
               </span>
             </p>
-            <label className="byline" htmlFor="mint-qty">Amount</label>
-            <div className="flex flex-wrap items-end gap-3">
-              <input
-                id="mint-qty"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                autoComplete="off"
-                value={quantityInput}
-                onChange={(e) => {
-                  const next = e.target.value.replace(/\D/g, "");
-                  setQuantityInput(next);
-                }}
-                onBlur={() => {
-                  const q = parseMintQuantity(quantityInput);
-                  setQuantityInput(String(q));
-                  void refreshQuote();
-                }}
-                className="font-display w-24 border border-[var(--ink)] bg-transparent px-2 py-1.5 text-2xl tracking-tight outline-none sm:w-28 sm:text-3xl"
-              />
-              <span className="pb-1 font-sans text-sm text-[var(--ink-mute)]">SATDUST</span>
-              {walletBalance !== null && account && (
-                <span className="pb-1 font-sans text-xs text-[var(--valid)] sm:text-sm">
-                  SATDUST {walletBalance.toLocaleString()}
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-1 border-t border-[var(--ink)]/25 pt-2 font-sans text-[0.7rem] leading-snug text-[var(--ink-mute)] sm:text-xs">
-              {quote ? (
-                <p className="text-[var(--ink-soft)]">
-                  Pay{" "}
-                  <span className="font-medium text-[var(--ink)]">
-                    ≈ {totalSats.toLocaleString()} sats · ${Number(quote.usd).toFixed(2)} ·{" "}
-                    {totalBtc.toFixed(8)} BTC
-                  </span>
-                  {" "}
-                  (all-in, {unitPaySats.toLocaleString()}/ea = {UNIT_SATS} carrier +{" "}
-                  {unitProjectFeeSats.toLocaleString()} fee)
+            {genesisClosed ? (
+              <>
+                <p className="border-t border-[var(--ink)]/25 pt-3 font-sans text-sm text-[var(--ink-soft)]">
+                  Genesis mint is complete ({GENESIS_SUPPLY.toLocaleString()} /{" "}
+                  {GENESIS_SUPPLY.toLocaleString()}). Swap SATDUST ⇄ BTC on the Index desk.
                 </p>
-              ) : (
-                <p>Loading price…</p>
-              )}
-            </div>
+                <div className="btn-row flex-col items-stretch gap-2 pt-3 sm:flex-row sm:items-center">
+                  <Link href="/explorer" className="btn btn-solid w-full text-center sm:w-auto">
+                    Open Index
+                  </Link>
+                  <Link href="/docs/tokenomics" className="btn btn-ghost w-full text-center sm:w-auto">
+                    Milestone supply
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <label className="byline" htmlFor="mint-qty">Amount</label>
+                <div className="flex flex-wrap items-end gap-3">
+                  <input
+                    id="mint-qty"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="off"
+                    value={quantityInput}
+                    onChange={(e) => {
+                      const next = e.target.value.replace(/\D/g, "");
+                      setQuantityInput(next);
+                    }}
+                    onBlur={() => {
+                      const q = parseMintQuantity(quantityInput);
+                      setQuantityInput(String(q));
+                      void refreshQuote();
+                    }}
+                    className="font-display w-24 border border-[var(--ink)] bg-transparent px-2 py-1.5 text-2xl tracking-tight outline-none sm:w-28 sm:text-3xl"
+                  />
+                  <span className="pb-1 font-sans text-sm text-[var(--ink-mute)]">SATDUST</span>
+                  {walletBalance !== null && account && (
+                    <span className="pb-1 font-sans text-xs text-[var(--valid)] sm:text-sm">
+                      SATDUST {walletBalance.toLocaleString()}
+                    </span>
+                  )}
+                </div>
 
-            <WalletConnect
-              headlessUntilConnected
-              balanceText={account ? formatBtcBalance(btcSats) : null}
-              onAccount={(acc, ad) => {
-                setAccount(acc);
-                setAdapter(ad);
-              }}
-              registerOpen={(open) => {
-                walletOpenRef.current = open;
-              }}
-            />
+                <div className="space-y-1 border-t border-[var(--ink)]/25 pt-2 font-sans text-[0.7rem] leading-snug text-[var(--ink-mute)] sm:text-xs">
+                  {quote ? (
+                    <p className="text-[var(--ink-soft)]">
+                      Pay{" "}
+                      <span className="font-medium text-[var(--ink)]">
+                        ≈ {totalSats.toLocaleString()} sats · ${Number(quote.usd).toFixed(2)} ·{" "}
+                        {totalBtc.toFixed(8)} BTC
+                      </span>
+                      {" "}
+                      (all-in, {unitPaySats.toLocaleString()}/ea = {UNIT_SATS} carrier +{" "}
+                      {unitProjectFeeSats.toLocaleString()} fee)
+                    </p>
+                  ) : (
+                    <p>Loading price…</p>
+                  )}
+                </div>
 
-            <div className="btn-row flex-col items-stretch gap-2 pt-1 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                className="btn btn-solid w-full sm:w-auto"
-                disabled={busy || quoteExpired}
-                onClick={requestMint}
-              >
-                {account ? `Pay & Mint ${qty}` : "Connect & Mint"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost w-full sm:w-auto"
-                onClick={() => void refreshQuote()}
-              >
-                Refresh
-              </button>
-            </div>
+                <WalletConnect
+                  headlessUntilConnected
+                  balanceText={account ? formatBtcBalance(btcSats) : null}
+                  onAccount={(acc, ad) => {
+                    setAccount(acc);
+                    setAdapter(ad);
+                  }}
+                  registerOpen={(open) => {
+                    walletOpenRef.current = open;
+                  }}
+                />
+
+                <div className="btn-row flex-col items-stretch gap-2 pt-1 sm:flex-row sm:items-center">
+                  <button
+                    type="button"
+                    className="btn btn-solid w-full sm:w-auto"
+                    disabled={busy || quoteExpired}
+                    onClick={requestMint}
+                  >
+                    {account ? `Pay & Mint ${qty}` : "Connect & Mint"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost w-full sm:w-auto"
+                    onClick={() => void refreshQuote()}
+                  >
+                    Refresh
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
           {busy && progress && (

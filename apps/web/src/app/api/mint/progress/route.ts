@@ -1,6 +1,6 @@
 import { displayMintProgress } from "@/lib/virtual-progress";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
-import { GENESIS_SUPPLY } from "@satdust/shared";
+import { GENESIS_SUPPLY, isGenesisMintClosed } from "@satdust/shared";
 import { getRealMintTotals } from "@/lib/server/mint-persist";
 
 export const dynamic = "force-dynamic";
@@ -19,5 +19,6 @@ export async function GET(req: Request) {
     authorized: GENESIS_SUPPLY,
     paused: progress.paused,
     virtualFrozen: progress.virtualFrozen,
+    genesisClosed: isGenesisMintClosed(nowMs),
   });
 }

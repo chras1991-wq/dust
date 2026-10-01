@@ -8,6 +8,7 @@ type ProgressPayload = {
   serverTimeMs?: number;
   authorized?: number;
   paused?: boolean;
+  genesisClosed?: boolean;
 };
 
 /**
@@ -18,6 +19,7 @@ type ProgressPayload = {
 export function useSmoothMintProgress() {
   const [shown, setShown] = useState<number | null>(null);
   const [authorized, setAuthorized] = useState<number | null>(null);
+  const [genesisClosed, setGenesisClosed] = useState(false);
   const [progressReady, setProgressReady] = useState(false);
   const reqRef = useRef(0);
 
@@ -30,6 +32,7 @@ export function useSmoothMintProgress() {
       if (reqId !== reqRef.current) return;
       if (typeof data.displayMinted !== "number") return;
       if (typeof data.authorized === "number") setAuthorized(data.authorized);
+      if (typeof data.genesisClosed === "boolean") setGenesisClosed(data.genesisClosed);
       setShown(data.displayMinted);
       setProgressReady(true);
     } catch {
@@ -54,6 +57,7 @@ export function useSmoothMintProgress() {
   return {
     liveMinted: shown,
     authorized,
+    genesisClosed,
     progressReady,
     bumpReal,
     refreshReal: syncProgress,

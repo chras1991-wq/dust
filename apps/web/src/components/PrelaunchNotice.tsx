@@ -16,8 +16,8 @@ export function PrelaunchNotice({
           "Migrates when the first mint batch completes. Desk UI is ready; execution follows Genesis mint and indexer feeds."}
       </p>
       <div className="btn-row mt-6">
-        <Link href="/mint" className="btn btn-solid">
-          Open Mint
+        <Link href="/explorer" className="btn btn-solid">
+          Open Index
         </Link>
         <Link href="/docs/dust20" className="btn btn-ghost">
           Read DUST-20

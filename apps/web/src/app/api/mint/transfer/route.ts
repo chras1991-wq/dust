@@ -4,7 +4,7 @@ import {
   usdToFeeSats,
   verifyQuoteSignature,
 } from "@satdust/quote";
-import { MINT_USD, NETWORK } from "@satdust/shared";
+import { MINT_USD, NETWORK, isGenesisMintClosed } from "@satdust/shared";
 import { getProjectAddress } from "@/lib/server/addresses";
 import { splitMintPaymentSats } from "@/lib/mint-pricing";
 import { hydrateMintStore, persistMintRecord } from "@/lib/server/mint-persist";
@@ -43,6 +43,9 @@ export async function POST(req: Request) {
     }
     if (!Number.isFinite(qty) || qty < 1 || qty > 100_000) {
       return noStoreJson({ error: "Quantity must be at least 1" }, { status: 400 });
+    }
+    if (isGenesisMintClosed()) {
+      return noStoreJson({ error: "Genesis mint complete — use the Index desk to swap" }, { status: 409 });
     }
 
     let quoteFeeSatsTotal: number;

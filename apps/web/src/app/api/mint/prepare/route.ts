@@ -1,5 +1,5 @@
 import { isQuoteExpired, verifyQuoteSignature } from "@satdust/quote";
-import { UNIT_SATS, NETWORK, MINT_USD } from "@satdust/shared";
+import { UNIT_SATS, NETWORK, MINT_USD, isGenesisMintClosed } from "@satdust/shared";
 import { getProjectAddress } from "@/lib/server/addresses";
 import { hydrateMintStore, persistMintRecord, tryConsumeQuoteUnits } from "@/lib/server/mint-persist";
 import { buildRevealPlan, assertPreBroadcast } from "@satdust/bitcoin";
@@ -72,6 +72,10 @@ export async function POST(req: Request) {
         { error: "Quote does not cover this mint batch — refresh price" },
         { status: 400 }
       );
+    }
+
+    if (isGenesisMintClosed()) {
+      return noStoreJson({ error: "Genesis mint complete — use the Index desk to swap" }, { status: 409 });
     }
 
     const supply = getSupplySnapshot();

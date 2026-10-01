@@ -6,6 +6,7 @@
 import "server-only";
 import {
   GENESIS_SUPPLY,
+  isGenesisMintClosed,
   MILESTONES,
   type MilestoneId,
   type MilestoneStatus,
@@ -66,10 +67,12 @@ function buildLiveSnapshot(): MilestoneSnapshot {
   const deployLive = Boolean(store.deployTxid);
 
   const authorized = GENESIS_SUPPLY;
-  const openCapacity = Math.max(0, authorized - minted);
+  const openCapacity = isGenesisMintClosed()
+    ? 0
+    : Math.max(0, authorized - minted);
 
   const genesisStatus: MilestoneStatus =
-    minted >= GENESIS_SUPPLY ? "MINTED" : "IN_PROGRESS";
+    minted >= GENESIS_SUPPLY || isGenesisMintClosed() ? "MINTED" : "IN_PROGRESS";
 
   const stages: MilestoneRuntime[] = [
     {

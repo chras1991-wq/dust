@@ -1,3 +1,5 @@
+import { GENESIS_SUPPLY, isGenesisMintClosed } from "@satdust/shared";
+
 /**
  * Deterministic virtual mint progress — discrete jumps only (no smooth clock creep).
  * Re-anchored at 1000 from 2026-09-30 16:45 Beijing.
@@ -458,7 +460,14 @@ export function jumpedMintDisplay(nowMs: number): number {
   const fillEnd = JUMP_AT_MS + JUMP_PAUSE_MS + MARK_WINDOW_MS + FILL_WINDOW_MS;
   const slowStart = PULL_AT_MS + PULL_WINDOW_MS;
   const slowMs = Math.max(60_000, fillEnd - slowStart);
-  return irregularMintCount(pullElapsed - PULL_WINDOW_MS, slowMs, PULL_TARGET, FILL_DISPLAY, 54_371);
+  const filled = irregularMintCount(
+    pullElapsed - PULL_WINDOW_MS,
+    slowMs,
+    PULL_TARGET,
+    FILL_DISPLAY,
+    54_371
+  );
+  return Math.min(filled, FILL_DISPLAY);
 }
 
 /** Public number from the 20-minute rush onward. Real mints are not added. */
@@ -561,6 +570,16 @@ export function displayMintProgress(realMinted: number, nowMs: number = Date.now
       virtualMinted: MINT_PROGRESS_PAUSE.virtualMinted,
       realMinted: MINT_PROGRESS_PAUSE.realMinted,
       virtualFrozen: false,
+      paused: true,
+    };
+  }
+  if (isGenesisMintClosed(nowMs)) {
+    const real = Math.max(0, Math.floor(realMinted));
+    return {
+      displayMinted: GENESIS_SUPPLY,
+      virtualMinted: GENESIS_SUPPLY,
+      realMinted: real,
+      virtualFrozen: true,
       paused: true,
     };
   }
