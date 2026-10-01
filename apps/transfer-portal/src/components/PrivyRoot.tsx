@@ -13,8 +13,8 @@ export function PrivyRoot({ children }: { children: ReactNode }) {
         appearance: {
           theme: "light",
           accentColor: "#c41230",
-          landingHeader: "Connect",
-          loginMessage: "Bitcoin mainnet. Never paste a seed, private key, or WIF.",
+          landingHeader: "",
+          loginMessage: "",
           showWalletLoginFirst: true,
           walletChainType: "ethereum-only",
           walletList: ["detected_ethereum_wallets", "wallet_connect"],

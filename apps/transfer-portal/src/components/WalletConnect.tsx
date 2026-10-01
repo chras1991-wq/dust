@@ -171,20 +171,20 @@ export function WalletConnect({ onAccount, registerOpen }: Props) {
   return (
     <div className="relative">
       {account ? (
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="pill-tag">
-            {walletName} · {account.address.slice(0, 6)}…{account.address.slice(-4)}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="pill-tag font-mono text-xs">
+            {account.address.slice(0, 6)}…{account.address.slice(-4)}
           </span>
-          <button type="button" className="btn btn-ghost" onClick={() => setOpen(true)}>
-            Switch
+          <button type="button" className="btn btn-ghost !w-auto px-2" onClick={() => setOpen(true)} aria-label="w">
+            ↻
           </button>
-          <button type="button" className="btn" onClick={() => void disconnect()}>
-            Disconnect
+          <button type="button" className="btn !w-auto px-2" onClick={() => void disconnect()} aria-label="d">
+            ×
           </button>
         </div>
       ) : (
-        <button type="button" className="btn btn-solid" onClick={() => setOpen(true)}>
-          Connect Wallet
+        <button type="button" className="btn btn-solid !w-auto px-4" onClick={() => setOpen(true)} aria-label="c">
+          ◉
         </button>
       )}
 
@@ -193,19 +193,12 @@ export function WalletConnect({ onAccount, registerOpen }: Props) {
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
           <div className="panel-edit modal-sheet mb-[env(safe-area-inset-bottom)] w-full sm:mb-0">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="kicker">Wallet</p>
-                <h2 className="font-display mt-2 text-2xl sm:text-3xl">Select wallet</h2>
-                <p className="mt-2 text-sm text-[var(--ink-mute)]">
-                  Any Bitcoin wallet on mainnet. Never paste a seed / private key / WIF.
-                </p>
-              </div>
-              <button type="button" className="btn btn-ghost !w-auto shrink-0 px-3" onClick={() => setOpen(false)}>
-                Close
+            <div className="flex items-start justify-end gap-3">
+              <button type="button" className="btn btn-ghost !w-auto shrink-0 px-3" onClick={() => setOpen(false)} aria-label="x">
+                ×
               </button>
             </div>
-            <ul className="mt-6 space-y-2">
+            <ul className="mt-4 space-y-2">
               <li>
                 <button
                   type="button"
@@ -213,14 +206,9 @@ export function WalletConnect({ onAccount, registerOpen }: Props) {
                   disabled={!ready || busy}
                   onClick={connectPrivy}
                 >
-                  <span>
-                    <span className="font-display text-lg">Privy</span>
-                    <span className="mt-0.5 block text-xs opacity-70">
-                      Email, social, or any WalletConnect wallet
-                    </span>
-                  </span>
+                  <span className="font-display text-lg">Privy</span>
                   <span className="font-condensed text-[0.7rem] uppercase tracking-[0.12em]">
-                    {busy ? "Wait" : "Ready"}
+                    {busy ? "…" : "●"}
                   </span>
                 </button>
               </li>
@@ -234,21 +222,16 @@ export function WalletConnect({ onAccount, registerOpen }: Props) {
                       disabled={!installed || busy}
                       onClick={() => void connect(w)}
                     >
-                      <span className="font-display text-lg">{w.name}</span>
-                      <span className="font-condensed text-[0.7rem] uppercase tracking-[0.12em]">
-                        {installed ? "Ready" : "Install"}
-                      </span>
+                  <span className="font-display text-lg">{w.name}</span>
+                  <span className="font-condensed text-[0.7rem] uppercase tracking-[0.12em]">
+                    {installed ? "●" : "○"}
+                  </span>
                     </button>
                   </li>
                 );
               })}
             </ul>
-            {mounted && !anyBrowser && (
-              <p className="mt-4 text-sm text-[var(--ink-mute)]">
-                No browser wallet detected. Continue with Privy, or install any Bitcoin wallet and
-                refresh.
-              </p>
-            )}
+            {mounted && !anyBrowser && <p className="mt-4 text-sm opacity-0" aria-hidden> </p>}
             {error && <p className="mt-3 font-sans text-sm text-[var(--invalid)]">{error}</p>}
           </div>
         </div>

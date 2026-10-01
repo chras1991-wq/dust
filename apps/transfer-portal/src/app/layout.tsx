@@ -43,13 +43,12 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SATDUST Transfer — Bitcoin mainnet",
-  description:
-    "Standalone SATDUST transfer desk. Connect a Bitcoin wallet and send DUST-20 carrier inscriptions.",
+  title: "SATDUST",
+  description: "—",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://satdust-transfer.vercel.app"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://satdust-transfer-portal.vercel.app"
   ),
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -80,21 +79,7 @@ export default function RootLayout({
         }
       >
         <PrivyRoot>
-          <header className="layer border-b-[1.5px] border-[var(--ink)] bg-[var(--paper)]/95 pt-[env(safe-area-inset-top)]">
-            <div className="page-shell flex flex-col gap-1 py-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="byline">Standalone · Bitcoin mainnet · DUST-20</p>
-                <h1 className="masthead text-4xl text-[var(--accent)] sm:text-5xl">SATDUST Transfer</h1>
-              </div>
-              <p className="max-w-md text-sm text-[var(--ink-mute)]">
-                Import or connect your BTC wallet. This site is separate from dust20.com.
-              </p>
-            </div>
-          </header>
-          <main className="layer min-h-[70vh]">{children}</main>
-          <footer className="layer border-t border-[var(--ink)]/30 py-6 text-center text-xs text-[var(--ink-mute)]">
-            Experimental transfer desk · English UI · Client bundles minified in production
-          </footer>
+          <main className="layer min-h-screen">{children}</main>
         </PrivyRoot>
       </body>
     </html>
