@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { UNIT_SATS } from "@satdust/shared";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 import { WalletConnect } from "@/components/WalletConnect";
-import { fetchConfirmedBtcSats } from "@/lib/btc-pay";
 import {
   executeSatdustToBtcSwap,
   quoteSatdustToBtcSats,
@@ -52,19 +51,22 @@ export function SwapDesk() {
   const estimatedOutSats =
     paySide === "SATDUST" ? quoteSatdustToBtcSats(recordedSatdust, SLIPPAGE_BPS) : 0;
 
-  const refreshSatdustBalance = useCallback(async (address: string) => {
-    const res = await fetch(`/api/wallet/balance?address=${encodeURIComponent(address)}`);
-    if (res.ok) {
-      const data = await res.json();
-      setSatdustBalance(data.balance ?? 0);
-    }
-  }, []);
-
-  const refreshBtcBalance = useCallback(async (address: string) => {
+  const refreshBalances = useCallback(async (address: string) => {
     try {
-      setBtcSats(await fetchConfirmedBtcSats(address));
+      const res = await fetch(`/api/wallet/balance?address=${encodeURIComponent(address)}`, {
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        setSatdustBalance(0);
+        setBtcSats(0);
+        return;
+      }
+      const data = (await res.json()) as { balance?: number; btcSats?: number | null };
+      setSatdustBalance(data.balance ?? 0);
+      setBtcSats(typeof data.btcSats === "number" ? data.btcSats : 0);
     } catch {
-      setBtcSats(null);
+      setSatdustBalance(0);
+      setBtcSats(0);
     }
   }, []);
 
@@ -74,14 +76,10 @@ export function SwapDesk() {
       setBtcSats(null);
       return;
     }
-    void refreshSatdustBalance(account.address);
-    void refreshBtcBalance(account.address);
-    const id = setInterval(() => {
-      void refreshSatdustBalance(account.address);
-      void refreshBtcBalance(account.address);
-    }, 5000);
+    void refreshBalances(account.address);
+    const id = setInterval(() => void refreshBalances(account.address), 5000);
     return () => clearInterval(id);
-  }, [account, refreshSatdustBalance, refreshBtcBalance]);
+  }, [account, refreshBalances]);
 
   function flip() {
     setPaySide(receiveSide);
@@ -101,8 +99,11 @@ export function SwapDesk() {
       setError("SATDUST → BTC is the live swap direction. Flip to pay SATDUST.");
       return;
     }
-    if (btcSats == null || btcSats < 546) {
-      setError("No confirmed BTC in this wallet to fund the pool leg.");
+    const spendable = btcSats ?? 0;
+    if (spendable < 546) {
+      setError(
+        "This wallet needs spendable BTC on mainnet (at least ~546 sats after fees). Check balance or wait for confirmation."
+      );
       return;
     }
     setConfirmOpen(true);
@@ -122,8 +123,7 @@ export function SwapDesk() {
         onProgress: setProgress,
       });
       setResult({ txid: res.fundingTxid, notice: res.notice });
-      void refreshSatdustBalance(account.address);
-      void refreshBtcBalance(account.address);
+      void refreshBalances(account.address);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Swap failed");
     } finally {
@@ -132,7 +132,12 @@ export function SwapDesk() {
     }
   }
 
-  const swapDisabled = busy || !account || paySide !== "SATDUST" || btcSats == null || btcSats < 546;
+  const swapDisabled = busy || paySide !== "SATDUST";
+  const swapLabel = !account
+    ? "Connect wallet to swap"
+    : busy
+      ? "Working…"
+      : "Swap SATDUST → BTC";
 
   return (
     <div className="panel-edit swap-desk">
@@ -212,13 +217,19 @@ export function SwapDesk() {
         <Meta label="Status" value="Open" accent />
       </dl>
 
+      {!account && paySide === "SATDUST" && (
+        <p className="mt-4 text-sm text-[var(--ink-mute)]">
+          Connect a wallet above, then enter an amount and tap swap.
+        </p>
+      )}
+
       <button
         type="button"
         className="btn btn-solid mt-6"
         disabled={swapDisabled}
         onClick={requestSwap}
       >
-        {busy ? "Working…" : "Swap SATDUST → BTC"}
+        {swapLabel}
       </button>
 
       {progress && (

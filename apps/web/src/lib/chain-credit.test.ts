@@ -4,7 +4,7 @@ import { creditQtyForPayment, projectPaymentsFromTxs } from "./chain-credit";
 
 const WALLET = "bc1pedny4fgcsqlghqtmexd57sxc0ff2sw8jssq32zf5g2zcy9kuzryqc9z85a";
 const PROJECT =
-  "bc1pvhl5eemwk4a9d8k225medwye8m4rzw0nhr3nsfw732xzr6zx8rmq5ckdk4";
+  "bc1qtestprojectaddress000000000000000000000000000";
 
 describe("creditQtyForPayment", () => {
   const unit = usdToFeeSats(1, 83715.4);
