@@ -136,7 +136,7 @@ export const unisatAdapter: BitcoinWalletAdapter = {
     }));
   },
   async signPsbt(psbt: string) {
-    return window.unisat!.signPsbt(psbt);
+    return window.unisat!.signPsbt(psbt, { autoFinalized: true });
   },
   async sendBitcoin(toAddress: string, satoshis: number) {
     if (!window.unisat?.sendBitcoin) {
@@ -186,7 +186,12 @@ export const okxAdapter: BitcoinWalletAdapter = {
     }));
   },
   async signPsbt(psbt: string) {
-    return window.okxwallet!.bitcoin!.signPsbt(psbt);
+    const btc = window.okxwallet!.bitcoin!;
+    try {
+      return await btc.signPsbt(psbt, { autoFinalized: true });
+    } catch {
+      return btc.signPsbt(psbt);
+    }
   },
   async sendBitcoin(toAddress: string, satoshis: number) {
     const btc = window.okxwallet?.bitcoin;
@@ -356,7 +361,12 @@ function injectedUnisatLike(
       return [];
     },
     async signPsbt(psbt: string) {
-      return getApi()!.signPsbt(psbt);
+      const api = getApi()!;
+      try {
+        return await api.signPsbt(psbt, { autoFinalized: true });
+      } catch {
+        return api.signPsbt(psbt);
+      }
     },
     async sendBitcoin(toAddress: string, satoshis: number) {
       const api = getApi();
