@@ -41,6 +41,13 @@ function snapshotFromStore(store: Store): StoreSnapshot {
   };
 }
 
+function mergeSwaps(existing: SwapRecord[] | undefined, next: SwapRecord[]): SwapRecord[] {
+  const byId = new Map<string, SwapRecord>();
+  for (const swap of existing ?? []) byId.set(swap.id, swap);
+  for (const swap of next) byId.set(swap.id, swap);
+  return [...byId.values()];
+}
+
 function mergeSnapshots(existing: StoreSnapshot, next: StoreSnapshot): StoreSnapshot {
   const mergedMints = mergeMintRecords(
     Array.isArray(existing.mints) ? existing.mints : [],
@@ -48,12 +55,7 @@ function mergeSnapshots(existing: StoreSnapshot, next: StoreSnapshot): StoreSnap
   );
   return {
     mints: mergedMints,
-    swaps:
-      next.swaps.length > 0
-        ? next.swaps
-        : Array.isArray(existing.swaps)
-          ? existing.swaps
-          : [],
+    swaps: mergeSwaps(existing.swaps, next.swaps),
     confirmedMinted: Math.max(existing.confirmedMinted || 0, next.confirmedMinted || 0),
     pendingMinted: Math.max(existing.pendingMinted || 0, next.pendingMinted || 0),
     deployTxid: next.deployTxid ?? existing.deployTxid ?? null,

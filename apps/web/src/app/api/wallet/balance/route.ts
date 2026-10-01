@@ -1,6 +1,5 @@
-import { listMints } from "@/lib/store";
+import { listMints, listSwaps, getStore } from "@/lib/store";
 import { ensureStoreHydrated } from "@/lib/store-persist";
-import { getStore } from "@/lib/store";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +34,13 @@ export async function GET(req: Request) {
   }
 
   const mints = listMints().filter((m) => m.walletAddress === address && CREDITED.has(m.status));
-  const balance = mints.reduce((s, m) => s + m.amount, 0);
+  let balance = mints.reduce((s, m) => s + m.amount, 0);
+  for (const swap of listSwaps()) {
+    if (swap.walletAddress !== address) continue;
+    if (swap.direction === "BTC_TO_SATDUST") balance += swap.satdustAmount;
+    else balance -= swap.satdustAmount;
+  }
+  balance = Math.max(0, Math.round(balance * 10_000) / 10_000);
   const records = mints.map((m) => ({
     mintId: m.id,
     amount: m.amount,

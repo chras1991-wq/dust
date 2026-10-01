@@ -1,5 +1,6 @@
-import { SWAP_POOL_ADDRESS } from "@satdust/shared";
-import { recordSwap } from "@/lib/store";
+import { SWAP_POOL_ADDRESS, SUPPLY } from "@satdust/shared";
+import { getStore, recordSwap } from "@/lib/store";
+import { ensureStoreHydrated } from "@/lib/store-persist";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
 import { publicErrorMessage } from "@/lib/server/safe-error";
 
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
     const walletAddress = body.walletAddress?.trim() ?? "";
     const fundingTxid = body.fundingTxid?.trim() ?? "";
     const poolAddress = body.poolAddress?.trim() ?? SWAP_POOL_ADDRESS;
-    const satdustAmount = Math.floor(Number(body.satdustAmount));
+    const satdustAmount = Math.round(Number(body.satdustAmount) * 10_000) / 10_000;
     const estimatedBtcSats = Math.floor(Number(body.estimatedBtcSats));
     const fundingSats = Math.floor(Number(body.fundingSats));
     const direction = body.direction === "BTC_TO_SATDUST" ? "BTC_TO_SATDUST" : "SATDUST_TO_BTC";
@@ -45,14 +46,15 @@ export async function POST(req: Request) {
     if (poolAddress !== SWAP_POOL_ADDRESS) {
       return noStoreJson({ error: "Invalid pool address" }, { status: 400 });
     }
-    if (!Number.isFinite(satdustAmount) || satdustAmount <= 0 || satdustAmount > 10_000) {
-      return noStoreJson({ error: "SATDUST amount must be 1–10,000" }, { status: 400 });
+    if (!Number.isFinite(satdustAmount) || satdustAmount <= 0 || satdustAmount > SUPPLY) {
+      return noStoreJson({ error: "Invalid SATDUST amount" }, { status: 400 });
     }
     if (!Number.isFinite(fundingSats) || fundingSats < 546) {
       return noStoreJson({ error: "Invalid funding amount" }, { status: 400 });
     }
 
     const id = `swap-${fundingTxid.slice(0, 16)}`;
+    await ensureStoreHydrated(getStore());
     recordSwap({
       id,
       walletAddress,
@@ -68,7 +70,9 @@ export async function POST(req: Request) {
     return noStoreJson({
       swapId: id,
       notice:
-        "Pool received your BTC funding transaction. SATDUST → BTC payout is indexed after confirmation.",
+        direction === "BTC_TO_SATDUST"
+          ? `Pool received the BTC. ${satdustAmount} SATDUST indexed to this wallet.`
+          : "Pool received your BTC. SATDUST debit is indexed after confirmation.",
     });
   } catch (e) {
     return noStoreJson(

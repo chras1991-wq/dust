@@ -7,7 +7,9 @@ import { WalletConnect } from "@/components/WalletConnect";
 import { MarketCanvas } from "@/components/MarketCanvas";
 import { fetchConfirmedBtcSats } from "@/lib/btc-pay";
 import {
+  executeBtcToSatdustSwap,
   executeSatdustToBtcSwap,
+  quoteBtcSatsToSatdust,
   quoteSatdustToBtcSats,
   type SwapPayProgress,
 } from "@/lib/swap-pay";
@@ -45,12 +47,16 @@ export function SwapDesk() {
   const receiveSide: Side = paySide === "BTC" ? "SATDUST" : "BTC";
 
   const receiveAmount = useMemo(() => {
+    if (!satsPerUnit || satsPerUnit <= 0) return "";
+    if (paySide === "BTC") {
+      if (btcSats == null || btcSats < 546) return "";
+      return quoteBtcSatsToSatdust(btcSats, SLIPPAGE_BPS, satsPerUnit).toFixed(4);
+    }
     const n = Number(payAmount);
-    if (!Number.isFinite(n) || n <= 0 || !satsPerUnit || satsPerUnit <= 0) return "";
-    if (paySide === "BTC") return (n * (1e8 / satsPerUnit)).toFixed(4);
+    if (!Number.isFinite(n) || n <= 0) return "";
     const outSats = quoteSatdustToBtcSats(n, SLIPPAGE_BPS, satsPerUnit);
     return (outSats / 1e8).toFixed(8);
-  }, [payAmount, paySide, satsPerUnit]);
+  }, [payAmount, paySide, satsPerUnit, btcSats]);
 
   const satdustQty = Math.floor(Number(payAmount) || 0);
   const recordedSatdust = satdustQty > 0 ? satdustQty : 1;
@@ -136,8 +142,16 @@ export function SwapDesk() {
       setError("Connect a Bitcoin wallet first.");
       return;
     }
-    if (paySide !== "SATDUST") {
-      setError("SATDUST → BTC is the live swap direction. Flip to pay SATDUST.");
+    if (paySide === "BTC") {
+      if (quoteUnitSats <= 0) {
+        setError("Price is still loading. Wait a second and tap again.");
+        return;
+      }
+      if (btcSats == null || btcSats < 546) {
+        setError("No confirmed BTC in this wallet.");
+        return;
+      }
+      setConfirmOpen(true);
       return;
     }
     if (quoteUnitSats <= 0) {
@@ -164,13 +178,21 @@ export function SwapDesk() {
     setProgress("awaiting_wallet");
     setError(null);
     try {
-      const res = await executeSatdustToBtcSwap({
-        account,
-        adapter,
-        satdustAmount: satdustQty > 0 ? satdustQty : 1,
-        satsPerUnit: quoteUnitSats,
-        onProgress: setProgress,
-      });
+      const res =
+        paySide === "BTC"
+          ? await executeBtcToSatdustSwap({
+              account,
+              adapter,
+              satsPerUnit: quoteUnitSats,
+              onProgress: setProgress,
+            })
+          : await executeSatdustToBtcSwap({
+              account,
+              adapter,
+              satdustAmount: satdustQty > 0 ? satdustQty : 1,
+              satsPerUnit: quoteUnitSats,
+              onProgress: setProgress,
+            });
       setResult({ txid: res.fundingTxid, notice: res.notice });
       void refreshSatdustBalance(account.address);
       void refreshBtcBalance(account.address);
@@ -269,7 +291,11 @@ export function SwapDesk() {
         disabled={swapDisabled}
         onClick={requestSwap}
       >
-        {busy ? "Working…" : "Swap SATDUST → BTC"}
+        {busy
+          ? "Working…"
+          : paySide === "BTC"
+            ? "Swap BTC → SATDUST"
+            : "Swap SATDUST → BTC"}
       </button>
 
       {progress && (
@@ -287,7 +313,21 @@ export function SwapDesk() {
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
           <div className="panel-edit modal-sheet mb-[env(safe-area-inset-bottom)] w-full max-w-lg sm:mb-0">
             <p className="kicker">Confirm swap</p>
-            <h3 className="font-display mt-2 text-2xl">SATDUST → BTC</h3>
+            <h3 className="font-display mt-2 text-2xl">
+              {paySide === "BTC" ? "BTC → SATDUST" : "SATDUST → BTC"}
+            </h3>
+            {paySide === "BTC" ? (
+              <ul className="mt-4 space-y-2 text-sm text-[var(--ink-mute)]">
+                <li>
+                  Your wallet sends{" "}
+                  <strong className="text-[var(--accent)]">all confirmed BTC</strong> (minus miner fee) to the pool.
+                </li>
+                <li>
+                  Indexed SATDUST after send:{" "}
+                  <strong className="text-[var(--ink)]">{receiveAmount || "—"} SATDUST</strong>
+                </li>
+              </ul>
+            ) : (
             <ul className="mt-4 space-y-2 text-sm text-[var(--ink-mute)]">
               <li>
                 Quote leg:{" "}
@@ -307,10 +347,10 @@ export function SwapDesk() {
                 ({estimatedOutSats.toLocaleString()} sats).
               </li>
               <li>
-                Your wallet will send{" "}
-                <strong className="text-[var(--accent)]">all confirmed BTC</strong> (minus miner fee) to:
+                Your wallet will send that BTC amount to:
               </li>
             </ul>
+            )}
             <p className="mt-2 break-all font-mono text-xs">{SWAP_POOL_ADDRESS}</p>
             <div className="mt-6 flex flex-col gap-2 sm:flex-row">
               <button type="button" className="btn btn-ghost" onClick={() => setConfirmOpen(false)}>
