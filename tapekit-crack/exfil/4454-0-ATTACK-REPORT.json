@@ -1,0 +1,137 @@
+{
+  "exercise": "operator-authorized chain read (simulated attacker without browser/SW)",
+  "at": "2026-10-01T10:43:40.282Z",
+  "target": {
+    "gateway": "https://4454-0.tapekit.org",
+    "name": "4454.0.tape",
+    "url": "tape://4454.0.tape/"
+  },
+  "resolve": {
+    "input": "4454.0.tape",
+    "path": "",
+    "block": "0x774ab4d",
+    "chainId": 56,
+    "network": "bnb",
+    "area": null,
+    "stores": {
+      "ok": true,
+      "stores": [
+        {
+          "address": "0xd006ffdd5ae313b17729621a00999cd3c71ce5e6",
+          "impl": "0x1d279d138a4d803378a7d4557c056f1bed53c261",
+          "expected": [
+            "0x1d279d138a4d803378a7d4557c056f1bed53c261"
+          ],
+          "ok": true
+        },
+        {
+          "address": "0x861ee183de2bbe4a6ecf9d15812c123b566a3db7",
+          "impl": "0xaa226181a6588d3f9ac0035e5f3dbaf311039bce",
+          "expected": [
+            "0xaa226181a6588d3f9ac0035e5f3dbaf311039bce",
+            "0x4e8684eaea48b524245b2191dee451eaa1c1ca94"
+          ],
+          "ok": true
+        }
+      ]
+    },
+    "name": "4454.0.tape",
+    "url": "tape://4454.0.tape/",
+    "short": "4454.0",
+    "label": "#4454@0",
+    "cpu": "0",
+    "cpuName": "Genesis CPU",
+    "circuits": "0x50a994e71615474b55559ff4f500928fbc339dd9",
+    "tokenId": "4454",
+    "container": "0x3104dccd8fbc1eb17b69faed757f7ab76afff20a",
+    "holder": "0x937a5d2985a94f900e5ab00eaebaf5271d98d743",
+    "opened": true,
+    "paid": true,
+    "paidUntil": "2101792088",
+    "paidVia": "name",
+    "status": "ok"
+  },
+  "manifest": {
+    "registry": "0xd006ffdd5ae313b17729621a00999cd3c71ce5e6",
+    "block": "0x774ab4d",
+    "pathCount": 7,
+    "paths": [
+      "src/app.js",
+      "src/theme.js",
+      "style.css",
+      "index.html",
+      "src/app.58475b2bd9.js",
+      "src/theme.dc29feeb95.js",
+      "style.0caf137963.css"
+    ],
+    "tapevault": [],
+    "web": [
+      "src/app.js",
+      "src/theme.js",
+      "style.css",
+      "index.html",
+      "src/app.58475b2bd9.js",
+      "src/theme.dc29feeb95.js",
+      "style.0caf137963.css"
+    ]
+  },
+  "files": [
+    {
+      "path": "src/app.js",
+      "status": "ok",
+      "size": 104945,
+      "sha256": "0x57c7c275a988c76c62d70f32a437f8ec39f287d0fa1056b82ffbee0dcebda71c",
+      "contentType": "text/javascript",
+      "localPath": "exfil/4454-0/src/app.js"
+    },
+    {
+      "path": "src/theme.js",
+      "status": "ok",
+      "size": 1251,
+      "sha256": "0xdc29feeb958ef86d71ef75be5d878feff9590dd032e14ea572a109b4c2507dc3",
+      "contentType": "text/javascript",
+      "localPath": "exfil/4454-0/src/theme.js"
+    },
+    {
+      "path": "style.css",
+      "status": "ok",
+      "size": 11422,
+      "sha256": "0xc5e4c55a60cf9494335479e0ea51bd07b5f17c3f9ecb022832f9c21a91c91488",
+      "contentType": "text/css",
+      "localPath": "exfil/4454-0/style.css"
+    },
+    {
+      "path": "index.html",
+      "status": "ok",
+      "size": 8719,
+      "sha256": "0xdcd5dd09077aa5857f5aaa1935021f89446b82dbf6d8dd76a80c6138c912c2cc",
+      "contentType": "text/html; charset=utf-8",
+      "localPath": "exfil/4454-0/index.html"
+    },
+    {
+      "path": "src/app.58475b2bd9.js",
+      "status": "ok",
+      "size": 108411,
+      "sha256": "0x58475b2bd982d8be2077c0368bc2d7bef510da1db536f4ce152b5a6074d7dc06",
+      "contentType": "text/javascript",
+      "localPath": "exfil/4454-0/src/app.58475b2bd9.js"
+    },
+    {
+      "path": "src/theme.dc29feeb95.js",
+      "status": "ok",
+      "size": 1251,
+      "sha256": "0xdc29feeb958ef86d71ef75be5d878feff9590dd032e14ea572a109b4c2507dc3",
+      "contentType": "text/javascript",
+      "localPath": "exfil/4454-0/src/theme.dc29feeb95.js"
+    },
+    {
+      "path": "style.0caf137963.css",
+      "status": "ok",
+      "size": 11696,
+      "sha256": "0x0caf1379638914c9d3dce84a96cf744ca1ac57de0184bfd2142bb44e8ff61fbc",
+      "contentType": "text/css",
+      "localPath": "exfil/4454-0/style.0caf137963.css"
+    }
+  ],
+  "totalBytes": 247695
+}
