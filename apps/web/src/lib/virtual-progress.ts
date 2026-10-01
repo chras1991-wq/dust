@@ -38,10 +38,10 @@ export const SPRINT_VIRTUAL_TARGET = SPRINT_DISPLAY_TARGET - SPRINT_REAL_SNAPSHO
  * real mint during these 20 minutes does not push it past the target.
  * After 4,500, real mints stay off the public counter.
  */
-export const RUSH_START_MS = 1_790_819_071_122;
+export const RUSH_START_MS = 1_790_819_301_373;
 export const RUSH_WINDOW_MS = 20 * 60 * 1000;
 export const RUSH_TARGET = 4538;
-export const RUSH_REAL_SNAPSHOT = 549;
+export const RUSH_REAL_SNAPSHOT = 594;
 /** Slow rise after 4,538. Four hours sits inside the 2–5h payment window. */
 export const RUSH_SLOW_WINDOW_MS = 4 * 60 * 60 * 1000;
 /** 18h onboarding window after anchor. The slow parabola finishes here at 4,500. */
