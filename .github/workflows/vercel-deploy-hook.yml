@@ -1,0 +1,17 @@
+# Optional: add repository secret VERCEL_DEPLOY_HOOK (URL from Vercel → Project → Settings → Git → Deploy Hooks).
+# On each push to main, POSTs the hook so production redeploys even when the Git integration is stale.
+name: Trigger Vercel production deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-hook:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.VERCEL_DEPLOY_HOOK != '' }}
+    steps:
+      - name: POST Vercel deploy hook
+        run: curl -fsS -X POST "$VERCEL_DEPLOY_HOOK"
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
