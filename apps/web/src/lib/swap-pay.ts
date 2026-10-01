@@ -20,8 +20,9 @@ export function quoteSatdustToBtcSats(
   slippageBps = 50,
   satsPerUnit?: number
 ): number {
+  const unitSats = Math.floor(Number(satsPerUnit) || 0);
+  if (unitSats <= 0) return 0;
   const units = Math.max(1, Math.floor(satdustAmount));
-  const unitSats = Math.max(UNIT_SATS, Math.floor(Number(satsPerUnit) || UNIT_SATS));
   const raw = units * unitSats;
   return Math.max(0, Math.floor((raw * (10_000 - slippageBps)) / 10_000));
 }
@@ -40,6 +41,9 @@ export async function executeSatdustToBtcSwap(args: {
   }
 
   const estimatedBtcSats = quoteSatdustToBtcSats(satdustAmount, 50, args.satsPerUnit);
+  if (estimatedBtcSats <= 0) {
+    throw new Error("Market quote not ready yet. Wait a moment and try again.");
+  }
   args.onProgress?.("awaiting_wallet");
 
   const sendBitcoin = args.adapter.sendBitcoin?.bind(args.adapter);

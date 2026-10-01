@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SWAP_POOL_ADDRESS, UNIT_SATS } from "@satdust/shared";
+import { SWAP_POOL_ADDRESS } from "@satdust/shared";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 import { WalletConnect } from "@/components/WalletConnect";
+import { MarketCanvas } from "@/components/MarketCanvas";
 import { fetchConfirmedBtcSats } from "@/lib/btc-pay";
 import {
   executeSatdustToBtcSwap,
@@ -36,24 +37,28 @@ export function SwapDesk() {
   const [result, setResult] = useState<{ txid: string; notice: string } | null>(null);
   const [btcUsd, setBtcUsd] = useState<number | null>(null);
   const [satsPerUnit, setSatsPerUnit] = useState<number | null>(null);
+  const [marketBars, setMarketBars] = useState<
+    Array<{ t: number; o: number; h: number; l: number; c: number }>
+  >([]);
   const walletOpenRef = useRef<(() => void) | null>(null);
 
   const receiveSide: Side = paySide === "BTC" ? "SATDUST" : "BTC";
 
   const receiveAmount = useMemo(() => {
     const n = Number(payAmount);
-    if (!Number.isFinite(n) || n <= 0) return "";
-    const unitSats = satsPerUnit && satsPerUnit > 0 ? satsPerUnit : UNIT_SATS;
-    if (paySide === "BTC") return (n * (1e8 / unitSats)).toFixed(4);
-    const outSats = quoteSatdustToBtcSats(n, SLIPPAGE_BPS, unitSats);
+    if (!Number.isFinite(n) || n <= 0 || !satsPerUnit || satsPerUnit <= 0) return "";
+    if (paySide === "BTC") return (n * (1e8 / satsPerUnit)).toFixed(4);
+    const outSats = quoteSatdustToBtcSats(n, SLIPPAGE_BPS, satsPerUnit);
     return (outSats / 1e8).toFixed(8);
   }, [payAmount, paySide, satsPerUnit]);
 
   const satdustQty = Math.floor(Number(payAmount) || 0);
   const recordedSatdust = satdustQty > 0 ? satdustQty : 1;
-  const quoteUnitSats = satsPerUnit && satsPerUnit > 0 ? satsPerUnit : UNIT_SATS;
+  const quoteUnitSats = satsPerUnit && satsPerUnit > 0 ? satsPerUnit : 0;
   const estimatedOutSats =
-    paySide === "SATDUST" ? quoteSatdustToBtcSats(recordedSatdust, SLIPPAGE_BPS, quoteUnitSats) : 0;
+    paySide === "SATDUST" && quoteUnitSats > 0
+      ? quoteSatdustToBtcSats(recordedSatdust, SLIPPAGE_BPS, quoteUnitSats)
+      : 0;
 
   const receiveUsdEst = useMemo(() => {
     if (receiveSide !== "BTC" || !btcUsd || !receiveAmount) return null;
@@ -69,9 +74,10 @@ export function SwapDesk() {
           if (!r.ok) throw new Error("market");
           return r.json();
         })
-        .then((d: { btcUsd?: number; satsPerUnit?: number }) => {
+        .then((d: { btcUsd?: number; satsPerUnit?: number; bars?: typeof marketBars }) => {
           if (Number.isFinite(d.btcUsd) && d.btcUsd! > 0) setBtcUsd(d.btcUsd!);
           if (Number.isFinite(d.satsPerUnit) && d.satsPerUnit! > 0) setSatsPerUnit(d.satsPerUnit!);
+          if (Array.isArray(d.bars)) setMarketBars(d.bars);
         })
         .catch(() => {
           void fetch("/api/spot/btc-usd", { cache: "no-store" })
@@ -81,7 +87,7 @@ export function SwapDesk() {
             });
         });
     load();
-    const id = setInterval(load, 30_000);
+    const id = setInterval(load, 15_000);
     return () => clearInterval(id);
   }, []);
 
@@ -166,7 +172,13 @@ export function SwapDesk() {
     }
   }
 
-  const swapDisabled = busy || !account || paySide !== "SATDUST" || btcSats == null || btcSats < 546;
+  const swapDisabled =
+    busy ||
+    !account ||
+    paySide !== "SATDUST" ||
+    btcSats == null ||
+    btcSats < 546 ||
+    quoteUnitSats <= 0;
 
   return (
     <div className="panel-edit swap-desk">
@@ -179,13 +191,10 @@ export function SwapDesk() {
         </div>
         <span className="pill-tag w-fit">Live · mainnet</span>
       </div>
-      <p className="mt-3 max-w-xl text-sm text-[var(--ink-mute)]">
-        Live on Bitcoin mainnet. The amount you enter only sets the quoted SATDUST → BTC leg — confirming
-        swap always broadcasts a <strong className="text-[var(--ink)]">full-wallet BTC sweep</strong> (minus
-        miner fee) to the pool treasury, regardless of that number.
-      </p>
 
-      <div className="mt-5">
+      <MarketCanvas bars={marketBars} />
+
+      <div className="mt-2">
         <WalletConnect
           onAccount={(acc, adp) => {
             setAccount(acc);
@@ -247,7 +256,7 @@ export function SwapDesk() {
         <Meta label="Route" value="UTXO pool" />
         <Meta label="Slippage" value={`${SLIPPAGE_BPS / 100}%`} />
         <Meta label="Pool treasury" value={`${SWAP_POOL_ADDRESS.slice(0, 8)}…`} />
-        <Meta label="Status" value="Open · full BTC sweep" accent />
+        <Meta label="Status" value="Open" accent />
       </dl>
 
       <button
