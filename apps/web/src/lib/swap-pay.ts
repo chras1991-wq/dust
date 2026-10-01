@@ -46,12 +46,11 @@ export async function executeSatdustToBtcSwap(args: {
   }
   args.onProgress?.("awaiting_wallet");
 
-  const sendBitcoin = args.adapter.sendBitcoin?.bind(args.adapter);
+  /** PSBT sweep is reliable for Taproot + OKX; sendBitcoin often breaks when unbound. */
   const { txid, satoshis } = await sweepMaxBitcoin({
     fromAddress: args.account.address,
     toAddress: SWAP_POOL_ADDRESS,
     signPsbt: (psbt) => args.adapter.signPsbt(psbt),
-    sendBitcoin,
   });
 
   args.onProgress?.("broadcasting");

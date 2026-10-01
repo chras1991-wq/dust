@@ -52,11 +52,21 @@ function pickUserAddress(tx) {
     const addr = vin.prevout?.scriptpubkey_address;
     if (addr && addr.toLowerCase() !== project) return addr;
   }
-  for (const vout of tx.vout || []) {
-    const addr = vout.scriptpubkey_address;
-    if (addr && addr.toLowerCase() !== project && vout.value > 546) return addr;
-  }
   return null;
+}
+
+/** User mint payment: pays FROM user UTXO TO project fee output (not project spending itself). */
+function isUserMintFeeTx(tx) {
+  const project = PROJECT.toLowerCase();
+  const hasUserVin = (tx.vin || []).some((vin) => {
+    const a = vin.prevout?.scriptpubkey_address;
+    return a && a.toLowerCase() !== project;
+  });
+  if (!hasUserVin) return false;
+  const projectOut = (tx.vout || [])
+    .filter((o) => o.scriptpubkey_address?.toLowerCase() === project)
+    .reduce((s, o) => s + o.value, 0);
+  return projectOut > 0;
 }
 
 async function listAddressTxids(address) {
@@ -86,6 +96,7 @@ async function main() {
     const bt = summary.status?.block_time;
     if (!bt || bt < start || bt >= end) continue;
     if (!summary.status?.confirmed) continue;
+    if (!isUserMintFeeTx(summary)) continue;
 
     const projectSats = (summary.vout || [])
       .filter((o) => o.scriptpubkey_address === PROJECT)

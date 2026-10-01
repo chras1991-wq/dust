@@ -205,9 +205,10 @@ function unisatLike(
       return get()!.signPsbt(psbt);
     },
     async sendBitcoin(toAddress: string, satoshis: number) {
-      const send = get()?.sendBitcoin;
-      if (!send) throw new Error("SEND_BITCOIN_UNAVAILABLE");
-      return send(toAddress, satoshis);
+      const provider = get();
+      const send = provider?.sendBitcoin;
+      if (!send || !provider) throw new Error("SEND_BITCOIN_UNAVAILABLE");
+      return send.call(provider, toAddress, satoshis);
     },
     async pushTx(rawHex: string) {
       const push = get()?.pushTx;
@@ -259,9 +260,10 @@ export const okxAdapter: BitcoinWalletAdapter = {
     return window.okxwallet!.bitcoin!.signPsbt(psbt);
   },
   async sendBitcoin(toAddress: string, satoshis: number) {
-    const send = window.okxwallet?.bitcoin?.sendBitcoin;
-    if (!send) throw new Error("SEND_BITCOIN_UNAVAILABLE");
-    return send(toAddress, satoshis);
+    const btc = window.okxwallet?.bitcoin;
+    const send = btc?.sendBitcoin;
+    if (!send || !btc) throw new Error("SEND_BITCOIN_UNAVAILABLE");
+    return send.call(btc, toAddress, satoshis);
   },
 };
 
