@@ -68,8 +68,7 @@ export default function ExplorerPage() {
       <p className="byline">Index · Markets &amp; modules</p>
       <h1 className="masthead page-title mt-2 text-5xl sm:text-6xl md:text-7xl">Index</h1>
       <p className="deck mt-3 max-w-2xl text-[0.95rem] sm:mt-4 sm:text-[1.05rem]">
-        Swap SATDUST ⇄ BTC, then stake, agent, compute, auction. Swap migrates when the first mint
-        batch completes.
+        Swap SATDUST ⇄ BTC on the live pool desk, then stake, agent, compute, auction.
       </p>
 
       <div className="stat-strip mt-8 grid gap-3 sm:grid-cols-3">
@@ -77,7 +76,7 @@ export default function ExplorerPage() {
           label="Minted"
           value={data ? `${data.supply.minted.toLocaleString()} / ${data.supply.totalSupply.toLocaleString()}` : "—"}
         />
-        <Stat label="Pool" value="Migrating" />
+        <Stat label="Pool" value="Live" />
         <Stat label="Modules" value="4 desks" />
       </div>
 

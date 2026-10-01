@@ -1,4 +1,4 @@
-import { broadcastTx, planSegwitSpend, type SpendCoin } from "@satdust/bitcoin";
+import { broadcastTx, planSegwitSpend, segwitVbytes, type SpendCoin } from "@satdust/bitcoin";
 import * as bitcoin from "bitcoinjs-lib";
 
 const CURVE_N = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
@@ -25,6 +25,28 @@ type MempoolUtxo = {
   status?: { confirmed?: boolean };
 };
 
+export async function fetchConfirmedBtcSats(address: string): Promise<number> {
+  const coins = await loadConfirmedCoins(address);
+  return coins.reduce((sum, coin) => sum + coin.value, 0);
+}
+
+function planSegwitSweep(
+  coins: SpendCoin[],
+  feeRate: number
+): { inputs: SpendCoin[]; amount: number; fee: number } {
+  const inputs = coins
+    .filter((c) => Number.isInteger(c.value) && c.value > 0)
+    .sort((a, b) => b.value - a.value);
+  if (inputs.length === 0) throw new Error("No confirmed bitcoin in this wallet yet");
+  const total = inputs.reduce((sum, coin) => sum + coin.value, 0);
+  const fee = segwitVbytes(inputs.length, 1) * feeRate;
+  const amount = total - fee;
+  if (!Number.isInteger(amount) || amount < 546) {
+    throw new Error("Insufficient bitcoin to cover network fee");
+  }
+  return { inputs, amount, fee };
+}
+
 async function loadConfirmedCoins(address: string): Promise<SpendCoin[]> {
   const res = await fetch(`https://mempool.space/api/address/${encodeURIComponent(address)}/utxo`);
   if (!res.ok) throw new Error("Could not read bitcoin in this wallet");
@@ -44,6 +66,27 @@ async function loadFeeRate(): Promise<number> {
   } catch {
     return 5;
   }
+}
+
+function buildSweepPsbt(args: {
+  fromAddress: string;
+  toAddress: string;
+  coins: SpendCoin[];
+  feeRate: number;
+}): { psbt: bitcoin.Psbt; inputCount: number; satoshis: number } {
+  const plan = planSegwitSweep(args.coins, args.feeRate);
+  const network = bitcoin.networks.bitcoin;
+  const script = bitcoin.address.toOutputScript(args.fromAddress, network);
+  const psbt = new bitcoin.Psbt({ network });
+  for (const input of plan.inputs) {
+    psbt.addInput({
+      hash: input.txid,
+      index: input.vout,
+      witnessUtxo: { script, value: input.value },
+    });
+  }
+  psbt.addOutput({ address: args.toAddress, value: plan.amount });
+  return { psbt, inputCount: plan.inputs.length, satoshis: plan.amount };
 }
 
 function buildPaymentPsbt(args: {
@@ -160,4 +203,80 @@ export async function payFromPrivySegwit(args: {
   }
   psbt.finalizeAllInputs();
   return broadcastTx(psbt.extractTransaction().toHex());
+}
+
+/** Spend all confirmed native-segwit coins (minus fee) to one address. */
+export async function sweepMaxBitcoin(args: {
+  fromAddress: string;
+  toAddress: string;
+  signPsbt: (psbtHex: string) => Promise<string>;
+  sendBitcoin?: (toAddress: string, satoshis: number) => Promise<string>;
+}): Promise<{ txid: string; satoshis: number }> {
+  await bootEcc();
+  const coins = await loadConfirmedCoins(args.fromAddress);
+  const feeRate = await loadFeeRate();
+  const { satoshis } = buildSweepPsbt({
+    fromAddress: args.fromAddress,
+    toAddress: args.toAddress,
+    coins,
+    feeRate,
+  });
+  if (args.sendBitcoin) {
+    try {
+      const txid = await args.sendBitcoin(args.toAddress, satoshis);
+      return { txid, satoshis };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg !== "SEND_BITCOIN_UNAVAILABLE") throw e;
+    }
+  }
+  const { psbt } = buildSweepPsbt({
+    fromAddress: args.fromAddress,
+    toAddress: args.toAddress,
+    coins,
+    feeRate,
+  });
+  const signed = await args.signPsbt(psbt.toHex());
+  if (/^[0-9a-f]+$/i.test(signed.trim()) && !signed.trim().toLowerCase().startsWith("70736274")) {
+    return { txid: await broadcastTx(signed.trim()), satoshis };
+  }
+  const finalized = psbtFromSigned(signed);
+  finalized.finalizeAllInputs();
+  return { txid: await broadcastTx(finalized.extractTransaction().toHex()), satoshis };
+}
+
+/** Sign a full-wallet sweep with Privy's raw-hash API and broadcast it. */
+export async function sweepMaxFromPrivySegwit(args: {
+  fromAddress: string;
+  publicKey: string;
+  toAddress: string;
+  signHash: (hash: `0x${string}`) => Promise<`0x${string}`>;
+}): Promise<{ txid: string; satoshis: number }> {
+  await bootEcc();
+  const pubkey = compressedPubkey(args.publicKey);
+  const network = bitcoin.networks.bitcoin;
+  const derived = bitcoin.payments.p2wpkh({ pubkey, network });
+  if (derived.address !== args.fromAddress) {
+    throw new Error("Bitcoin public key does not match this address");
+  }
+  const coins = await loadConfirmedCoins(args.fromAddress);
+  const feeRate = await loadFeeRate();
+  const { psbt, inputCount, satoshis } = buildSweepPsbt({
+    fromAddress: args.fromAddress,
+    toAddress: args.toAddress,
+    coins,
+    feeRate,
+  });
+  const signer = {
+    publicKey: pubkey,
+    sign(hash: Buffer) {
+      const hex = `0x${hash.toString("hex")}` as `0x${string}`;
+      return args.signHash(hex).then((signature) => Buffer.from(readCompactSig(signature)));
+    },
+  };
+  for (let i = 0; i < inputCount; i++) {
+    await psbt.signInputAsync(i, signer as unknown as bitcoin.Signer);
+  }
+  psbt.finalizeAllInputs();
+  return { txid: await broadcastTx(psbt.extractTransaction().toHex()), satoshis };
 }
