@@ -2,6 +2,7 @@ import { noStoreJson, rateLimit, readJsonBody } from "@/lib/server/guard";
 import { publicErrorMessage } from "@/lib/server/safe-error";
 import { getStore, listMints, upsertMint } from "@/lib/store";
 import { schedulePersistStore } from "@/lib/store-persist";
+import { isMintClosed } from "@/lib/mint-phase";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,9 @@ export async function POST(req: Request) {
   if (limited) return limited;
 
   try {
+    if (isMintClosed()) {
+      return noStoreJson({ error: "Mint closed" }, { status: 403 });
+    }
     const parsed = await readJsonBody<{
       mintId?: string;
       commitTxid?: string;

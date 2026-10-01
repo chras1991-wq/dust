@@ -502,12 +502,48 @@ body::before {
   display: none;
 }
 
-.nav-scroll a {
+.nav-scroll a,
+.nav-scroll a:link,
+.nav-scroll a:visited,
+.nav-scroll a:hover,
+.nav-scroll a:active {
   flex: 0 0 auto;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   padding: 0.35rem 0.7rem;
+  color: var(--accent);
+  opacity: 1;
+  pointer-events: auto;
+  -webkit-text-fill-color: var(--accent);
+}
+
+.nav-scroll a[aria-current="page"],
+.nav-scroll a[aria-current="page"]:link,
+.nav-scroll a[aria-current="page"]:visited,
+.nav-scroll a[aria-current="page"]:hover,
+.nav-scroll a[aria-current="page"]:active {
+  color: var(--paper);
+  background: var(--ink);
+  -webkit-text-fill-color: var(--paper);
+}
+
+.btn,
+.btn:link,
+.btn:visited {
+  opacity: 1;
+}
+
+.btn-solid,
+.btn-solid:link,
+.btn-solid:visited,
+.btn-solid:hover,
+.btn-solid:active {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  opacity: 1;
+  -webkit-text-fill-color: #fff;
 }
 
 .modal-sheet {

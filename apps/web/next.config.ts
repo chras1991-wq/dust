@@ -45,6 +45,12 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["@satdust/shared"],
   },
+  async redirects() {
+    return [
+      { source: "/mint", destination: "/explorer", permanent: false },
+      { source: "/mint/:path*", destination: "/explorer", permanent: false },
+    ];
+  },
   webpack: (config, { dev, isServer, webpack }) => {
     if (!isServer) {
       config.resolve.fallback = {

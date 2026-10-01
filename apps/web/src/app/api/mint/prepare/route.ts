@@ -9,6 +9,7 @@ import { publicErrorMessage } from "@/lib/server/safe-error";
 import { getQuote, getSupplySnapshot, upsertMint } from "@/lib/store";
 import { getMilestoneSnapshot } from "@/lib/milestone-store";
 import { estimateMinerFeeSats } from "@/lib/prices";
+import { isMintClosed } from "@/lib/mint-phase";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,9 @@ export async function POST(req: Request) {
   if (limited) return limited;
 
   try {
+    if (isMintClosed()) {
+      return noStoreJson({ error: "Mint closed — use Index swap" }, { status: 403 });
+    }
     assertMintIntegrity();
 
     const parsed = await readJsonBody<{

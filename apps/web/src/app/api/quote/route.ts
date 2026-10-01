@@ -6,6 +6,7 @@ import { assertMintIntegrity } from "@/lib/server/integrity";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
 import { publicErrorMessage } from "@/lib/server/safe-error";
 import { saveQuote } from "@/lib/store";
+import { isMintClosed } from "@/lib/mint-phase";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,9 @@ export async function POST(req: Request) {
   if (limited) return limited;
 
   try {
+    if (isMintClosed()) {
+      return noStoreJson({ error: "Mint closed — use Index swap" }, { status: 403 });
+    }
     assertMintIntegrity();
     let quantity = 1;
     try {
