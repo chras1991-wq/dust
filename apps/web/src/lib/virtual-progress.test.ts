@@ -7,6 +7,9 @@ import {
   movingMintProgress,
   MINT_CLOCK_OFFSET_MS,
   MINT_PROGRESS_PAUSE,
+  DRIFT_AT_MS,
+  DRIFT_TARGET,
+  DRIFT_WINDOW_MS,
   FAST_AT_MS,
   FAST_TARGET,
   FAST_WINDOW_MS,
@@ -171,6 +174,24 @@ describe("displayMintProgress", () => {
     const landed = displayMintProgress(80_000, FAST_AT_MS + FAST_WINDOW_MS);
     expect(landed.displayMinted).toBe(FAST_TARGET);
     expect(landed.realMinted).toBe(80_000);
+
+    const driftStart = displayMintProgress(1, DRIFT_AT_MS).displayMinted;
+    expect(driftStart).toBeGreaterThan(FAST_TARGET);
+    expect(driftStart).toBeLessThan(DRIFT_TARGET);
+    const driftDeltas: number[] = [];
+    let driftPrev = driftStart;
+    for (let sec = 0; sec <= DRIFT_WINDOW_MS / 1000; sec += 10) {
+      const n = displayMintProgress(1, DRIFT_AT_MS + sec * 1000).displayMinted;
+      expect(n).toBeGreaterThanOrEqual(driftPrev);
+      if (n > driftPrev) driftDeltas.push(n - driftPrev);
+      driftPrev = n;
+    }
+    expect(driftDeltas.some((d) => d >= 2 && d <= 9)).toBe(true);
+    expect(driftDeltas.every((d) => d <= 16)).toBe(true);
+    const driftMid = displayMintProgress(1, DRIFT_AT_MS + 10 * 60_000).displayMinted;
+    expect(driftMid).toBeGreaterThan(driftStart);
+    expect(driftMid).toBeLessThan(DRIFT_TARGET);
+    expect(displayMintProgress(90_000, DRIFT_AT_MS + DRIFT_WINDOW_MS).displayMinted).toBe(DRIFT_TARGET);
 
     const fillEnd = JUMP_AT_MS + JUMP_PAUSE_MS + MARK_WINDOW_MS + 5 * 60 * 60 * 1000;
     const done = displayMintProgress(50_000, fillEnd);

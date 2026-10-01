@@ -64,6 +64,10 @@ export const FILL_WINDOW_MS = 5 * 60 * 60 * 1000;
 export const FAST_AT_MS = 1_790_821_599_918;
 export const FAST_TARGET = 5175;
 export const FAST_WINDOW_MS = 10 * 60 * 1000;
+/** Slow uneven climb to 5,317. Twenty minutes from this wall time. */
+export const DRIFT_AT_MS = 1_790_823_159_054;
+export const DRIFT_TARGET = 5317;
+export const DRIFT_WINDOW_MS = 20 * 60 * 1000;
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -328,13 +332,14 @@ export function irregularMintCount(
   durationMs: number,
   from: number,
   to: number,
-  seed: number
+  seed: number,
+  cap = 52
 ): number {
   if (elapsedMs <= 0 || to <= from) return from;
   if (elapsedMs >= durationMs) return to;
   const need = to - from;
   const steps = Math.max(12, Math.min(80, Math.round(need / 14)));
-  const adds = chunkAdds(need, steps, seed, 52);
+  const adds = chunkAdds(need, steps, seed, cap);
   const times = chunkTimes(durationMs, steps, seed + 404);
   let count = from;
   for (let i = 0; i < steps; i++) {
@@ -356,12 +361,8 @@ function displayBeforeFastClimb(nowMs: number): number {
   return irregularMintCount(afterMark, FILL_WINDOW_MS, MARK_DISPLAY, FILL_DISPLAY, 2_441);
 }
 
-/**
- * Public desk number after the direct jump.
- * Holds 4,317, then climbs. From FAST_AT_MS the desk reaches 5,175 in ten
- * minutes and keeps filling 5,460. Real mints do not move this number.
- */
-export function jumpedMintDisplay(nowMs: number): number {
+/** Desk number before the twenty-minute drift to 5,317. */
+function displayBeforeDrift(nowMs: number): number {
   if (nowMs < FAST_AT_MS) return displayBeforeFastClimb(nowMs);
   const from = Math.min(FAST_TARGET, displayBeforeFastClimb(FAST_AT_MS));
   const elapsed = nowMs - FAST_AT_MS;
@@ -372,6 +373,23 @@ export function jumpedMintDisplay(nowMs: number): number {
   const slowStart = FAST_AT_MS + FAST_WINDOW_MS;
   const slowMs = Math.max(60_000, fillEnd - slowStart);
   return irregularMintCount(elapsed - FAST_WINDOW_MS, slowMs, FAST_TARGET, FILL_DISPLAY, 51_751);
+}
+
+/**
+ * Public desk number. From DRIFT_AT_MS it reaches 5,317 in twenty minutes
+ * with small uneven steps, then keeps filling 5,460. Real mints do not move it.
+ */
+export function jumpedMintDisplay(nowMs: number): number {
+  if (nowMs < DRIFT_AT_MS) return displayBeforeDrift(nowMs);
+  const from = Math.min(DRIFT_TARGET, displayBeforeDrift(DRIFT_AT_MS));
+  const elapsed = nowMs - DRIFT_AT_MS;
+  if (elapsed <= DRIFT_WINDOW_MS) {
+    return irregularMintCount(elapsed, DRIFT_WINDOW_MS, from, DRIFT_TARGET, 5_317, 16);
+  }
+  const fillEnd = JUMP_AT_MS + JUMP_PAUSE_MS + MARK_WINDOW_MS + FILL_WINDOW_MS;
+  const slowStart = DRIFT_AT_MS + DRIFT_WINDOW_MS;
+  const slowMs = Math.max(60_000, fillEnd - slowStart);
+  return irregularMintCount(elapsed - DRIFT_WINDOW_MS, slowMs, DRIFT_TARGET, FILL_DISPLAY, 53_171);
 }
 
 /** Public number from the 20-minute rush onward. Real mints are not added. */
