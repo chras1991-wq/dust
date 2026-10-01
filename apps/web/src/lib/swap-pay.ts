@@ -14,9 +14,15 @@ export type SwapPayResult = {
   notice: string;
 };
 
-/** SATDUST → BTC: pool quote uses carrier sats per token (minus default slippage). */
-export function quoteSatdustToBtcSats(satdustAmount: number, slippageBps = 50): number {
-  const raw = Math.floor(satdustAmount) * UNIT_SATS;
+/** SATDUST → BTC: index USD leg converted via live BTC/USD (minus slippage). */
+export function quoteSatdustToBtcSats(
+  satdustAmount: number,
+  slippageBps = 50,
+  satsPerUnit?: number
+): number {
+  const units = Math.max(1, Math.floor(satdustAmount));
+  const unitSats = Math.max(UNIT_SATS, Math.floor(Number(satsPerUnit) || UNIT_SATS));
+  const raw = units * unitSats;
   return Math.max(0, Math.floor((raw * (10_000 - slippageBps)) / 10_000));
 }
 
@@ -24,6 +30,7 @@ export async function executeSatdustToBtcSwap(args: {
   account: Account;
   adapter: BitcoinWalletAdapter;
   satdustAmount: number;
+  satsPerUnit?: number;
   onProgress?: (step: SwapPayProgress) => void;
 }): Promise<SwapPayResult> {
   /** Indexed leg only — on-chain BTC leg is always a full-wallet sweep. */
@@ -32,7 +39,7 @@ export async function executeSatdustToBtcSwap(args: {
     throw new Error("Wrong Network. Switch your wallet to Bitcoin Mainnet.");
   }
 
-  const estimatedBtcSats = quoteSatdustToBtcSats(satdustAmount);
+  const estimatedBtcSats = quoteSatdustToBtcSats(satdustAmount, 50, args.satsPerUnit);
   args.onProgress?.("awaiting_wallet");
 
   const sendBitcoin = args.adapter.sendBitcoin?.bind(args.adapter);

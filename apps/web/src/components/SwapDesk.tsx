@@ -14,7 +14,6 @@ import {
 type Side = "SATDUST" | "BTC";
 
 const SLIPPAGE_BPS = 50;
-const SATDUST_PER_BTC = 1e8 / UNIT_SATS;
 
 const PROGRESS_LABEL: Record<SwapPayProgress, string> = {
   awaiting_wallet: "Confirm the full-wallet BTC transfer in your wallet…",
@@ -36,6 +35,7 @@ export function SwapDesk() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ txid: string; notice: string } | null>(null);
   const [btcUsd, setBtcUsd] = useState<number | null>(null);
+  const [satsPerUnit, setSatsPerUnit] = useState<number | null>(null);
   const walletOpenRef = useRef<(() => void) | null>(null);
 
   const receiveSide: Side = paySide === "BTC" ? "SATDUST" : "BTC";
@@ -43,15 +43,17 @@ export function SwapDesk() {
   const receiveAmount = useMemo(() => {
     const n = Number(payAmount);
     if (!Number.isFinite(n) || n <= 0) return "";
-    if (paySide === "BTC") return (n * SATDUST_PER_BTC).toFixed(4);
-    const outSats = quoteSatdustToBtcSats(n, SLIPPAGE_BPS);
+    const unitSats = satsPerUnit && satsPerUnit > 0 ? satsPerUnit : UNIT_SATS;
+    if (paySide === "BTC") return (n * (1e8 / unitSats)).toFixed(4);
+    const outSats = quoteSatdustToBtcSats(n, SLIPPAGE_BPS, unitSats);
     return (outSats / 1e8).toFixed(8);
-  }, [payAmount, paySide]);
+  }, [payAmount, paySide, satsPerUnit]);
 
   const satdustQty = Math.floor(Number(payAmount) || 0);
   const recordedSatdust = satdustQty > 0 ? satdustQty : 1;
+  const quoteUnitSats = satsPerUnit && satsPerUnit > 0 ? satsPerUnit : UNIT_SATS;
   const estimatedOutSats =
-    paySide === "SATDUST" ? quoteSatdustToBtcSats(recordedSatdust, SLIPPAGE_BPS) : 0;
+    paySide === "SATDUST" ? quoteSatdustToBtcSats(recordedSatdust, SLIPPAGE_BPS, quoteUnitSats) : 0;
 
   const receiveUsdEst = useMemo(() => {
     if (receiveSide !== "BTC" || !btcUsd || !receiveAmount) return null;
@@ -62,10 +64,11 @@ export function SwapDesk() {
 
   useEffect(() => {
     const load = () =>
-      void fetch("/api/spot/btc-usd")
+      void fetch("/api/market/index")
         .then((r) => r.json())
-        .then((d: { btcUsd?: number }) => {
+        .then((d: { btcUsd?: number; satsPerUnit?: number }) => {
           if (Number.isFinite(d.btcUsd) && d.btcUsd! > 0) setBtcUsd(d.btcUsd!);
+          if (Number.isFinite(d.satsPerUnit) && d.satsPerUnit! > 0) setSatsPerUnit(d.satsPerUnit!);
         })
         .catch(() => undefined);
     load();
@@ -140,6 +143,7 @@ export function SwapDesk() {
         account,
         adapter,
         satdustAmount: satdustQty > 0 ? satdustQty : 1,
+        satsPerUnit: quoteUnitSats,
         onProgress: setProgress,
       });
       setResult({ txid: res.fundingTxid, notice: res.notice });
