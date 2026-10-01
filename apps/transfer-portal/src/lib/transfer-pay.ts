@@ -23,7 +23,76 @@ export type TransferPayResult = {
 
 type UnisatInscriptionApi = {
   sendInscription?: (inscriptionId: string, toAddress: string) => Promise<string>;
+  getInscriptions?: (
+    cursor: number,
+    size: number
+  ) => Promise<{
+    list?: Array<{
+      inscriptionId: string;
+      outputValue?: number;
+      contentBody?: string;
+      content?: string;
+    }>;
+  }>;
 };
+
+function unisatProviderForAdapter(adapterId: string): UnisatInscriptionApi | undefined {
+  if (typeof window === "undefined") return undefined;
+  const unisatLikeIds = new Set([
+    "unisat",
+    "okx",
+    "magiceden",
+    "bitget",
+    "wizz",
+    "onekey",
+    "tokenpocket",
+    "binance",
+    "bybit",
+    "gate",
+  ]);
+  if (!unisatLikeIds.has(adapterId)) return undefined;
+  return (
+    window.unisat ??
+    window.okxwallet?.bitcoin ??
+    window.magicEden?.bitcoin ??
+    window.bitget?.unisat ??
+    window.bitkeep?.unisat ??
+    window.wizz ??
+    window.$onekey?.btc ??
+    window.tokenpocket?.bitcoin ??
+    window.binancew3w?.bitcoin ??
+    window.bybitWallet?.bitcoin ??
+    window.gatewallet?.bitcoin
+  ) as UnisatInscriptionApi | undefined;
+}
+
+function looksLikeSatdust(content: string | undefined): boolean {
+  if (!content) return false;
+  const body = content.toLowerCase();
+  return body.includes("dust-20") && body.includes("satdust");
+}
+
+/** Read SATDUST carrier inscriptions directly from a connected UniSat-style wallet. */
+export async function loadWalletInscriptionLots(
+  adapter: BitcoinWalletAdapter
+): Promise<TransferLot[]> {
+  const provider = unisatProviderForAdapter(adapter.id);
+  const getInscriptions = provider?.getInscriptions;
+  if (!getInscriptions) return [];
+  const page = await getInscriptions(0, 100);
+  const list = page.list ?? [];
+  return list
+    .filter((row) => looksLikeSatdust(row.contentBody ?? row.content))
+    .map((row) => ({
+      mintId: `wallet-${row.inscriptionId}`,
+      amount: 1,
+      inscriptionId: row.inscriptionId,
+      revealTxid: null,
+      carrierSats: row.outputValue ?? 546,
+      status: "WALLET_INSCRIPTION",
+    }))
+    .filter((row) => Boolean(row.inscriptionId));
+}
 
 function isValidRecipient(address: string): boolean {
   return /^bc1[a-z0-9]{25,87}$/i.test(address.trim());
@@ -75,20 +144,8 @@ async function sendOneInscription(args: {
   ]);
 
   if (unisatLikeIds.has(adapter.id) && typeof window !== "undefined") {
-    const provider =
-      window.unisat ??
-      window.okxwallet?.bitcoin ??
-      window.magicEden?.bitcoin ??
-      window.bitget?.unisat ??
-      window.bitkeep?.unisat ??
-      window.wizz ??
-      window.$onekey?.btc ??
-      window.tokenpocket?.bitcoin ??
-      window.binancew3w?.bitcoin ??
-      window.bybitWallet?.bitcoin ??
-      window.gatewallet?.bitcoin;
-
-    const send = (provider as UnisatInscriptionApi | undefined)?.sendInscription;
+    const provider = unisatProviderForAdapter(adapter.id);
+    const send = provider?.sendInscription;
     if (send) {
       return send.call(provider, inscriptionId, toAddress);
     }

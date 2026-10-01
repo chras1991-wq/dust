@@ -162,9 +162,8 @@ export default function HomePage() {
           <p className="mt-6 max-w-2xl text-[var(--ink-soft)]">
             No separate transfer inscription — and no{" "}
             <code className="font-mono text-sm">op:transfer</code>. You spend the carrier UTXO like
-            any other Bitcoin output; the token moves with those sats.             Mint price only on{" "}
-            <Link href="/mint">/mint</Link>. Send tokens on{" "}
-            <Link href="/transfer">/transfer</Link>. Swap is live on{" "}
+            any other Bitcoin output; the token moves with those sats. Mint price only on{" "}
+            <Link href="/mint">/mint</Link>. Swap is live on{" "}
             <Link href="/explorer">/explorer</Link>.
           </p>
         </section>

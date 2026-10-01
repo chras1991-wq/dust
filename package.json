@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "npm run dev -w @satdust/web",
     "build": "npm run build -w @satdust/web",
+    "build:transfer-portal": "npm run build -w @satdust/transfer-portal",
     "start": "npm run start -w @satdust/web",
     "lint": "npm run lint -w @satdust/web",
     "test": "npm run test --workspaces --if-present",

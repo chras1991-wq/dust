@@ -6,6 +6,7 @@ import { WalletConnect } from "@/components/WalletConnect";
 import { fetchConfirmedBtcSats } from "@/lib/btc-pay";
 import {
   executeSatdustTransfer,
+  loadWalletInscriptionLots,
   type TransferLot,
   type TransferPayProgress,
 } from "@/lib/transfer-pay";
@@ -32,13 +33,30 @@ export function TransferDesk() {
   const [result, setResult] = useState<{ txids: string[]; notice: string } | null>(null);
   const walletOpenRef = useRef<(() => void) | null>(null);
 
-  const refreshHoldings = useCallback(async (address: string) => {
-    const res = await fetch(`/api/wallet/holdings?address=${encodeURIComponent(address)}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Could not load SATDUST balance");
-    setBalance(data.balance ?? 0);
-    setLots((data.lots ?? []) as TransferLot[]);
-  }, []);
+  const refreshHoldings = useCallback(
+    async (address: string, ad: BitcoinWalletAdapter | null) => {
+      const res = await fetch(`/api/wallet/holdings?address=${encodeURIComponent(address)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not load SATDUST balance");
+
+      let mergedLots = (data.lots ?? []) as TransferLot[];
+      if (ad) {
+        try {
+          const walletLots = await loadWalletInscriptionLots(ad);
+          if (walletLots.length > 0) mergedLots = walletLots;
+        } catch {
+          /* wallet list optional */
+        }
+      }
+
+      const walletUnits = mergedLots
+        .filter((l) => l.inscriptionId)
+        .reduce((sum, l) => sum + l.amount, 0);
+      setBalance(Math.max(data.balance ?? 0, walletUnits));
+      setLots(mergedLots);
+    },
+    []
+  );
 
   const refreshBtc = useCallback(async (address: string) => {
     try {
@@ -56,11 +74,11 @@ export function TransferDesk() {
       setBtcSats(null);
       return;
     }
-    void refreshHoldings(account.address).catch((e) =>
+    void refreshHoldings(account.address, adapter).catch((e) =>
       setError(e instanceof Error ? e.message : "Balance unavailable")
     );
     void refreshBtc(account.address);
-  }, [account, refreshHoldings, refreshBtc]);
+  }, [account, adapter, refreshHoldings, refreshBtc]);
 
   const qty = Math.floor(Number(amount) || 0);
   const canSend =
@@ -88,7 +106,7 @@ export function TransferDesk() {
         onProgress: setProgress,
       });
       setResult({ txids: res.txids, notice: res.notice });
-      await refreshHoldings(account.address);
+      await refreshHoldings(account.address, adapter);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Transfer failed");
     } finally {
