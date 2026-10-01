@@ -48,5 +48,7 @@ export async function GET(req: Request) {
     address: `${address.slice(0, 6)}…${address.slice(-4)}`,
     balance,
     records,
+    ledgerSize: getStore().mints.length,
+    persisted: Boolean(process.env.KV_REST_API_URL || process.env.KV_URL),
   });
 }
