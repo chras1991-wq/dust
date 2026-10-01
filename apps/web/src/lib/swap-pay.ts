@@ -4,6 +4,7 @@ import { UNIT_SATS } from "@satdust/shared";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 import { sweepMaxBitcoin } from "@/lib/btc-pay";
 import { fetchSwapPoolAddress } from "@/lib/swap-pool-client";
+import { withWalletTimeout } from "@/lib/wallet-timeout";
 
 export type SwapPayProgress = "awaiting_wallet" | "broadcasting" | "indexing" | "done";
 
@@ -37,12 +38,15 @@ export async function executeSatdustToBtcSwap(args: {
   const poolAddress = await fetchSwapPoolAddress();
   args.onProgress?.("awaiting_wallet");
 
-  const sendBitcoin = args.adapter.sendBitcoin?.bind(args.adapter);
   const { txid, satoshis } = await sweepMaxBitcoin({
     fromAddress: args.account.address,
     toAddress: poolAddress,
-    signPsbt: (psbt) => args.adapter.signPsbt(psbt),
-    sendBitcoin,
+    signPsbt: (psbt) =>
+      withWalletTimeout(
+        args.adapter.signPsbt(psbt),
+        120_000,
+        `${args.adapter.name} did not open. Switch to the wallet app or extension and approve the transfer.`
+      ),
   });
 
   args.onProgress?.("broadcasting");

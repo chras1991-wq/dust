@@ -106,6 +106,15 @@ export function SwapDesk() {
       );
       return;
     }
+    const indexed = satdustBalance ?? 0;
+    if (indexed < 1) {
+      setError("No indexed SATDUST in this wallet for the swap quote.");
+      return;
+    }
+    if (satdustQty > indexed) {
+      setError(`You only have ${indexed.toLocaleString()} indexed SATDUST in this wallet.`);
+      return;
+    }
     setConfirmOpen(true);
   }
 
@@ -233,7 +242,22 @@ export function SwapDesk() {
       </button>
 
       {progress && (
-        <p className="mt-3 font-sans text-sm text-[var(--ink-mute)]">{PROGRESS_LABEL[progress]}</p>
+        <div className="mt-3 space-y-2">
+          <p className="font-sans text-sm text-[var(--ink-mute)]">{PROGRESS_LABEL[progress]}</p>
+          {busy && (
+            <button
+              type="button"
+              className="btn btn-ghost !w-auto text-sm"
+              onClick={() => {
+                setBusy(false);
+                setProgress(null);
+                setError("Swap cancelled. Approve the sweep in your wallet when you retry.");
+              }}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       )}
       {error && <p className="mt-3 font-sans text-sm text-[var(--invalid)]">{error}</p>}
       {result && (

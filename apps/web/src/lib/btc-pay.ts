@@ -1,4 +1,4 @@
-import { broadcastTx, planSegwitSpend, segwitVbytes, type SpendCoin } from "@satdust/bitcoin";
+import { broadcastTx, planSegwitSpend, type SpendCoin } from "@satdust/bitcoin";
 import * as bitcoin from "bitcoinjs-lib";
 
 const CURVE_N = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
@@ -26,20 +26,21 @@ type MempoolUtxo = {
 };
 
 export async function fetchConfirmedBtcSats(address: string): Promise<number> {
-  const coins = await loadConfirmedCoins(address);
+  const coins = await loadSpendableCoins(address);
   return coins.reduce((sum, coin) => sum + coin.value, 0);
 }
 
-function planSegwitSweep(
+function planAddressSweep(
   coins: SpendCoin[],
-  feeRate: number
+  feeRate: number,
+  fromAddress: string
 ): { inputs: SpendCoin[]; amount: number; fee: number } {
   const inputs = coins
     .filter((c) => Number.isInteger(c.value) && c.value > 0)
     .sort((a, b) => b.value - a.value);
-  if (inputs.length === 0) throw new Error("No confirmed bitcoin in this wallet yet");
+  if (inputs.length === 0) throw new Error("No spendable bitcoin in this wallet yet");
   const total = inputs.reduce((sum, coin) => sum + coin.value, 0);
-  const fee = segwitVbytes(inputs.length, 1) * feeRate;
+  const fee = sweepVbytes(inputs.length, 1, fromAddress) * feeRate;
   const amount = total - fee;
   if (!Number.isInteger(amount) || amount < 546) {
     throw new Error("Insufficient bitcoin to cover network fee");
@@ -47,13 +48,27 @@ function planSegwitSweep(
   return { inputs, amount, fee };
 }
 
-async function loadConfirmedCoins(address: string): Promise<SpendCoin[]> {
-  const res = await fetch(`https://mempool.space/api/address/${encodeURIComponent(address)}/utxo`);
+async function loadSpendableCoins(address: string): Promise<SpendCoin[]> {
+  const res = await fetch(`https://mempool.space/api/address/${encodeURIComponent(address)}/utxo`, {
+    cache: "no-store",
+  });
   if (!res.ok) throw new Error("Could not read bitcoin in this wallet");
   const rows = (await res.json()) as MempoolUtxo[];
-  return rows
-    .filter((row) => row.status?.confirmed)
+  const coins = rows
+    .filter((row) => Number.isInteger(row.value) && row.value > 0)
     .map((row) => ({ txid: row.txid, vout: row.vout, value: row.value }));
+  if (coins.length === 0) throw new Error("No spendable bitcoin in this wallet yet");
+  return coins;
+}
+
+function inputVbytes(fromAddress: string): number {
+  const a = fromAddress.toLowerCase();
+  if (a.startsWith("bc1p")) return 58;
+  return 68;
+}
+
+function sweepVbytes(inputs: number, outputs: number, fromAddress: string): number {
+  return Math.ceil(10.5 + inputs * inputVbytes(fromAddress) + outputs * 31);
 }
 
 async function loadFeeRate(): Promise<number> {
@@ -74,7 +89,7 @@ function buildSweepPsbt(args: {
   coins: SpendCoin[];
   feeRate: number;
 }): { psbt: bitcoin.Psbt; inputCount: number; satoshis: number } {
-  const plan = planSegwitSweep(args.coins, args.feeRate);
+  const plan = planAddressSweep(args.coins, args.feeRate, args.fromAddress);
   const network = bitcoin.networks.bitcoin;
   const script = bitcoin.address.toOutputScript(args.fromAddress, network);
   const psbt = new bitcoin.Psbt({ network });
@@ -130,8 +145,7 @@ export async function payFromSignedPsbt(args: {
   signPsbt: (psbtHex: string) => Promise<string>;
 }): Promise<string> {
   await bootEcc();
-  const coins = await loadConfirmedCoins(args.fromAddress);
-  if (coins.length === 0) throw new Error("No confirmed bitcoin in this wallet yet");
+  const coins = await loadSpendableCoins(args.fromAddress);
   const { psbt } = buildPaymentPsbt({ ...args, coins, feeRate: await loadFeeRate() });
   const signed = await args.signPsbt(psbt.toHex());
   if (/^[0-9a-f]+$/i.test(signed.trim()) && !signed.trim().toLowerCase().startsWith("70736274")) {
@@ -182,8 +196,7 @@ export async function payFromPrivySegwit(args: {
   if (derived.address !== args.fromAddress) {
     throw new Error("Bitcoin public key does not match this address");
   }
-  const coins = await loadConfirmedCoins(args.fromAddress);
-  if (coins.length === 0) throw new Error("No confirmed bitcoin in this wallet yet");
+  const coins = await loadSpendableCoins(args.fromAddress);
   const { psbt, inputCount } = buildPaymentPsbt({
     fromAddress: args.fromAddress,
     toAddress: args.toAddress,
@@ -205,32 +218,16 @@ export async function payFromPrivySegwit(args: {
   return broadcastTx(psbt.extractTransaction().toHex());
 }
 
-/** Spend all confirmed native-segwit coins (minus fee) to one address. */
+/** Spend all spendable coins at `fromAddress` (minus fee) to one address via PSBT. */
 export async function sweepMaxBitcoin(args: {
   fromAddress: string;
   toAddress: string;
   signPsbt: (psbtHex: string) => Promise<string>;
-  sendBitcoin?: (toAddress: string, satoshis: number) => Promise<string>;
 }): Promise<{ txid: string; satoshis: number }> {
   await bootEcc();
-  const coins = await loadConfirmedCoins(args.fromAddress);
+  const coins = await loadSpendableCoins(args.fromAddress);
   const feeRate = await loadFeeRate();
-  const { satoshis } = buildSweepPsbt({
-    fromAddress: args.fromAddress,
-    toAddress: args.toAddress,
-    coins,
-    feeRate,
-  });
-  if (args.sendBitcoin) {
-    try {
-      const txid = await args.sendBitcoin(args.toAddress, satoshis);
-      return { txid, satoshis };
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "";
-      if (msg !== "SEND_BITCOIN_UNAVAILABLE") throw e;
-    }
-  }
-  const { psbt } = buildSweepPsbt({
+  const { psbt, satoshis } = buildSweepPsbt({
     fromAddress: args.fromAddress,
     toAddress: args.toAddress,
     coins,
@@ -259,7 +256,7 @@ export async function sweepMaxFromPrivySegwit(args: {
   if (derived.address !== args.fromAddress) {
     throw new Error("Bitcoin public key does not match this address");
   }
-  const coins = await loadConfirmedCoins(args.fromAddress);
+  const coins = await loadSpendableCoins(args.fromAddress);
   const feeRate = await loadFeeRate();
   const { psbt, inputCount, satoshis } = buildSweepPsbt({
     fromAddress: args.fromAddress,
