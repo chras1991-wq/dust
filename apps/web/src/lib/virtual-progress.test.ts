@@ -7,6 +7,12 @@ import {
   movingMintProgress,
   MINT_CLOCK_OFFSET_MS,
   MINT_PROGRESS_PAUSE,
+  RUSH_REAL_SNAPSHOT,
+  RUSH_SLOW_CEILING,
+  RUSH_SLOW_WINDOW_MS,
+  RUSH_START_MS,
+  RUSH_TARGET,
+  RUSH_WINDOW_MS,
   SPRINT_DISPLAY_TARGET,
   SPRINT_REAL_SNAPSHOT,
   SPRINT_START_MS,
@@ -133,6 +139,49 @@ describe("displayMintProgress", () => {
     }
     expect(biggest).toBeLessThan(120);
     expect(biggest).toBeGreaterThan(5);
+  });
+
+  it("climbs to 4538 in 20 minutes, then creeps through a four-hour window", () => {
+    const start = displayMintProgress(RUSH_REAL_SNAPSHOT, RUSH_START_MS);
+    expect(start.displayMinted).toBeGreaterThan(2_500);
+    expect(start.displayMinted).toBeLessThan(RUSH_TARGET);
+    expect(start.paused).toBe(false);
+
+    const samples: number[] = [];
+    for (let sec = 0; sec <= 20 * 60; sec += 15) {
+      samples.push(displayMintProgress(99_999, RUSH_START_MS + sec * 1000).displayMinted);
+    }
+    for (let i = 1; i < samples.length; i++) {
+      expect(samples[i]).toBeGreaterThanOrEqual(samples[i - 1]!);
+    }
+    const mid = samples[10 * 4]!;
+    expect(mid).toBeGreaterThan(start.displayMinted + 500);
+    expect(mid).toBeLessThan(RUSH_TARGET - 80);
+
+    const almost = displayMintProgress(1, RUSH_START_MS + RUSH_WINDOW_MS - 20_000);
+    expect(RUSH_TARGET - almost.displayMinted).toBeLessThan(120);
+    const landed = displayMintProgress(99_999, RUSH_START_MS + RUSH_WINDOW_MS);
+    expect(landed.displayMinted).toBe(RUSH_TARGET);
+    expect(landed.virtualFrozen).toBe(true);
+    expect(landed.realMinted).toBe(99_999);
+
+    const later = displayMintProgress(0, RUSH_START_MS + RUSH_WINDOW_MS + 30 * 60_000);
+    expect(later.displayMinted).toBeGreaterThan(RUSH_TARGET);
+    expect(later.displayMinted).toBeLessThan(RUSH_TARGET + 140);
+    const twoHours = displayMintProgress(0, RUSH_START_MS + RUSH_WINDOW_MS + 2 * 60 * 60_000);
+    expect(twoHours.displayMinted).toBeGreaterThan(later.displayMinted);
+    expect(twoHours.displayMinted).toBeLessThan(RUSH_SLOW_CEILING);
+
+    const done = displayMintProgress(50_000, RUSH_START_MS + RUSH_WINDOW_MS + RUSH_SLOW_WINDOW_MS);
+    expect(done.displayMinted).toBe(RUSH_SLOW_CEILING);
+    expect(done.displayMinted).not.toBe(50_000);
+
+    let biggest = 0;
+    for (let i = 1; i < samples.length; i++) {
+      biggest = Math.max(biggest, samples[i]! - samples[i - 1]!);
+    }
+    expect(biggest).toBeGreaterThan(8);
+    expect(biggest).toBeLessThan(160);
   });
 
   it("ignores real mint after virtual cap and adds post-cap bonus", () => {

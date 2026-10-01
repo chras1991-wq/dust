@@ -33,11 +33,23 @@ export const SPRINT_WINDOW_MS = 10 * 60 * 1000;
 export const SPRINT_DISPLAY_TARGET = 3000;
 export const SPRINT_REAL_SNAPSHOT = 432;
 export const SPRINT_VIRTUAL_TARGET = SPRINT_DISPLAY_TARGET - SPRINT_REAL_SNAPSHOT;
+/**
+ * Fast public climb to 4,538. The schedule is the number on the desk, so a
+ * real mint during these 20 minutes does not push it past the target.
+ * After 4,500, real mints stay off the public counter.
+ */
+export const RUSH_START_MS = 1_790_819_071_122;
+export const RUSH_WINDOW_MS = 20 * 60 * 1000;
+export const RUSH_TARGET = 4538;
+export const RUSH_REAL_SNAPSHOT = 549;
+/** Slow rise after 4,538. Four hours sits inside the 2–5h payment window. */
+export const RUSH_SLOW_WINDOW_MS = 4 * 60 * 60 * 1000;
 /** 18h onboarding window after anchor. The slow parabola finishes here at 4,500. */
 export const VIRTUAL_WINDOW_MS = 18 * 60 * 60 * 1000;
 /** After 4500: display-only bonus in discrete steps. */
 export const POST_CAP_WINDOW_MS = 5 * 60 * 60 * 1000;
 export const POST_CAP_BONUS_MAX = 360;
+export const RUSH_SLOW_CEILING = VIRTUAL_CAP + POST_CAP_BONUS_MAX;
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -132,18 +144,18 @@ function legacyVirtualMintCount(nowMs: number): number {
  * The public number is this plus real mints, so the snapshot real total
  * makes the desk read 3,000 at the end of the window.
  */
-function sprintVirtual(elapsedMs: number, from: number, to: number): number {
+function sprintVirtual(elapsedMs: number, from: number, to: number, windowMs: number): number {
   if (elapsedMs <= 0 || to <= from) return from;
-  if (elapsedMs >= SPRINT_WINDOW_MS) return to;
+  if (elapsedMs >= windowMs) return to;
   const delta = to - from;
   let t = 0;
   let count = from;
   let i = 0;
-  while (t < elapsedMs && count < to && i < 500) {
+  while (t < elapsedMs && count < to && i < 800) {
     const gap = randInt(i + 2_400, 2_800, 5_400);
     if (t + gap > elapsedMs) break;
     t += gap;
-    const p = t / SPRINT_WINDOW_MS;
+    const p = t / windowMs;
     const eased = p ** 0.82;
     const ideal = from + Math.round(delta * eased);
     const room = ideal - count;
@@ -199,8 +211,50 @@ export function virtualMintCountAt(nowMs: number = Date.now()): number {
   if (nowMs < SPRINT_START_MS) return legacyVirtualMintCount(nowMs);
   const from = legacyVirtualMintCount(SPRINT_START_MS);
   const sprintElapsed = nowMs - SPRINT_START_MS;
-  if (sprintElapsed <= SPRINT_WINDOW_MS) return sprintVirtual(sprintElapsed, from, SPRINT_VIRTUAL_TARGET);
+  if (sprintElapsed <= SPRINT_WINDOW_MS) {
+    return sprintVirtual(sprintElapsed, from, SPRINT_VIRTUAL_TARGET, SPRINT_WINDOW_MS);
+  }
   return slowVirtual(nowMs);
+}
+
+function rushAnchor(): number {
+  return Math.min(RUSH_TARGET, virtualMintCountAt(RUSH_START_MS) + RUSH_REAL_SNAPSHOT);
+}
+
+/** After 4,538: ease-out parabola in bursts across the payment window. */
+function rushSlow(elapsedMs: number): number {
+  if (elapsedMs <= 0) return RUSH_TARGET;
+  if (elapsedMs >= RUSH_SLOW_WINDOW_MS) return RUSH_SLOW_CEILING;
+  const span = RUSH_SLOW_CEILING - RUSH_TARGET;
+  let t = 0;
+  let count = RUSH_TARGET;
+  let wave = 0;
+  while (t < elapsedMs && count < RUSH_SLOW_CEILING && wave < 2_000) {
+    const rest = randInt(wave + 1_100, 70_000, 150_000);
+    if (t + rest > elapsedMs) break;
+    t += rest;
+    const p = Math.min(1, t / RUSH_SLOW_WINDOW_MS);
+    const ideal = RUSH_TARGET + Math.round(span * (1 - (1 - p) ** 2));
+    const room = ideal - count;
+    if (room > 0) {
+      const take = Math.max(2, Math.round(room * (0.7 + mulberry32(wave + 23)() * 0.3)));
+      count += Math.min(room, take, 18);
+    }
+    wave += 1;
+  }
+  const p = Math.min(1, elapsedMs / RUSH_SLOW_WINDOW_MS);
+  const ideal = RUSH_TARGET + Math.round(span * (1 - (1 - p) ** 2));
+  return Math.min(count, ideal, RUSH_SLOW_CEILING);
+}
+
+/** Public number from the 20-minute rush onward. Real mints are not added. */
+export function rushDisplay(nowMs: number): number {
+  const from = rushAnchor();
+  const elapsed = nowMs - RUSH_START_MS;
+  if (elapsed <= RUSH_WINDOW_MS) {
+    return sprintVirtual(elapsed, from, RUSH_TARGET, RUSH_WINDOW_MS);
+  }
+  return rushSlow(elapsed - RUSH_WINDOW_MS);
 }
 
 function postCapDisplayBonus(nowMs: number): number {
@@ -228,10 +282,21 @@ export function movingMintProgress(realMinted: number, nowMs: number = Date.now(
   virtualFrozen: boolean;
   paused: boolean;
 } {
+  const real = Math.max(0, Math.floor(realMinted));
+
+  if (nowMs >= RUSH_START_MS) {
+    const displayMinted = rushDisplay(nowMs);
+    return {
+      displayMinted,
+      virtualMinted: displayMinted,
+      realMinted: real,
+      virtualFrozen: displayMinted >= VIRTUAL_CAP,
+      paused: false,
+    };
+  }
+
   const baseVirtual = virtualMintCountAt(nowMs);
   const virtualFrozen = baseVirtual >= VIRTUAL_CAP;
-
-  const real = Math.max(0, Math.floor(realMinted));
 
   if (virtualFrozen) {
     // After the 18h window the clock stays at 4500. Real mints are not folded in.
