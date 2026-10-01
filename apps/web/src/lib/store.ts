@@ -2,6 +2,8 @@ import "server-only";
 import type { QuoteRecord } from "@satdust/quote";
 import type { MintStatus } from "@satdust/bitcoin";
 import { SUPPLY } from "@satdust/shared";
+import { displayMintProgress } from "@/lib/virtual-progress";
+import { schedulePersistStore } from "@/lib/store-persist";
 
 export type SwapRecord = {
   id: string;
@@ -34,7 +36,7 @@ export type MintRecord = {
   invalidReason?: string;
 };
 
-type Store = {
+export type Store = {
   quotes: Map<string, QuoteRecord>;
   /** Units already reserved from a signed quote (1 SATDUST = 1 unit). */
   quoteUnitsConsumed: Map<string, number>;
@@ -74,12 +76,17 @@ export function getStore(): Store {
 
 export function getSupplySnapshot() {
   const s = getStore();
-  const remaining = Math.max(0, SUPPLY - s.confirmedMinted - s.pendingMinted);
+  const realTotal = s.confirmedMinted + s.pendingMinted;
+  const progress = displayMintProgress(realTotal);
+  const remaining = Math.max(0, SUPPLY - progress.displayMinted);
   return {
     totalSupply: SUPPLY,
-    minted: s.confirmedMinted,
-    remaining: Math.max(0, SUPPLY - s.confirmedMinted),
+    /** UI + milestone progress (virtual ∪ real). */
+    minted: progress.displayMinted,
+    realMinted: s.confirmedMinted,
+    virtualMinted: progress.virtualMinted,
     pending: s.pendingMinted,
+    remaining: Math.max(0, SUPPLY - s.confirmedMinted),
     availableEstimated: remaining,
     highContention: remaining <= 20 && remaining > 0,
   };
@@ -112,10 +119,12 @@ export function upsertMint(mint: MintRecord) {
   const idx = store.mints.findIndex((m) => m.id === mint.id);
   if (idx >= 0) store.mints[idx] = mint;
   else store.mints.push(mint);
+  schedulePersistStore(store);
 }
 
 export function recordSwap(swap: SwapRecord) {
   getStore().swaps.push(swap);
+  schedulePersistStore(getStore());
 }
 
 export function listSwaps(): SwapRecord[] {

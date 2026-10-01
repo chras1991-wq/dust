@@ -1,6 +1,7 @@
 import { noStoreJson, rateLimit, readJsonBody } from "@/lib/server/guard";
 import { publicErrorMessage } from "@/lib/server/safe-error";
 import { getStore, listMints, upsertMint } from "@/lib/store";
+import { schedulePersistStore } from "@/lib/store-persist";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
     if (wasPending) {
       const store = getStore();
       store.pendingMinted += amount;
+      schedulePersistStore(store);
     }
 
     return noStoreJson({ ok: true, mintId, status: "REVEAL_BROADCAST" });

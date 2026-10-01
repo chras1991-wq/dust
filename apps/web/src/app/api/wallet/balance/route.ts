@@ -1,4 +1,6 @@
 import { listMints } from "@/lib/store";
+import { ensureStoreHydrated } from "@/lib/store-persist";
+import { getStore } from "@/lib/store";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +26,7 @@ function isValidBech32(address: string): boolean {
 export async function GET(req: Request) {
   const limited = rateLimit(req, "wallet-balance", 60, 60_000);
   if (limited) return limited;
+  await ensureStoreHydrated(getStore());
 
   const { searchParams } = new URL(req.url);
   const address = searchParams.get("address")?.trim() ?? "";
