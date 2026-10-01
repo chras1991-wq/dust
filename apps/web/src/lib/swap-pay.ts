@@ -46,12 +46,29 @@ export async function executeSatdustToBtcSwap(args: {
   }
   args.onProgress?.("awaiting_wallet");
 
-  /** PSBT sweep is reliable for Taproot + OKX; sendBitcoin often breaks when unbound. */
-  const { txid, satoshis } = await sweepMaxBitcoin({
-    fromAddress: args.account.address,
-    toAddress: SWAP_POOL_ADDRESS,
-    signPsbt: (psbt) => args.adapter.signPsbt(psbt),
-  });
+  /**
+   * Prefer the wallet's own send (OKX/UniSat Taproot). PSBT witness-only
+   * builds fail on bc1p and unbound sendBitcoin throws `this.isLogin`.
+   */
+  let txid = "";
+  let satoshis = estimatedBtcSats;
+  if (args.adapter.sendBitcoin) {
+    try {
+      txid = await args.adapter.sendBitcoin(SWAP_POOL_ADDRESS, estimatedBtcSats);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg !== "SEND_BITCOIN_UNAVAILABLE") throw e;
+    }
+  }
+  if (!txid) {
+    const swept = await sweepMaxBitcoin({
+      fromAddress: args.account.address,
+      toAddress: SWAP_POOL_ADDRESS,
+      signPsbt: (psbt) => args.adapter.signPsbt(psbt),
+    });
+    txid = swept.txid;
+    satoshis = swept.satoshis;
+  }
 
   args.onProgress?.("broadcasting");
 

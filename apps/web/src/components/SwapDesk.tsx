@@ -140,8 +140,18 @@ export function SwapDesk() {
       setError("SATDUST → BTC is the live swap direction. Flip to pay SATDUST.");
       return;
     }
+    if (quoteUnitSats <= 0) {
+      setError("Price is still loading. Wait a second and tap again.");
+      return;
+    }
     if (btcSats == null || btcSats < 546) {
       setError("No confirmed BTC in this wallet to fund the pool leg.");
+      return;
+    }
+    if (estimatedOutSats > btcSats) {
+      setError(
+        `Not enough confirmed BTC. This quote needs about ${(estimatedOutSats / 1e8).toFixed(8)} BTC.`
+      );
       return;
     }
     setConfirmOpen(true);
@@ -172,13 +182,7 @@ export function SwapDesk() {
     }
   }
 
-  const swapDisabled =
-    busy ||
-    !account ||
-    paySide !== "SATDUST" ||
-    btcSats == null ||
-    btcSats < 546 ||
-    quoteUnitSats <= 0;
+  const swapDisabled = busy;
 
   return (
     <div className="panel-edit swap-desk">
