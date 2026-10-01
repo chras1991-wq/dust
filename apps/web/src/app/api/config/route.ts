@@ -19,6 +19,7 @@ import { getMilestoneSnapshot } from "@/lib/milestone-store";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
 import { assertMintIntegrity } from "@/lib/server/integrity";
 import { publicErrorMessage } from "@/lib/server/safe-error";
+import { isMintClosed } from "@/lib/mint-phase";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,8 @@ export async function GET(req: Request) {
       deployPayload: DEPLOY_PAYLOAD,
       deployTxid: store.deployTxid,
       deployInscriptionId: store.deployInscriptionId,
-      mintOpen: ms.openCapacity > 0,
+      mintClosed: isMintClosed(),
+      mintOpen: !isMintClosed() && ms.openCapacity > 0,
       openMintCapacity: ms.openCapacity,
       voteSatdustEquivBtc: VOTE_SATDUST_EQUIV_BTC,
       swapOpen: true,

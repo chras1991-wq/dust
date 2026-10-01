@@ -21,8 +21,8 @@ export default function HomePage() {
             SATDUST is the opening ticker. Each unit rides a {UNIT_SATS}-sat carrier on L1.
           </p>
           <div className="animate-rise-delay-2 btn-row mt-7 sm:mt-8">
-            <Link href="/mint" className="btn btn-solid">
-              Mint SATDUST
+            <Link href="/explorer" className="btn btn-solid">
+              Index
             </Link>
             <Link href="/docs/dust20" className="btn btn-ghost-on-dark">
               Read DUST-20
@@ -162,8 +162,7 @@ export default function HomePage() {
           <p className="mt-6 max-w-2xl text-[var(--ink-soft)]">
             No separate transfer inscription — and no{" "}
             <code className="font-mono text-sm">op:transfer</code>. You spend the carrier UTXO like
-            any other Bitcoin output; the token moves with those sats. Mint price only on{" "}
-            <Link href="/mint">/mint</Link>. Swap is live on{" "}
+            any other Bitcoin output; the token moves with those sats. Index pricing and swap on{" "}
             <Link href="/explorer">/explorer</Link>.
           </p>
         </section>
