@@ -126,7 +126,7 @@ export async function hydrateStore(store: Store): Promise<void> {
 }
 
 export async function ensureStoreHydrated(store: Store): Promise<void> {
-  if (globalThis.__satdustStoreHydrated) return;
+  if (globalThis.__satdustStoreHydrated && store.mints.length > 0) return;
   await hydrateStore(store);
   globalThis.__satdustStoreHydrated = true;
 }
