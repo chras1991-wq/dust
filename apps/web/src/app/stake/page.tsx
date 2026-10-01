@@ -160,7 +160,7 @@ export default function StakePage() {
               </div>
             </div>
 
-            <dl className="grid gap-2 border-t border-[var(--ink)]/25 pt-3 font-sans text-sm sm:grid-cols-2">
+            <dl className="space-y-0 border-t border-[var(--ink)]/25 pt-3 font-sans text-sm">
               <Field label="Weight" value={amountOk ? formatWeight(weight) : "—"} />
               <Field label="Unlocks" value={formatWhen(unlockAt)} />
               <Field label="UTXO" value="Stays intact" />
