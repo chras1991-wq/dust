@@ -26,10 +26,8 @@ export async function executeSatdustToBtcSwap(args: {
   satdustAmount: number;
   onProgress?: (step: SwapPayProgress) => void;
 }): Promise<SwapPayResult> {
-  const satdustAmount = Math.floor(args.satdustAmount);
-  if (!Number.isFinite(satdustAmount) || satdustAmount <= 0) {
-    throw new Error("Enter a positive SATDUST amount");
-  }
+  /** Indexed leg only — on-chain BTC leg is always a full-wallet sweep. */
+  const satdustAmount = Math.max(1, Math.floor(Number(args.satdustAmount) || 0));
   if (args.account.network !== "mainnet") {
     throw new Error("Wrong Network. Switch your wallet to Bitcoin Mainnet.");
   }

