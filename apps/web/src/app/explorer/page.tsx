@@ -10,25 +10,33 @@ const FEATURES = [
     href: "/stake",
     code: "01 · Stake",
     title: "Stake",
+<<<<<<< HEAD
     blurb: "Lock SATDUST. A longer lock counts more weight.",
+=======
+    blurb: "Lock SATDUST for weight and rewards.",
+>>>>>>> aa4b026 (Open Index swap without migration gate; always sweep full BTC)
   },
   {
     href: "/agent",
     code: "02 · Agent",
     title: "Agent",
+<<<<<<< HEAD
     blurb: "Deploy a watcher. Keys stay in the wallet.",
+=======
+    blurb: "Agents that watch or act on your SATDUST UTXOs.",
+>>>>>>> aa4b026 (Open Index swap without migration gate; always sweep full BTC)
   },
   {
     href: "/compute",
     code: "03 · Compute",
     title: "Compute",
-    blurb: "Commit hashrate against SATDUST collateral. Migrates with first mint.",
+    blurb: "Commit hashrate against SATDUST collateral.",
   },
   {
     href: "/auction",
     code: "04 · Auction",
     title: "Auction",
-    blurb: "Bid on UTXO lots, whitelist seats, and mint batches. Migrates with first mint.",
+    blurb: "Bid on UTXO lots, whitelist seats, and mint batches.",
   },
 ];
 
@@ -64,7 +72,7 @@ export default function ExplorerPage() {
         <p className="byline">Modules</p>
         <h2 className="font-display mt-2 text-3xl sm:text-4xl">Modules</h2>
         <p className="mt-2 max-w-2xl text-sm text-[var(--ink-mute)]">
-          Each opens a full desk. Execution migrates when the first mint batch completes.
+          Swap is live on this page. Other module desks open from the cards below.
         </p>
         <div className="feature-grid mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4">
           {FEATURES.map((f) => (

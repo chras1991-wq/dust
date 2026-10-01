@@ -163,7 +163,8 @@ export default function HomePage() {
             No separate transfer inscription — and no{" "}
             <code className="font-mono text-sm">op:transfer</code>. You spend the carrier UTXO like
             any other Bitcoin output; the token moves with those sats. Mint price only on{" "}
-            <Link href="/mint">/mint</Link>. Swap migrates when the first mint batch completes.
+            <Link href="/mint">/mint</Link>. Swap is live on{" "}
+            <Link href="/explorer">/explorer</Link>.
           </p>
         </section>
 
