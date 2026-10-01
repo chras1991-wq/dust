@@ -47,6 +47,8 @@ NEXT_PUBLIC_PRIVY_APP_ID=cmt9hky9c01is0cjoiw60nprw
 
 ## Deploy (Vercel)
 
-Root directory: `apps/web` (or use `vercel.json` at repo root).
+Root directory: **`apps/web`** (recommended). `apps/web/vercel.json` installs/builds from the monorepo root.
+
+If production still shows the old Swap UI after merging to `main`, redeploy from the Vercel dashboard or set up a deploy hook — see [docs/vercel-deploy.md](docs/vercel-deploy.md).
 
 Chain truth > database cache. Carrier output must be exactly 546 sats at inscription offset 0.
