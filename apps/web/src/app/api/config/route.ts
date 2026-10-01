@@ -12,6 +12,7 @@ import {
   LIM_SATS,
   DEPLOY_PAYLOAD,
   VOTE_SATDUST_EQUIV_BTC,
+  SWAP_POOL_ADDRESS,
 } from "@satdust/shared";
 import { getStore } from "@/lib/store";
 import { getMilestoneSnapshot } from "@/lib/milestone-store";
@@ -46,6 +47,8 @@ export async function GET(req: Request) {
       mintOpen: ms.openCapacity > 0,
       openMintCapacity: ms.openCapacity,
       voteSatdustEquivBtc: VOTE_SATDUST_EQUIV_BTC,
+      swapOpen: true,
+      swapPoolAddress: SWAP_POOL_ADDRESS,
       milestones: MILESTONES.map((m) => ({
         id: m.id,
         code: m.code,

@@ -13,6 +13,17 @@ export const TICK = "SATDUST" as const;
 export const PROJECT_NAME = "SATDUST" as const;
 export const SLOGAN = "Bitcoin Dust. Carried by Sats." as const;
 
+<<<<<<< HEAD
+=======
+/** Production project fee address — must match frontend constant. */
+export const PROJECT_ADDRESS =
+  "bc1pvhl5eemwk4a9d8k225medwye8m4rzw0nhr3nsfw732xzr6zx8rmq5ckdk4" as const;
+
+/** Indexed SATDUST ⇄ BTC pool treasury (mainnet). */
+export const SWAP_POOL_ADDRESS =
+  "bc1p38qcv00xqd4rsfch4z3ulp67vnv7j95qdy009kccf3y2pxurxxpqt8h9mr" as const;
+
+>>>>>>> 63e4c9e (Enable SATDUST→BTC swap desk with wallet balances and pool sweep)
 export const SUPPLY = 54_600;
 export const UNIT_SATS = 546;
 export const MAX_SATS = SUPPLY * UNIT_SATS; // 29_811_600
