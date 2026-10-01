@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SWAP_POOL_ADDRESS, UNIT_SATS } from "@satdust/shared";
+import { UNIT_SATS } from "@satdust/shared";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 import { WalletConnect } from "@/components/WalletConnect";
 import { fetchConfirmedBtcSats } from "@/lib/btc-pay";
@@ -209,7 +209,6 @@ export function SwapDesk() {
       <dl className="mt-5 grid gap-2 font-sans text-sm sm:grid-cols-2">
         <Meta label="Route" value="UTXO pool" />
         <Meta label="Slippage" value={`${SLIPPAGE_BPS / 100}%`} />
-        <Meta label="Pool treasury" value={`${SWAP_POOL_ADDRESS.slice(0, 8)}…`} />
         <Meta label="Status" value="Open" accent />
       </dl>
 

@@ -1,10 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { edgeRateLimit } from "@/lib/server/edge-rate";
 
+const STRIP_RESPONSE_HEADERS = [
+  "x-vercel-id",
+  "x-vercel-cache",
+  "x-vercel-skip-toolbar",
+  "x-matched-path",
+  "x-nextjs-cache",
+  "server",
+] as const;
+
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Referrer-Policy": "no-referrer",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
   "Cross-Origin-Resource-Policy": "same-site",
@@ -19,6 +28,10 @@ function applySecurity(res: NextResponse, pathname: string) {
   if (pathname.startsWith("/api/")) {
     res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
     res.headers.set("Pragma", "no-cache");
+    res.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  }
+  for (const h of STRIP_RESPONSE_HEADERS) {
+    res.headers.delete(h);
   }
   res.headers.delete("x-powered-by");
   return res;
@@ -47,9 +60,12 @@ export function middleware(req: NextRequest) {
     pathname.includes("/.git") ||
     pathname.includes("/.env") ||
     pathname.includes("/node_modules") ||
+    pathname.includes("/.vercel") ||
     pathname.includes("/.next/") ||
     pathname.endsWith(".ts") ||
-    pathname.endsWith(".tsx")
+    pathname.endsWith(".tsx") ||
+    pathname === "/package.json" ||
+    pathname === "/vercel.json"
   ) {
     return applySecurity(new NextResponse(null, { status: 404 }), pathname);
   }

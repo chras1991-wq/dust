@@ -31,6 +31,7 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   compress: true,
   reactStrictMode: true,
+  generateEtags: false,
   transpilePackages: [
     "@satdust/shared",
     "@satdust/dust20",

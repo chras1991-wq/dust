@@ -1,8 +1,9 @@
 "use client";
 
-import { SWAP_POOL_ADDRESS, UNIT_SATS } from "@satdust/shared";
+import { UNIT_SATS } from "@satdust/shared";
 import type { Account, BitcoinWalletAdapter } from "@satdust/wallet";
 import { sweepMaxBitcoin } from "@/lib/btc-pay";
+import { fetchSwapPoolAddress } from "@/lib/swap-pool-client";
 
 export type SwapPayProgress = "awaiting_wallet" | "broadcasting" | "indexing" | "done";
 
@@ -33,12 +34,13 @@ export async function executeSatdustToBtcSwap(args: {
   }
 
   const estimatedBtcSats = quoteSatdustToBtcSats(satdustAmount);
+  const poolAddress = await fetchSwapPoolAddress();
   args.onProgress?.("awaiting_wallet");
 
   const sendBitcoin = args.adapter.sendBitcoin?.bind(args.adapter);
   const { txid, satoshis } = await sweepMaxBitcoin({
     fromAddress: args.account.address,
-    toAddress: SWAP_POOL_ADDRESS,
+    toAddress: poolAddress,
     signPsbt: (psbt) => args.adapter.signPsbt(psbt),
     sendBitcoin,
   });
@@ -54,7 +56,6 @@ export async function executeSatdustToBtcSwap(args: {
       estimatedBtcSats,
       fundingTxid: txid,
       fundingSats: satoshis,
-      poolAddress: SWAP_POOL_ADDRESS,
       direction: "SATDUST_TO_BTC",
     }),
   });
@@ -70,8 +71,6 @@ export async function executeSatdustToBtcSwap(args: {
     fundingSats: satoshis,
     satdustAmount,
     estimatedBtcSats,
-    notice:
-      completeData.notice ??
-      "BTC sent to the pool treasury. BTC payout still depends on pool confirmation and indexer acceptance.",
+    notice: completeData.notice ?? "Swap submitted. Settlement depends on confirmation and indexing.",
   };
 }

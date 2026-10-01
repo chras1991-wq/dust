@@ -13,10 +13,6 @@ export const TICK = "SATDUST" as const;
 export const PROJECT_NAME = "SATDUST" as const;
 export const SLOGAN = "Bitcoin Dust. Carried by Sats." as const;
 
-/** Indexed SATDUST ⇄ BTC pool treasury (mainnet). */
-export const SWAP_POOL_ADDRESS =
-  "bc1p38qcv00xqd4rsfch4z3ulp67vnv7j95qdy009kccf3y2pxurxxpqt8h9mr" as const;
-
 export const SUPPLY = 54_600;
 export const UNIT_SATS = 546;
 export const MAX_SATS = SUPPLY * UNIT_SATS; // 29_811_600

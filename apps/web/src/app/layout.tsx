@@ -48,6 +48,14 @@ export const metadata: Metadata = {
   description:
     "DUST-20 tokens lock real sats in a UTXO on Bitcoin. SATDUST is the opening ticker.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://dust20.com"),
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, noimageindex: true },
+  },
+  other: {
+    "format-detection": "telephone=no",
+  },
 };
 
 export const viewport: Viewport = {

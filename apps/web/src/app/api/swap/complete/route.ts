@@ -1,5 +1,5 @@
-import { SWAP_POOL_ADDRESS } from "@satdust/shared";
 import { recordSwap } from "@/lib/store";
+import { getSwapPoolAddress } from "@/lib/server/swap-pool";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
 import { publicErrorMessage } from "@/lib/server/safe-error";
 
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
     const walletAddress = body.walletAddress?.trim() ?? "";
     const fundingTxid = body.fundingTxid?.trim() ?? "";
-    const poolAddress = body.poolAddress?.trim() ?? SWAP_POOL_ADDRESS;
+    const poolAddress = getSwapPoolAddress();
     const satdustAmount = Math.floor(Number(body.satdustAmount));
     const estimatedBtcSats = Math.floor(Number(body.estimatedBtcSats));
     const fundingSats = Math.floor(Number(body.fundingSats));
@@ -41,9 +41,6 @@ export async function POST(req: Request) {
     }
     if (!isTxid(fundingTxid)) {
       return noStoreJson({ error: "Invalid funding txid" }, { status: 400 });
-    }
-    if (poolAddress !== SWAP_POOL_ADDRESS) {
-      return noStoreJson({ error: "Invalid pool address" }, { status: 400 });
     }
     if (!Number.isFinite(satdustAmount) || satdustAmount <= 0 || satdustAmount > 10_000) {
       return noStoreJson({ error: "SATDUST amount must be 1–10,000" }, { status: 400 });
