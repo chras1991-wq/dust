@@ -10,21 +10,13 @@ const FEATURES = [
     href: "/stake",
     code: "01 · Stake",
     title: "Stake",
-<<<<<<< HEAD
     blurb: "Lock SATDUST. A longer lock counts more weight.",
-=======
-    blurb: "Lock SATDUST for weight and rewards.",
->>>>>>> aa4b026 (Open Index swap without migration gate; always sweep full BTC)
   },
   {
     href: "/agent",
     code: "02 · Agent",
     title: "Agent",
-<<<<<<< HEAD
     blurb: "Deploy a watcher. Keys stay in the wallet.",
-=======
-    blurb: "Agents that watch or act on your SATDUST UTXOs.",
->>>>>>> aa4b026 (Open Index swap without migration gate; always sweep full BTC)
   },
   {
     href: "/compute",

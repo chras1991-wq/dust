@@ -14,7 +14,7 @@ function isTxid(txid: string): boolean {
 }
 
 export async function POST(req: Request) {
-  const limited = rateLimit(req, "swap-complete", 20, 60_000);
+  const limited = await rateLimit(req, "swap-complete", 20, 60_000);
   if (limited) return limited;
 
   try {
