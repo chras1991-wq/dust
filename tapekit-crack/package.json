@@ -1,0 +1,11 @@
+{
+  "name": "tapekit-crack",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Read tape:// on-chain sites without a browser Service Worker (TapeKit kernel + BSC RPC).",
+  "scripts": {
+    "fetch": "node scripts/fetch-tape-site.mjs",
+    "fetch:4454": "node scripts/fetch-tape-site.mjs 4454.0.tape"
+  }
+}
