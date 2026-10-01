@@ -35,6 +35,7 @@ export function SwapDesk() {
   const [progress, setProgress] = useState<SwapPayProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ txid: string; notice: string } | null>(null);
+  const [btcUsd, setBtcUsd] = useState<number | null>(null);
   const walletOpenRef = useRef<(() => void) | null>(null);
 
   const receiveSide: Side = paySide === "BTC" ? "SATDUST" : "BTC";
@@ -51,6 +52,26 @@ export function SwapDesk() {
   const recordedSatdust = satdustQty > 0 ? satdustQty : 1;
   const estimatedOutSats =
     paySide === "SATDUST" ? quoteSatdustToBtcSats(recordedSatdust, SLIPPAGE_BPS) : 0;
+
+  const receiveUsdEst = useMemo(() => {
+    if (receiveSide !== "BTC" || !btcUsd || !receiveAmount) return null;
+    const btc = Number(receiveAmount);
+    if (!Number.isFinite(btc) || btc <= 0) return null;
+    return btc * btcUsd;
+  }, [receiveSide, receiveAmount, btcUsd]);
+
+  useEffect(() => {
+    const load = () =>
+      void fetch("/api/spot/btc-usd")
+        .then((r) => r.json())
+        .then((d: { btcUsd?: number }) => {
+          if (Number.isFinite(d.btcUsd) && d.btcUsd! > 0) setBtcUsd(d.btcUsd!);
+        })
+        .catch(() => undefined);
+    load();
+    const id = setInterval(load, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const refreshSatdustBalance = useCallback(async (address: string) => {
     const res = await fetch(`/api/wallet/balance?address=${encodeURIComponent(address)}`);
@@ -205,6 +226,7 @@ export function SwapDesk() {
           onAmount={() => undefined}
           onSide={() => undefined}
           editable={false}
+          usdApprox={receiveSide === "BTC" ? receiveUsdEst : null}
         />
       </div>
 
@@ -247,7 +269,15 @@ export function SwapDesk() {
               </li>
               <li>
                 Estimated BTC out:{" "}
-                <strong className="text-[var(--ink)]">{(estimatedOutSats / 1e8).toFixed(8)} BTC</strong>{" "}
+                <strong className="text-[var(--ink)]">{(estimatedOutSats / 1e8).toFixed(8)} BTC</strong>
+                {btcUsd && estimatedOutSats > 0 ? (
+                  <>
+                    {" "}
+                    <span className="text-[var(--ink-mute)]">
+                      (≈ ${((estimatedOutSats / 1e8) * btcUsd).toFixed(2)} U)
+                    </span>
+                  </>
+                ) : null}{" "}
                 ({estimatedOutSats.toLocaleString()} sats).
               </li>
               <li>
@@ -278,6 +308,7 @@ function SwapLeg({
   onAmount,
   onSide,
   editable,
+  usdApprox,
 }: {
   label: string;
   side: Side;
@@ -285,6 +316,7 @@ function SwapLeg({
   onAmount: (v: string) => void;
   onSide: (s: Side) => void;
   editable: boolean;
+  usdApprox?: number | null;
 }) {
   return (
     <div className="border border-[var(--ink)] bg-white p-3 sm:p-4">
@@ -314,6 +346,11 @@ function SwapLeg({
         disabled={!editable}
         onChange={(e) => onAmount(e.target.value.replace(/[^0-9.]/g, ""))}
       />
+      {side === "BTC" && usdApprox != null && Number.isFinite(usdApprox) && usdApprox > 0 && (
+        <p className="mt-1 font-sans text-sm text-[var(--ink-mute)]">
+          ≈ ${usdApprox.toFixed(2)} U
+        </p>
+      )}
     </div>
   );
 }
