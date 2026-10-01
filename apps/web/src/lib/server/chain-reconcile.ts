@@ -1,7 +1,7 @@
 import "server-only";
 import { usdToFeeSats } from "@satdust/quote";
 import { UNIT_SATS } from "@satdust/shared";
-import { PROJECT_ADDRESS } from "@satdust/shared/project";
+import { getProjectAddress } from "@/lib/server/addresses";
 import {
   projectPaymentsFromTxs,
   type ChainPayment,
@@ -226,7 +226,7 @@ export async function reconcileWalletChainCredits(
   await hydrateMintStore(true);
   const payments = projectPaymentsFromTxs({
     address: addr,
-    projectAddress: PROJECT_ADDRESS,
+    projectAddress: getProjectAddress(),
     txs,
     nowSec: Math.floor(now / 1000),
   });

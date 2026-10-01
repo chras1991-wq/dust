@@ -7,6 +7,4 @@
 5. Quotes: median BTC/USD, 60s TTL, HMAC signature
 6. Reveal: output0=546 carrier@offset0, output1=project fee
 
-Project address (hard-coded):
-
-`bc1pvhl5eemwk4a9d8k225medwye8m4rzw0nhr3nsfw732xzr6zx8rmq5ckdk4`
+Project payee: set `PROJECT_ADDRESS` in Vercel / `.env.local` only (not in git).

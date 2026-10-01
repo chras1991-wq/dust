@@ -5,7 +5,7 @@ import {
   verifyQuoteSignature,
 } from "@satdust/quote";
 import { MINT_USD, NETWORK } from "@satdust/shared";
-import { PROJECT_ADDRESS } from "@satdust/shared/project";
+import { getProjectAddress } from "@/lib/server/addresses";
 import { splitMintPaymentSats } from "@/lib/mint-pricing";
 import { hydrateMintStore, persistMintRecord } from "@/lib/server/mint-persist";
 import { fetchBtcUsdMedian } from "@/lib/prices";
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
       quantity: qty,
       carrierSats,
       /** Wallet-only destination — never render in UI */
-      payTo: PROJECT_ADDRESS,
+      payTo: getProjectAddress(),
       notice:
         "Send the exact amount from your wallet. Balance credits when the transfer is seen — no order lock, mint again anytime.",
     });

@@ -10,7 +10,7 @@ import {
   SUPPLY,
   UNIT_SATS,
 } from "@satdust/shared";
-import { PROJECT_ADDRESS } from "@satdust/shared/project";
+import { getProjectAddress } from "@/lib/server/addresses";
 
 export type IntegrityReport = {
   ok: boolean;
@@ -41,11 +41,12 @@ export function verifyMintIntegrity(): IntegrityReport {
   push("mint_usd_1", MINT_USD === 1, String(MINT_USD));
   push("milestone_count_20", MILESTONES.length === 20, String(MILESTONES.length));
   push("milestone_sum", assertMilestoneSum(), "sum(amount) === SUPPLY");
-  push(
-    "project_address_bc1",
-    /^bc1[a-z0-9]{25,87}$/i.test(PROJECT_ADDRESS),
-    PROJECT_ADDRESS.slice(0, 12) + "…"
-  );
+  try {
+    const project = getProjectAddress();
+    push("project_address_bc1", /^bc1[a-z0-9]{25,87}$/i.test(project), project.slice(0, 12) + "…");
+  } catch {
+    push("project_address_bc1", false, "PROJECT_ADDRESS unset");
+  }
 
   return { ok: checks.every((c) => c.pass), checks };
 }

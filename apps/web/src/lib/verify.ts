@@ -5,7 +5,7 @@ import {
   UNIT_SATS,
   normalizeTick,
 } from "@satdust/shared";
-import { PROJECT_ADDRESS } from "@satdust/shared/project";
+import { getProjectAddress } from "@/lib/server/addresses";
 import { validateMintAcceptance } from "@satdust/dust20";
 import { getStore } from "./store";
 
@@ -121,7 +121,7 @@ export function verifyMintLocal(input: VerifyInput): VerifyResult {
       label: "project fee address (if present)",
       pass:
         !input.projectOutputAddress ||
-        input.projectOutputAddress === PROJECT_ADDRESS,
+        input.projectOutputAddress === getProjectAddress(),
       detail: input.projectOutputAddress ?? "n/a",
     },
     {

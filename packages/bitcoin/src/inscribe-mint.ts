@@ -6,7 +6,7 @@
  */
 import * as bitcoin from "bitcoinjs-lib";
 import { UNIT_SATS } from "@satdust/shared";
-import { PROJECT_ADDRESS } from "@satdust/shared/project";
+import { getProjectAddress } from "@satdust/shared/project";
 
 type EccLib = {
   signSchnorr: (hash: Uint8Array, priv: Uint8Array) => Uint8Array;
@@ -87,8 +87,9 @@ export async function createMintInscribePlan(args: {
   revealMinerFeeSats: number;
   projectAddress?: string;
 }): Promise<MintInscribePlan> {
-  const projectAddress = args.projectAddress ?? PROJECT_ADDRESS;
-  if (projectAddress !== PROJECT_ADDRESS) {
+  const expected = getProjectAddress();
+  const projectAddress = args.projectAddress ?? expected;
+  if (projectAddress !== expected) {
     throw new Error("ABORT: project address mismatch");
   }
   if (args.projectFeeSats <= 0) {
@@ -141,7 +142,8 @@ export async function buildAndSignRevealTx(args: {
   userAddress: string;
   projectAddress?: string;
 }): Promise<{ txHex: string; txid: string }> {
-  const projectAddress = args.projectAddress ?? PROJECT_ADDRESS;
+  const expected = getProjectAddress();
+  const projectAddress = args.projectAddress ?? expected;
   const { ecc, ECPair: pairFactory } = await boot();
   const keyPair = pairFactory.fromPrivateKey(
     Buffer.from(args.plan.ephemeralPrivHex, "hex")

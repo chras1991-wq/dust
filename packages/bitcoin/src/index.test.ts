@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { UNIT_SATS } from "@satdust/shared";
-import { PROJECT_ADDRESS } from "@satdust/shared/project";
+import { getProjectAddress } from "@satdust/shared/project";
 import { assertPreBroadcast, buildRevealPlan } from "./index";
+
+const PROJECT_ADDRESS = getProjectAddress();
 
 describe("reveal plan", () => {
   it("places carrier at 546 and project fee next", () => {

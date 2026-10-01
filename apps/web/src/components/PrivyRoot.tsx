@@ -2,14 +2,18 @@
 
 import { PrivyProvider } from "@privy-io/react-auth";
 
-/** Public Privy app id (safe in the browser). */
-export const PRIVY_APP_ID =
-  process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cmt9hky9c01is0cjoiw60nprw";
+function privyAppId(): string {
+  const id = process.env.NEXT_PUBLIC_PRIVY_APP_ID?.trim();
+  if (!id) {
+    throw new Error("NEXT_PUBLIC_PRIVY_APP_ID is not configured");
+  }
+  return id;
+}
 
 export function PrivyRoot({ children }: { children: React.ReactNode }) {
   return (
     <PrivyProvider
-      appId={PRIVY_APP_ID}
+      appId={privyAppId()}
       config={{
         loginMethods: ["wallet"],
         appearance: {

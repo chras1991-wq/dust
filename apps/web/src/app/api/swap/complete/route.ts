@@ -1,5 +1,5 @@
 import { recordSwap } from "@/lib/store";
-import { getSwapPoolAddress } from "@/lib/server/swap-pool";
+import { getSwapPoolAddress } from "@/lib/server/addresses";
 import { noStoreJson, rateLimit } from "@/lib/server/guard";
 import { publicErrorMessage } from "@/lib/server/safe-error";
 

@@ -1,5 +1,5 @@
 import { UNIT_SATS } from "@satdust/shared";
-import { PROJECT_ADDRESS } from "@satdust/shared/project";
+import { getProjectAddress } from "@satdust/shared/project";
 
 export {
   buildOrdMintScript,
@@ -37,8 +37,9 @@ export function buildRevealPlan(args: {
   minerFeeSats: number;
   projectAddress?: string;
 }): RevealPlan {
-  const projectAddress = args.projectAddress ?? PROJECT_ADDRESS;
-  if (projectAddress !== PROJECT_ADDRESS) {
+  const expected = getProjectAddress();
+  const projectAddress = args.projectAddress ?? expected;
+  if (projectAddress !== expected) {
     throw new Error("ABORT: project address mismatch");
   }
   if (args.projectFeeSats <= 0) {
@@ -89,7 +90,7 @@ export function assertPreBroadcast(args: {
       `ABORT: inscription offset must be 0, got ${args.inscriptionOffset}`
     );
   }
-  if (args.projectOutputAddress !== PROJECT_ADDRESS) {
+  if (args.projectOutputAddress !== getProjectAddress()) {
     throw new Error("ABORT: project payment address mismatch");
   }
 }
